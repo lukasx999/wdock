@@ -7,28 +7,6 @@
 // #define GLFW_INCLUDE_NONE
 // #include <GLFW/glfw3.h>
 
-#include <wayland-egl.h>
-
-#undef USE_GLAD
-
-#ifdef USE_GLAD
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#else
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
-
-#ifdef USE_GLAD
-#define GLAD_EGL_IMPLEMENTATION
-#include <glad/egl.h>
-#else
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#endif
-
-
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
 
@@ -40,10 +18,7 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
-#include <wayland-client.h>
-#include "wlr-layer-shell-unstable-v1.h"
-
-
+#include "wayland.hpp"
 
 namespace {
 
@@ -164,154 +139,14 @@ namespace {
 //
 // }
 
-struct state {
-    struct wl_display*    wl_display    = nullptr;
-    struct wl_surface*    wl_surface    = nullptr;
-    struct wl_registry*   wl_registry   = nullptr;
-    struct wl_compositor* wl_compositor = nullptr;
 
-    // xdg_wm_base*  xdg_wm_base  = nullptr;
-    // xdg_surface*  xdg_surface  = nullptr;
-    // xdg_toplevel* xdg_toplevel = nullptr;
-    struct zwlr_layer_shell_v1* zwlr_layer_shell = nullptr;
-    struct zwlr_layer_surface_v1* zwlr_layer_surface = nullptr;
-    struct wl_egl_window* egl_window = nullptr;
-
-    EGLDisplay egl_display = nullptr;
-    EGLSurface egl_surface = nullptr;
-    EGLContext egl_context = nullptr;
-    EGLConfig  egl_config  = nullptr;
-};
-
-[[nodiscard]] bool init_egl(int width, int height, state& state) {
-
-    std::array config_attribs {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RED_SIZE,   8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE,  8,
-        EGL_ALPHA_SIZE, 8,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-        EGL_NONE
-    };
-
-    std::array context_attribs {
-        EGL_CONTEXT_MAJOR_VERSION, 4,
-        EGL_CONTEXT_MINOR_VERSION, 6,
-        EGL_CONTEXT_OPENGL_DEBUG, EGL_TRUE,
-        EGL_NONE
-    };
-
-    state.egl_display = eglGetDisplay(state.wl_display);
-    if (state.egl_display == EGL_NO_DISPLAY) return false;
-
-    EGLint major, minor;
-    if (eglInitialize(state.egl_display, &major, &minor) != EGL_TRUE) return false;
-
-    EGLint config_count;
-    eglGetConfigs(state.egl_display, nullptr, 0, &config_count);
-
-    std::vector<EGLConfig> configs(config_count);
-
-    if (!eglBindAPI(EGL_OPENGL_API)) return false;
-
-    EGLint n;
-    eglChooseConfig(state.egl_display, config_attribs.data(), configs.data(), config_count, &n);
-
-    state.egl_config = configs.front();
-    state.egl_context = eglCreateContext(state.egl_display, state.egl_config, EGL_NO_CONTEXT, context_attribs.data());
-    if (state.egl_context == EGL_NO_CONTEXT) return false;
-
-    state.egl_window = wl_egl_window_create(state.wl_surface, width, height);
-    if (state.egl_window == EGL_NO_SURFACE) return false;
-
-    state.egl_surface = eglCreateWindowSurface(state.egl_display, state.egl_config, state.egl_window, nullptr);
-    if (!eglMakeCurrent(state.egl_display, state.egl_surface, state.egl_surface, state.egl_context)) return false;
-
-    return true;
-}
-
-wl_registry_listener wl_registry_listener_ {
-    .global = [](void *data, struct wl_registry *wl_registry, uint32_t name, const char *interface, uint32_t version) {
-        state& state = *static_cast<struct state*>(data);
-
-        using namespace std::placeholders;
-        auto bind_global = std::bind(wl_registry_bind, wl_registry, name, _1, version);
-
-        if (std::string_view(interface) == wl_compositor_interface.name)
-            state.wl_compositor = static_cast<wl_compositor*>(bind_global(&wl_compositor_interface));
-
-        if (std::string_view(interface) == zwlr_layer_shell_v1_interface.name)
-            state.zwlr_layer_shell = static_cast<zwlr_layer_shell_v1*>(bind_global(&zwlr_layer_shell_v1_interface));
-
-    },
-    .global_remove = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_registry* wl_registry, [[maybe_unused]] uint32_t name) { }
-};
-
-zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener_ {
-    .configure = [] (void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height) {
-        zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface_v1, serial);
-        // state& state = *static_cast<struct state*>(data);
-        // glViewport(0, 0, width, height);
-        // wl_egl_window_resize(self.m_egl_window, width, height, 0, 0);
-    },
-    .closed = []([[maybe_unused]] void* data, [[maybe_unused]] struct zwlr_layer_surface_v1* zwlr_layer_surface_v1) { }
-};
-
-void draw() {
-    glClearColor(1.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-}
-
-wl_callback_listener wl_callback_listener_ {
-    .done = [] (void* data, struct wl_callback* wl_callback, [[maybe_unused]] uint32_t callback_data) {
-        state& state = *static_cast<struct state*>(data);
-
-        wl_callback_destroy(wl_callback);
-
-        struct wl_callback* frame_callback = wl_surface_frame(state.wl_surface);
-        wl_callback_add_listener(frame_callback, &wl_callback_listener_, &state);
-
-        draw();
-        eglSwapBuffers(state.egl_display, state.egl_surface);
-    }
-};
 
 } // namespace
 
 int main() {
 
-    int width = 500;
-    int height = 500;
-
-    state state;
-
-    state.wl_display = wl_display_connect(nullptr);
-    state.wl_registry = wl_display_get_registry(state.wl_display);
-    wl_registry_add_listener(state.wl_registry, &wl_registry_listener_, &state);
-    wl_display_roundtrip(state.wl_display);
-
-    state.wl_surface = wl_compositor_create_surface(state.wl_compositor);
-
-    if (!init_egl(width, height, state))
-        throw std::runtime_error("failed to initialize EGL");
-
-    state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(state.zwlr_layer_shell, state.wl_surface, nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, "wdock");
-
-    zwlr_layer_surface_v1_add_listener(state.zwlr_layer_surface, &zwlr_layer_surface_v1_listener_, &state);
-    zwlr_layer_surface_v1_set_size(state.zwlr_layer_surface, 500, 500);
-    zwlr_layer_surface_v1_set_anchor(state.zwlr_layer_surface, ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
-    zwlr_layer_surface_v1_set_margin(state.zwlr_layer_surface, 0, 300, 0, 0);
-
-    wl_surface_commit(state.wl_surface);
-    wl_display_roundtrip(state.wl_display);
-
-    wl_callback* frame_callback = wl_surface_frame(state.wl_surface);
-    wl_callback_add_listener(frame_callback, &wl_callback_listener_, &state);
-
-    eglSwapBuffers(state.egl_display, state.egl_surface);
-
-    while (wl_display_dispatch(state.wl_display) != -1);
+    wayland_layer_shell window(500, 500, "wdock");
+    window.run();
 
 }
 
