@@ -1,8 +1,6 @@
 #include <print>
 #include <cassert>
 #include <chrono>
-#include <wayland-client-core.h>
-#include <wayland-client-protocol.h>
 
 // #define GLFW_INCLUDE_NONE
 // #include <GLFW/glfw3.h>
@@ -145,7 +143,13 @@ namespace {
 
 int main() {
 
-    wayland_layer_shell window(500, 500, "wdock");
+    wayland_layer_surface window(500, 500, "wdock", wayland_layer_surface::anchor::top);
+
+    window.on_draw([] {
+        glClearColor(1.0, 0.0, 0.0, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
+    });
+
     window.run();
 
 }
