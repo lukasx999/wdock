@@ -1,3 +1,0 @@
-/home/lukas/code/repos/wdock/build/CMakeFiles/wdock.dir
-/home/lukas/code/repos/wdock/build/CMakeFiles/edit_cache.dir
-/home/lukas/code/repos/wdock/build/CMakeFiles/rebuild_cache.dir
