@@ -1,7 +1,7 @@
 #include "wayland.hpp"
 #include <wayland-egl-core.h>
 
-wayland_layer_surface::wayland_layer_surface(int width, int height, const char* title, anchor anchor) {
+wayland_layer_surface::wayland_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
 
     m_state.wl_display = wl_display_connect(nullptr);
     if (m_state.wl_display == nullptr)
@@ -16,7 +16,7 @@ wayland_layer_surface::wayland_layer_surface(int width, int height, const char* 
     if (!init_egl(width, height))
         throw wayland_error("failed to initialize EGL");
 
-    setup_layer_surface(width, height, title, anchor);
+    setup_layer_surface(width, height, title, anchor, margin);
 
     wl_surface_commit(m_state.wl_surface);
     wl_display_roundtrip(m_state.wl_display);

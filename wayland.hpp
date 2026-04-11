@@ -9,24 +9,12 @@
 #include <wayland-client.h>
 #include "wlr-layer-shell-unstable-v1.h"
 
-#undef USE_GLAD
-
-#ifdef USE_GLAD
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
-#endif
 
-#ifdef USE_GLAD
-#define GLAD_EGL_IMPLEMENTATION
-#include <glad/egl.h>
-#else
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#endif
 
 struct wayland_error : std::runtime_error {
     using runtime_error::runtime_error;
@@ -57,7 +45,14 @@ class wayland_layer_surface {
 
     enum class anchor { top, bottom, left, right };
 
-    wayland_layer_surface(int width, int height, const char* title, anchor anchor);
+    struct margin {
+        int top    = 0;
+        int right  = 0;
+        int bottom = 0;
+        int left   = 0;
+    };
+
+    wayland_layer_surface(int width, int height, const char* title, anchor anchor, margin margin={0, 0, 0, 0});
 
     ~wayland_layer_surface() {
         wl_display_disconnect(m_state.wl_display);
@@ -101,7 +96,7 @@ class wayland_layer_surface {
         }
     }
 
-    void setup_layer_surface(int width, int height, const char* title, anchor anchor) {
+    void setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
 
         m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
             nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
@@ -109,7 +104,7 @@ class wayland_layer_surface {
         zwlr_layer_surface_v1_add_listener(m_state.zwlr_layer_surface, &m_layer_surface_listener, &m_state);
         zwlr_layer_surface_v1_set_size(m_state.zwlr_layer_surface, width, height);
         zwlr_layer_surface_v1_set_anchor(m_state.zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
-        // zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, 0, 300, 0, 0);
+        zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
     }
 
     [[nodiscard]] bool init_egl(int width, int height);
