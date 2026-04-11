@@ -52,62 +52,6 @@ void opengl_debug_message_callback([[maybe_unused]] GLenum src, [[maybe_unused]]
     std::println(stderr, "opengl error: {}", msg);
 }
 
-void imgui_init() {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-
-    // ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
-}
-
-void imgui_shutdown() {
-    ImGui_ImplOpenGL3_Shutdown();
-    // ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-void with_imgui_frame_context(std::invocable auto fn, int width, int height) {
-    ImGui_ImplOpenGL3_NewFrame();
-
-    ImGui_ImplNullPlatform_NewFrame();
-
-    // TODO:
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize = ImVec2(width, height);
-    io.DeltaTime = 1.0f / 60.0f;
-
-    // ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    fn();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void imgui_configure() {
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.FontSizeBase = 40.0f;
-
-    ImGuiIO& io = ImGui::GetIO();
-    auto font_path = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
-    io.Fonts->AddFontFromFileTTF(font_path);
-}
-
-void imgui_set_next_window_dimensions() {
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::SetNextWindowPos({ 0, 0 });
-    ImGui::SetNextWindowSize(io.DisplaySize);
-}
-
-void with_imgui_main_context(std::invocable auto fn) {
-    int flags = ImGuiWindowFlags_NoDecoration
-        | ImGuiWindowFlags_NoMove;
-
-    imgui_set_next_window_dimensions();
-    ImGui::Begin("main", nullptr, flags);
-    fn();
-    ImGui::End();
-}
-
 [[nodiscard]] std::string get_time_string() {
     auto now = std::chrono::system_clock::now();
     std::chrono::zoned_time zt("Europe/Vienna", now);
@@ -150,24 +94,17 @@ void imgui_draw() {
 int main() {
 
     wayland_layer_surface surface(500, 500, "wdock", wayland_layer_surface::anchor::top);
-
-    imgui_init();
-    imgui_configure();
+    ui ui;
 
     glDebugMessageCallback(opengl_debug_message_callback, nullptr);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     surface.on_draw([&] {
         glClear(GL_COLOR_BUFFER_BIT);
-
-        with_imgui_frame_context([&] {
-            with_imgui_main_context(imgui_draw);
-        }, surface.get_width(), surface.get_height());
-
+        ui.draw(surface.get_width(), surface.get_height(), imgui_draw);
     });
 
     surface.dispatch();
-    imgui_shutdown();
 
 }
 
