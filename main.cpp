@@ -8,20 +8,13 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glext.h>
-
 #undef USE_GLFW
 
-#ifdef USE_GLFW
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
-#else
-#include "wayland.hpp"
-#endif // USE_GLFW
 
+#include "wayland.hpp"
 #include "ui.hpp"
 
 namespace {
@@ -63,7 +56,6 @@ namespace {
 
     }
 
-    #ifdef USE_GLFW
     [[nodiscard]] GLFWwindow* setup_glfw(int width, int height, const char* window_title) {
         glfwSetErrorCallback([]([[maybe_unused]] int error_code, char const* desc) {
             std::println(stderr, "glfw error: {}", desc);
@@ -109,7 +101,6 @@ namespace {
         glfwDestroyWindow(window);
         glfwTerminate();
     }
-    #endif // USE_GLFW
 
     void opengl_debug_message_callback([[maybe_unused]] GLenum src, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id, [[maybe_unused]] GLenum severity, [[maybe_unused]] GLsizei len, const char* msg, [[maybe_unused]] const void* args) {
         std::println(stderr, "opengl error: {}", msg);

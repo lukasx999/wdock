@@ -1,5 +1,16 @@
+#include <print>
+
 #include "wayland.hpp"
-#include <wayland-egl-core.h>
+
+#ifdef USE_GLAD
+#define GLAD_EGL_IMPLEMENTATION
+#include <glad/egl.h>
+#endif // USE_GLAD
+
+#ifdef USE_GLAD
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
+#endif // USE_GLAD
 
 wayland_layer_surface::wayland_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
 
@@ -72,6 +83,8 @@ bool wayland_layer_surface::init_egl(int width, int height) {
 
     m_state.egl_surface = eglCreateWindowSurface(m_state.egl_display, m_state.egl_config, m_state.egl_window, nullptr);
     if (!eglMakeCurrent(m_state.egl_display, m_state.egl_surface, m_state.egl_surface, m_state.egl_context)) return false;
+
+    // gladLoadEGL(m_state.egl_display, eglGetProcAddress);
 
     return true;
 }

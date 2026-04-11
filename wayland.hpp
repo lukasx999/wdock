@@ -9,12 +9,22 @@
 #include <wayland-client.h>
 #include "wlr-layer-shell-unstable-v1.h"
 
+#undef USE_GLAD
+
+#ifdef USE_GLAD
+#include <glad/egl.h>
+#else
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#endif // USE_GLAD
+
+#ifdef USE_GLAD
+#include <glad/gl.h>
+#else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
-
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
+#endif // USE_GLAD
 
 struct wayland_error : std::runtime_error {
     using runtime_error::runtime_error;
