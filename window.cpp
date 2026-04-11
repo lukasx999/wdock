@@ -1,6 +1,4 @@
-#include <print>
-
-#include "wayland.hpp"
+#include "window.hpp"
 
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>

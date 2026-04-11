@@ -18,7 +18,7 @@ imgui/misc/cpp/imgui_stdlib.cpp
 imgui/backends/imgui_impl_opengl3.cpp
 imgui/backends/imgui_impl_null.cpp)
 
-add_executable(wdock main.cpp ${IMGUI_SOURCES} wayland.cpp ui.cpp)
+add_executable(wdock main.cpp ${IMGUI_SOURCES} window.cpp ui.cpp)
 
 
 

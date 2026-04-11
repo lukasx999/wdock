@@ -8,7 +8,7 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
-#include "wayland.hpp"
+#include "window.hpp"
 #include "ui.hpp"
 
 namespace {
