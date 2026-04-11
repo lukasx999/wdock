@@ -58,4 +58,4 @@ target_compile_options(wdock PRIVATE -fsanitize=address,undefined -ggdb -Wall -W
 target_link_options(wdock PRIVATE -fsanitize=address,undefined)
 target_include_directories(wdock PRIVATE glad/include/ imgui/ imgui/backends/ imgui/misc/cpp/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
-target_link_libraries(wdock PRIVATE PkgConfig::Cairo wayland-client wayland-egl)
+target_link_libraries(wdock PRIVATE PkgConfig::Cairo wayland-client wayland-egl OpenGL EGL)

@@ -44,10 +44,7 @@ class window {
 
     window(int width, int height, const char* title, anchor anchor, margin margin={0, 0, 0, 0});
 
-    ~window() {
-        wl_display_disconnect(m_state.wl_display);
-    }
-
+    ~window();
     window(const window&) = delete;
     window(window&&) = delete;
     window& operator=(const window&) = delete;

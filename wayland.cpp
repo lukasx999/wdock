@@ -39,6 +39,18 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
     eglSwapBuffers(m_state.egl_display, m_state.egl_surface);
 }
 
+window::~window() {
+    gladLoaderUnloadGL();
+
+    eglDestroyContext(m_state.egl_display, m_state.egl_context);
+    eglDestroySurface(m_state.egl_display, m_state.egl_surface);
+    eglTerminate(m_state.egl_display);
+
+    gladLoaderUnloadEGL();
+
+    wl_display_disconnect(m_state.wl_display);
+}
+
 bool window::init_egl(int width, int height) {
 
     std::array config_attribs {

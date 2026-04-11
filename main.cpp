@@ -93,4 +93,6 @@ int main2() {
 
     while (!(a.run_async() ||  b.run_async()));
 
+    return 0;
+
 }
