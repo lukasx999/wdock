@@ -1,4 +1,5 @@
 #include "wayland.hpp"
+#include <wayland-egl-core.h>
 
 wayland_layer_surface::wayland_layer_surface(int width, int height, const char* title, anchor anchor) {
 

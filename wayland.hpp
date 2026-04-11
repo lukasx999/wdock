@@ -4,6 +4,7 @@
 #include <functional>
 #include <stdexcept>
 
+#include <wayland-egl-core.h>
 #include <wayland-egl.h>
 #include <wayland-client.h>
 #include "wlr-layer-shell-unstable-v1.h"
@@ -69,6 +70,18 @@ class wayland_layer_surface {
 
     void on_draw(std::function<void()> draw_callback) {
         m_state.draw_callback = draw_callback;
+    }
+
+    [[nodiscard]] int get_width() const {
+        int width;
+        wl_egl_window_get_attached_size(m_state.egl_window, &width, nullptr);
+        return width;
+    }
+
+    [[nodiscard]] int get_height() const {
+        int height;
+        wl_egl_window_get_attached_size(m_state.egl_window, nullptr, &height);
+        return height;
     }
 
     void dispatch() {

@@ -14,7 +14,11 @@ pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET GLOBAL cairomm-1.16)
 
 
 file(GLOB IMGUI_CORE_SRC imgui/*.cpp)
-list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC} imgui/misc/cpp/imgui_stdlib.cpp imgui/backends/imgui_impl_opengl3.cpp imgui/backends/imgui_impl_glfw.cpp)
+list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC}
+imgui/misc/cpp/imgui_stdlib.cpp
+imgui/backends/imgui_impl_opengl3.cpp
+imgui/backends/imgui_impl_glfw.cpp
+imgui/backends/imgui_impl_null.cpp)
 
 add_executable(wdock main.cpp ${IMGUI_SOURCES} wayland.cpp)
 
