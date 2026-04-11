@@ -7,7 +7,9 @@
 #include <wayland-egl-core.h>
 #include <wayland-egl.h>
 #include <wayland-client.h>
-#include "wlr-layer-shell-unstable-v1.h"
+
+#include <wlr-layer-shell-unstable-v1.h>
+#include <xdg-shell.h>
 
 #undef USE_GLAD
 
@@ -37,6 +39,10 @@ class wayland_layer_surface {
         struct wl_surface*    wl_surface    = nullptr;
         struct wl_registry*   wl_registry   = nullptr;
         struct wl_compositor* wl_compositor = nullptr;
+
+        struct xdg_wm_base*  xdg_wm_base  = nullptr;
+        struct xdg_surface*  xdg_surface  = nullptr;
+        struct xdg_toplevel* xdg_toplevel = nullptr;
 
         struct zwlr_layer_shell_v1* zwlr_layer_shell = nullptr;
         struct zwlr_layer_surface_v1* zwlr_layer_surface = nullptr;
@@ -106,22 +112,39 @@ class wayland_layer_surface {
         }
     }
 
-    void setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
-
-        m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
-            nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
-
-        zwlr_layer_surface_v1_add_listener(m_state.zwlr_layer_surface, &m_layer_surface_listener, &m_state);
-        zwlr_layer_surface_v1_set_size(m_state.zwlr_layer_surface, width, height);
-        zwlr_layer_surface_v1_set_anchor(m_state.zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
-        zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
-    }
-
+    void setup_toplevel(const char* title);
+    void setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin);
     [[nodiscard]] bool init_egl(int width, int height);
 
     static void bind_globals(void *data, struct wl_registry *wl_registry, uint32_t name, const char *interface, uint32_t version);
     static void configure_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height);
     static void draw_frame(void* data, struct wl_callback* wl_callback, uint32_t callback_data);
+
+    static inline xdg_wm_base_listener m_xdg_wm_base_listener {
+        .ping = []([[maybe_unused]] void* data, struct xdg_wm_base* xdg_wm_base, uint32_t serial) {
+            xdg_wm_base_pong(xdg_wm_base, serial);
+        }
+    };
+
+    static inline xdg_toplevel_listener m_xdg_toplevel_listener {
+
+        .configure = [](void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, [[maybe_unused]] struct wl_array* states) {
+            state& state = *static_cast<struct state*>(data);
+            glViewport(0, 0, width, height);
+            wl_egl_window_resize(state.egl_window, width, height, 0, 0);
+        },
+
+        .close = []([[maybe_unused]] void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel) { },
+        .configure_bounds = []([[maybe_unused]] void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, [[maybe_unused]] int32_t width, [[maybe_unused]] int32_t height) { },
+        .wm_capabilities = []([[maybe_unused]] void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, [[maybe_unused]] struct wl_array* capabilities) { },
+
+    };
+
+    static inline xdg_surface_listener m_xdg_surface_listener {
+        .configure = []([[maybe_unused]] void* data, struct xdg_surface* xdg_surface, uint32_t serial) {
+            xdg_surface_ack_configure(xdg_surface, serial);
+        }
+    };
 
     static inline wl_registry_listener m_registry_listener {
         .global = bind_globals,

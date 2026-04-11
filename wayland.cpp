@@ -1,6 +1,7 @@
 #include <print>
 
 #include "wayland.hpp"
+#include "xdg-shell.h"
 
 #ifdef USE_GLAD
 #define GLAD_EGL_IMPLEMENTATION
@@ -27,7 +28,8 @@ wayland_layer_surface::wayland_layer_surface(int width, int height, const char* 
     if (!init_egl(width, height))
         throw wayland_error("failed to initialize EGL");
 
-    setup_layer_surface(width, height, title, anchor, margin);
+    // setup_layer_surface(width, height, title, anchor, margin);
+    setup_toplevel(title);
 
     wl_surface_commit(m_state.wl_surface);
     wl_display_roundtrip(m_state.wl_display);
@@ -37,6 +39,30 @@ wayland_layer_surface::wayland_layer_surface(int width, int height, const char* 
 
     eglSwapBuffers(m_state.egl_display, m_state.egl_surface);
 
+}
+
+void wayland_layer_surface::setup_toplevel(const char* title) {
+
+    xdg_wm_base_add_listener(m_state.xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
+
+    m_state.xdg_surface = xdg_wm_base_get_xdg_surface(m_state.xdg_wm_base, m_state.wl_surface);
+    m_state.xdg_toplevel = xdg_surface_get_toplevel(m_state.xdg_surface);
+    xdg_toplevel_set_title(m_state.xdg_toplevel, title);
+
+    xdg_toplevel_add_listener(m_state.xdg_toplevel, &m_xdg_toplevel_listener, this);
+    xdg_surface_add_listener(m_state.xdg_surface, &m_xdg_surface_listener, nullptr);
+
+}
+
+void wayland_layer_surface::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
+
+    m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
+        nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
+
+    zwlr_layer_surface_v1_add_listener(m_state.zwlr_layer_surface, &m_layer_surface_listener, &m_state);
+    zwlr_layer_surface_v1_set_size(m_state.zwlr_layer_surface, width, height);
+    zwlr_layer_surface_v1_set_anchor(m_state.zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
+    zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
 }
 
 bool wayland_layer_surface::init_egl(int width, int height) {
@@ -89,7 +115,7 @@ bool wayland_layer_surface::init_egl(int width, int height) {
     return true;
 }
 
-void wayland_layer_surface::bind_globals(void *data, struct wl_registry *wl_registry, uint32_t name, const char *interface, uint32_t version) {
+void wayland_layer_surface::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
     state& state = *static_cast<struct state*>(data);
 
     using namespace std::placeholders;
@@ -98,8 +124,11 @@ void wayland_layer_surface::bind_globals(void *data, struct wl_registry *wl_regi
     if (std::string_view(interface) == wl_compositor_interface.name)
         state.wl_compositor = static_cast<wl_compositor*>(bind_global(&wl_compositor_interface));
 
-    if (std::string_view(interface) == zwlr_layer_shell_v1_interface.name)
+    else if (std::string_view(interface) == zwlr_layer_shell_v1_interface.name)
         state.zwlr_layer_shell = static_cast<zwlr_layer_shell_v1*>(bind_global(&zwlr_layer_shell_v1_interface));
+
+    else if (std::string_view(interface) == xdg_wm_base_interface.name)
+        state.xdg_wm_base = static_cast<xdg_wm_base*>(bind_global(&xdg_wm_base_interface));
 
 }
 
