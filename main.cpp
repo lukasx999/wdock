@@ -58,25 +58,6 @@ namespace {
 
 int main() {
 
-    window a(500, 500, "a", window::anchor::left);
-    window b(500, 500, "b", window::anchor::right);
-
-    a.on_draw([&] {
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-    });
-
-    b.on_draw([&] {
-        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-    });
-
-    while (!(a.run_async() ||  b.run_async()));
-
-}
-
-int main2() {
-
     int width = 700;
     int height = 800;
     const char* title = "wdock";
@@ -93,5 +74,23 @@ int main2() {
     });
 
     window.run();
+}
+
+int main2() {
+
+    window a(500, 500, "a", window::anchor::left);
+    window b(500, 500, "b", window::anchor::right);
+
+    a.on_draw([&] {
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    });
+
+    b.on_draw([&] {
+        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    });
+
+    while (!(a.run_async() ||  b.run_async()));
 
 }

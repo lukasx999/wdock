@@ -10,7 +10,7 @@
 #include <wlr-layer-shell-unstable-v1.h>
 #include <xdg-shell.h>
 
-#undef USE_GLAD
+#define USE_GLAD
 
 #ifdef USE_GLAD
 #include <glad/egl.h>

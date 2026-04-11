@@ -1,16 +1,15 @@
 #include <print>
 
 #include "wayland.hpp"
-#include "xdg-shell.h"
-
-#ifdef USE_GLAD
-#define GLAD_EGL_IMPLEMENTATION
-#include <glad/egl.h>
-#endif // USE_GLAD
 
 #ifdef USE_GLAD
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
+#endif // USE_GLAD
+
+#ifdef USE_GLAD
+#define GLAD_EGL_IMPLEMENTATION
+#include <glad/egl.h>
 #endif // USE_GLAD
 
 window::window(int width, int height, const char* title, anchor anchor, margin margin) {
@@ -38,7 +37,6 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
     wl_callback_add_listener(frame_callback, &m_frame_callback_listener, &m_state);
 
     eglSwapBuffers(m_state.egl_display, m_state.egl_surface);
-
 }
 
 bool window::init_egl(int width, int height) {
@@ -60,11 +58,16 @@ bool window::init_egl(int width, int height) {
         EGL_NONE
     };
 
+    // for some reason we need to call gladLoaderLoadEGL() before and after eglInitialize().
+    if (!gladLoaderLoadEGL(nullptr)) return false;
+
     m_state.egl_display = eglGetDisplay(m_state.wl_display);
     if (m_state.egl_display == EGL_NO_DISPLAY) return false;
 
     EGLint major, minor;
     if (eglInitialize(m_state.egl_display, &major, &minor) != EGL_TRUE) return false;
+
+    if (!gladLoaderLoadEGL(m_state.egl_display)) return false;
 
     EGLint config_count;
     eglGetConfigs(m_state.egl_display, nullptr, 0, &config_count);
@@ -86,7 +89,7 @@ bool window::init_egl(int width, int height) {
     m_state.egl_surface = eglCreateWindowSurface(m_state.egl_display, m_state.egl_config, m_state.egl_window, nullptr);
     if (!eglMakeCurrent(m_state.egl_display, m_state.egl_surface, m_state.egl_surface, m_state.egl_context)) return false;
 
-    // gladLoadEGL(m_state.egl_display, eglGetProcAddress);
+    gladLoaderLoadGL();
 
     return true;
 }
