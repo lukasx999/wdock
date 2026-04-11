@@ -13,11 +13,11 @@
 #include <glad/gl.h>
 #endif // USE_GLAD
 
-wayland_layer_surface::wayland_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
+window::window(int width, int height, const char* title, anchor anchor, margin margin) {
 
     m_state.wl_display = wl_display_connect(nullptr);
     if (m_state.wl_display == nullptr)
-        throw wayland_error("failed to connect to wayland display");
+        throw window_error("failed to connect to wayland display");
 
     m_state.wl_registry = wl_display_get_registry(m_state.wl_display);
     wl_registry_add_listener(m_state.wl_registry, &m_registry_listener, &m_state);
@@ -26,10 +26,10 @@ wayland_layer_surface::wayland_layer_surface(int width, int height, const char* 
     m_state.wl_surface = wl_compositor_create_surface(m_state.wl_compositor);
 
     if (!init_egl(width, height))
-        throw wayland_error("failed to initialize EGL");
+        throw window_error("failed to initialize EGL");
 
-    // setup_layer_surface(width, height, title, anchor, margin);
-    setup_toplevel(title);
+    setup_layer_surface(width, height, title, anchor, margin);
+    // setup_toplevel(title);
 
     wl_surface_commit(m_state.wl_surface);
     wl_display_roundtrip(m_state.wl_display);
@@ -41,7 +41,7 @@ wayland_layer_surface::wayland_layer_surface(int width, int height, const char* 
 
 }
 
-bool wayland_layer_surface::init_egl(int width, int height) {
+bool window::init_egl(int width, int height) {
 
     std::array config_attribs {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -91,7 +91,7 @@ bool wayland_layer_surface::init_egl(int width, int height) {
     return true;
 }
 
-void wayland_layer_surface::setup_toplevel(const char* title) {
+void window::setup_toplevel(const char* title) {
 
     xdg_wm_base_add_listener(m_state.xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
 
@@ -104,7 +104,7 @@ void wayland_layer_surface::setup_toplevel(const char* title) {
 
 }
 
-void wayland_layer_surface::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
+void window::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
 
     m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
         nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
@@ -115,7 +115,7 @@ void wayland_layer_surface::setup_layer_surface(int width, int height, const cha
     zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
 }
 
-void wayland_layer_surface::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
+void window::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
     state& state = *static_cast<struct state*>(data);
 
     using namespace std::placeholders;
@@ -132,26 +132,27 @@ void wayland_layer_surface::bind_globals(void* data, struct wl_registry* wl_regi
 
 }
 
-void wayland_layer_surface::draw_frame(void* data, struct wl_callback* wl_callback, [[maybe_unused]] uint32_t callback_data) {
+void window::draw_frame(void* data, struct wl_callback* wl_callback, [[maybe_unused]] uint32_t callback_data) {
     state& state = *static_cast<struct state*>(data);
 
     wl_callback_destroy(wl_callback);
-
     struct wl_callback* frame_callback = wl_surface_frame(state.wl_surface);
     wl_callback_add_listener(frame_callback, &m_frame_callback_listener, &state);
+
+    eglMakeCurrent(state.egl_display, state.egl_surface, state.egl_surface, state.egl_context);
 
     state.draw_callback();
     eglSwapBuffers(state.egl_display, state.egl_surface);
 }
 
-void wayland_layer_surface::configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height) {
+void window::configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height) {
     zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface_v1, serial);
     state& state = *static_cast<struct state*>(data);
     glViewport(0, 0, width, height);
     wl_egl_window_resize(state.egl_window, width, height, 0, 0);
 }
 
-void wayland_layer_surface::configure_toplevel(void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, [[maybe_unused]] struct wl_array* states) {
+void window::configure_toplevel(void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, [[maybe_unused]] struct wl_array* states) {
     state& state = *static_cast<struct state*>(data);
     glViewport(0, 0, width, height);
     wl_egl_window_resize(state.egl_window, width, height, 0, 0);

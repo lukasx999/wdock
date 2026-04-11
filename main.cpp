@@ -58,21 +58,40 @@ namespace {
 
 int main() {
 
+    window a(500, 500, "a", window::anchor::left);
+    window b(500, 500, "b", window::anchor::right);
+
+    a.on_draw([&] {
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    });
+
+    b.on_draw([&] {
+        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    });
+
+    while (!(a.run_async() ||  b.run_async()));
+
+}
+
+int main2() {
+
     int width = 700;
     int height = 800;
     const char* title = "wdock";
 
-    wayland_layer_surface surface(width, height, title, wayland_layer_surface::anchor::right, {0, 200, 0, 0});
+    window window(width, height, title, window::anchor::right, {0, 200, 0, 0});
     ui ui;
 
     glDebugMessageCallback(opengl_debug_message_callback, nullptr);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    surface.on_draw([&] {
+    window.on_draw([&] {
         glClear(GL_COLOR_BUFFER_BIT);
-        ui.draw(surface.get_width(), surface.get_height(), imgui_draw);
+        ui.draw(window.get_width(), window.get_height(), imgui_draw);
     });
 
-    surface.dispatch();
+    window.run();
 
 }

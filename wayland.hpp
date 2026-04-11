@@ -10,7 +10,7 @@
 #include <wlr-layer-shell-unstable-v1.h>
 #include <xdg-shell.h>
 
-#define USE_GLAD
+#undef USE_GLAD
 
 #ifdef USE_GLAD
 #include <glad/egl.h>
@@ -27,11 +27,11 @@
 #include <GL/glext.h>
 #endif // USE_GLAD
 
-struct wayland_error : std::runtime_error {
+struct window_error : std::runtime_error {
     using runtime_error::runtime_error;
 };
 
-class wayland_layer_surface {
+class window {
     public:
     enum class anchor { top, bottom, left, right };
 
@@ -42,16 +42,16 @@ class wayland_layer_surface {
         int left   = 0;
     };
 
-    wayland_layer_surface(int width, int height, const char* title, anchor anchor, margin margin={0, 0, 0, 0});
+    window(int width, int height, const char* title, anchor anchor, margin margin={0, 0, 0, 0});
 
-    ~wayland_layer_surface() {
+    ~window() {
         wl_display_disconnect(m_state.wl_display);
     }
 
-    wayland_layer_surface(const wayland_layer_surface&) = delete;
-    wayland_layer_surface(wayland_layer_surface&&) = delete;
-    wayland_layer_surface& operator=(const wayland_layer_surface&) = delete;
-    wayland_layer_surface& operator=(wayland_layer_surface&&) = delete;
+    window(const window&) = delete;
+    window(window&&) = delete;
+    window& operator=(const window&) = delete;
+    window& operator=(window&&) = delete;
 
     void on_draw(std::function<void()> draw_callback) {
         m_state.draw_callback = draw_callback;
@@ -69,8 +69,13 @@ class wayland_layer_surface {
         return height;
     }
 
-    void dispatch() {
+    void run() const {
         while (wl_display_dispatch(m_state.wl_display) != -1);
+    }
+
+    bool run_async() const {
+        bool should_quit = wl_display_dispatch(m_state.wl_display) == -1;
+        return should_quit;
     }
 
     private:
