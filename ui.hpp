@@ -5,19 +5,21 @@
 #include <imgui_impl_null.h>
 #include <imgui_stdlib.h>
 
+#include "imgui_impl_wayland.hpp"
+
 class ui {
     public:
     ui() {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        // ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplWayland_Init();
         ImGui_ImplOpenGL3_Init();
         configure();
     }
 
     ~ui() {
         ImGui_ImplOpenGL3_Shutdown();
-        // ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplWayland_Shutdown();
         ImGui::DestroyContext();
     }
 
@@ -42,14 +44,7 @@ class ui {
 
     void with_frame_context(std::invocable auto fn, int width, int height) const {
         ImGui_ImplOpenGL3_NewFrame();
-
-        // ImGui_ImplGlfw_NewFrame();
-        // ImGui_ImplNullPlatform_NewFrame();
-
-        // TODO:
-        ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2(width, height);
-        io.DeltaTime = 1.0f / 60.0f;
+        ImGui_ImplWayland_NewFrame(width, height);
 
         ImGui::NewFrame();
         fn();

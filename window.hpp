@@ -4,6 +4,7 @@
 #include <functional>
 #include <stdexcept>
 
+#include <wayland-client-protocol.h>
 #include <wayland-egl.h>
 #include <wayland-client.h>
 
@@ -68,6 +69,8 @@ class window {
         struct wl_surface*    wl_surface    = nullptr;
         struct wl_registry*   wl_registry   = nullptr;
         struct wl_compositor* wl_compositor = nullptr;
+        struct wl_seat*       wl_seat       = nullptr;
+        struct wl_pointer*    wl_pointer    = nullptr;
 
         struct xdg_wm_base*  xdg_wm_base  = nullptr;
         struct xdg_surface*  xdg_surface  = nullptr;
@@ -105,6 +108,27 @@ class window {
     static void configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height);
     static void draw_frame(void* data, struct wl_callback* wl_callback, uint32_t callback_data);
     static void configure_toplevel(void* data, struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, struct wl_array* states);
+
+    static inline wl_pointer_listener m_wl_pointer_listener {
+        .enter = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t serial, [[maybe_unused]] struct wl_surface* surface, [[maybe_unused]] wl_fixed_t surface_x, [[maybe_unused]] wl_fixed_t surface_y) { },
+        .leave = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t serial, [[maybe_unused]] struct wl_surface* surface) { },
+
+        .motion = [](void* data, struct wl_pointer* wl_pointer, uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+
+        },
+
+        .button = [](void* data, struct wl_pointer* wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state) {
+
+        },
+
+        .axis = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, [[maybe_unused]] uint32_t axis, [[maybe_unused]] wl_fixed_t value) { },
+        .frame = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer) { },
+        .axis_source = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis_source) { },
+        .axis_stop = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, [[maybe_unused]] uint32_t axis) { },
+        .axis_discrete = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis, [[maybe_unused]] int32_t discrete) { },
+        .axis_value120 = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis, [[maybe_unused]] int32_t value120) { },
+        .axis_relative_direction = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis, [[maybe_unused]] uint32_t direction) { },
+    };
 
     static inline xdg_wm_base_listener m_xdg_wm_base_listener {
         .ping = []([[maybe_unused]] void* data, struct xdg_wm_base* xdg_wm_base, uint32_t serial) {

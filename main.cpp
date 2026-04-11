@@ -8,6 +8,7 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
+#include "imgui.h"
 #include "window.hpp"
 #include "ui.hpp"
 
@@ -47,6 +48,12 @@ namespace {
         ImGui::Text("Memory");
         ImGui::SameLine();
         ImGui::ProgressBar(get_memory_usage());
+
+        ImGui::Button("<");
+        ImGui::SameLine();
+        ImGui::Button("||");
+        ImGui::SameLine();
+        ImGui::Button(">");
 
     }
 

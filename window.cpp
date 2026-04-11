@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include <wayland-client-protocol.h>
 
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
@@ -15,6 +16,9 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
     m_state.wl_registry = wl_display_get_registry(m_state.wl_display);
     wl_registry_add_listener(m_state.wl_registry, &m_registry_listener, &m_state);
     wl_display_roundtrip(m_state.wl_display);
+
+    m_state.wl_pointer =  wl_seat_get_pointer(m_state.wl_seat);
+    wl_pointer_add_listener(m_state.wl_pointer, &m_wl_pointer_listener, &m_state);
 
     m_state.wl_surface = wl_compositor_create_surface(m_state.wl_compositor);
 
@@ -132,6 +136,9 @@ void window::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t 
 
     if (std::string_view(interface) == wl_compositor_interface.name)
         state.wl_compositor = static_cast<wl_compositor*>(bind_global(&wl_compositor_interface));
+
+    if (std::string_view(interface) == wl_seat_interface.name)
+        state.wl_seat = static_cast<wl_seat*>(bind_global(&wl_seat_interface));
 
     else if (std::string_view(interface) == zwlr_layer_shell_v1_interface.name)
         state.zwlr_layer_shell = static_cast<zwlr_layer_shell_v1*>(bind_global(&zwlr_layer_shell_v1_interface));
