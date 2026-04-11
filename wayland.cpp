@@ -41,30 +41,6 @@ wayland_layer_surface::wayland_layer_surface(int width, int height, const char* 
 
 }
 
-void wayland_layer_surface::setup_toplevel(const char* title) {
-
-    xdg_wm_base_add_listener(m_state.xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
-
-    m_state.xdg_surface = xdg_wm_base_get_xdg_surface(m_state.xdg_wm_base, m_state.wl_surface);
-    m_state.xdg_toplevel = xdg_surface_get_toplevel(m_state.xdg_surface);
-    xdg_toplevel_set_title(m_state.xdg_toplevel, title);
-
-    xdg_toplevel_add_listener(m_state.xdg_toplevel, &m_xdg_toplevel_listener, this);
-    xdg_surface_add_listener(m_state.xdg_surface, &m_xdg_surface_listener, nullptr);
-
-}
-
-void wayland_layer_surface::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
-
-    m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
-        nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
-
-    zwlr_layer_surface_v1_add_listener(m_state.zwlr_layer_surface, &m_layer_surface_listener, &m_state);
-    zwlr_layer_surface_v1_set_size(m_state.zwlr_layer_surface, width, height);
-    zwlr_layer_surface_v1_set_anchor(m_state.zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
-    zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
-}
-
 bool wayland_layer_surface::init_egl(int width, int height) {
 
     std::array config_attribs {
@@ -115,6 +91,30 @@ bool wayland_layer_surface::init_egl(int width, int height) {
     return true;
 }
 
+void wayland_layer_surface::setup_toplevel(const char* title) {
+
+    xdg_wm_base_add_listener(m_state.xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
+
+    m_state.xdg_surface = xdg_wm_base_get_xdg_surface(m_state.xdg_wm_base, m_state.wl_surface);
+    m_state.xdg_toplevel = xdg_surface_get_toplevel(m_state.xdg_surface);
+    xdg_toplevel_set_title(m_state.xdg_toplevel, title);
+
+    xdg_toplevel_add_listener(m_state.xdg_toplevel, &m_xdg_toplevel_listener, this);
+    xdg_surface_add_listener(m_state.xdg_surface, &m_xdg_surface_listener, nullptr);
+
+}
+
+void wayland_layer_surface::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
+
+    m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
+        nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
+
+    zwlr_layer_surface_v1_add_listener(m_state.zwlr_layer_surface, &m_layer_surface_listener, &m_state);
+    zwlr_layer_surface_v1_set_size(m_state.zwlr_layer_surface, width, height);
+    zwlr_layer_surface_v1_set_anchor(m_state.zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
+    zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
+}
+
 void wayland_layer_surface::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
     state& state = *static_cast<struct state*>(data);
 
@@ -144,8 +144,14 @@ void wayland_layer_surface::draw_frame(void* data, struct wl_callback* wl_callba
     eglSwapBuffers(state.egl_display, state.egl_surface);
 }
 
-void wayland_layer_surface::configure_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height) {
+void wayland_layer_surface::configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height) {
     zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface_v1, serial);
+    state& state = *static_cast<struct state*>(data);
+    glViewport(0, 0, width, height);
+    wl_egl_window_resize(state.egl_window, width, height, 0, 0);
+}
+
+void wayland_layer_surface::configure_toplevel(void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, [[maybe_unused]] struct wl_array* states) {
     state& state = *static_cast<struct state*>(data);
     glViewport(0, 0, width, height);
     wl_egl_window_resize(state.egl_window, width, height, 0, 0);
