@@ -3,7 +3,6 @@
 #include <cassert>
 #include <functional>
 #include <stdexcept>
-#include <string_view>
 
 #include <wayland-egl.h>
 #include <wayland-client.h>
@@ -72,7 +71,7 @@ class wayland_layer_surface {
         m_state.draw_callback = draw_callback;
     }
 
-    void run() {
+    void dispatch() {
         while (wl_display_dispatch(m_state.wl_display) != -1);
     }
 

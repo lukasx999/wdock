@@ -8,10 +8,10 @@
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
 
-// #include <imgui.h>
-// #include <imgui_impl_glfw.h>
-// #include <imgui_impl_opengl3.h>
-// #include <imgui_stdlib.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_stdlib.h>
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
@@ -56,86 +56,86 @@ namespace {
 //
 //     return window;
 // }
-//
-// void imgui_init(GLFWwindow* window) {
-//     IMGUI_CHECKVERSION();
-//     ImGui::CreateContext();
-//     ImGuiIO& io = ImGui::GetIO();
-//     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-//
-//     ImGui_ImplGlfw_InitForOpenGL(window, true);
-//     ImGui_ImplOpenGL3_Init();
-// }
-//
+
+void imgui_init() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    // ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
+}
+
 // void imgui_shutdown() {
-//     ImGui_ImplOpenGL3_Shutdown();
-//     ImGui_ImplGlfw_Shutdown();
-//     ImGui::DestroyContext();
+// ImGui_ImplOpenGL3_Shutdown();
+// ImGui_ImplGlfw_Shutdown();
+// ImGui::DestroyContext();
 // }
-//
-// void with_imgui_frame_context(std::invocable auto fn) {
-//     ImGui_ImplOpenGL3_NewFrame();
-//     ImGui_ImplGlfw_NewFrame();
-//     ImGui::NewFrame();
-//     fn();
-//     ImGui::Render();
-//     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-// }
-//
+
+void with_imgui_frame_context(std::invocable auto fn) {
+    ImGui_ImplOpenGL3_NewFrame();
+    // ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    fn();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 // void imgui_configure() {
-//     ImGuiStyle& style = ImGui::GetStyle();
-//     style.FontSizeBase = 40.0f;
+// ImGuiStyle& style = ImGui::GetStyle();
+// style.FontSizeBase = 40.0f;
 //
-//     ImGuiIO& io = ImGui::GetIO();
-//     // auto font_path = "/usr/share/fonts/TTF/Roboto-Regular.ttf";
-//     auto font_path = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
-//     io.Fonts->AddFontFromFileTTF(font_path);
+// ImGuiIO& io = ImGui::GetIO();
+// // auto font_path = "/usr/share/fonts/TTF/Roboto-Regular.ttf";
+// auto font_path = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
+// io.Fonts->AddFontFromFileTTF(font_path);
 // }
 //
 // void imgui_set_next_window_dimensions(GLFWwindow* window) {
-//     int w, h;
-//     glfwGetFramebufferSize(window, &w, &h);
+// int w, h;
+// glfwGetFramebufferSize(window, &w, &h);
 //
-//     ImGui::SetNextWindowPos({ 0, 0 });
-//     ImGui::SetNextWindowSize(ImVec2(w, h));
+// ImGui::SetNextWindowPos({ 0, 0 });
+// ImGui::SetNextWindowSize(ImVec2(w, h));
 // }
-//
-// [[nodiscard]] std::string get_time_string() {
-//     auto now = std::chrono::system_clock::now();
-//     std::chrono::zoned_time zt("Europe/Vienna", now);
-//     return std::format("{:%H:%M}", zt);
-// }
-//
-// [[nodiscard]] std::string get_date_string() {
-//     auto now = std::chrono::system_clock::now();
-//     std::chrono::zoned_time zt("Europe/Vienna", now);
-//     return std::format("{:%d.%m.%Y}", zt);
-// }
-//
-// [[nodiscard]] std::string get_uname_string() {
-//     struct utsname buf;
-//     assert(uname(&buf) == 0);
-//     return std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
-// }
-//
-// [[nodiscard]] float get_memory_usage() {
-//     struct sysinfo buf;
-//     assert(sysinfo(&buf) == 0);
-//     return static_cast<float>(buf.totalram - buf.freeram) / buf.totalram;
-// }
-//
-// void imgui_draw() {
-//
-//     ImGui::Text("welcome to wdock");
-//     ImGui::Text("%s", get_uname_string().c_str());
-//     ImGui::Text(" %s", get_time_string().c_str());
-//     ImGui::Text(" %s", get_date_string().c_str());
-//
-//     ImGui::Text("Memory");
-//     ImGui::SameLine();
-//     ImGui::ProgressBar(get_memory_usage());
-//
-// }
+
+[[nodiscard]] std::string get_time_string() {
+    auto now = std::chrono::system_clock::now();
+    std::chrono::zoned_time zt("Europe/Vienna", now);
+    return std::format("{:%H:%M}", zt);
+}
+
+[[nodiscard]] std::string get_date_string() {
+    auto now = std::chrono::system_clock::now();
+    std::chrono::zoned_time zt("Europe/Vienna", now);
+    return std::format("{:%d.%m.%Y}", zt);
+}
+
+[[nodiscard]] std::string get_uname_string() {
+    struct utsname buf;
+    assert(uname(&buf) == 0);
+    return std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
+}
+
+[[nodiscard]] float get_memory_usage() {
+    struct sysinfo buf;
+    assert(sysinfo(&buf) == 0);
+    return static_cast<float>(buf.totalram - buf.freeram) / buf.totalram;
+}
+
+void imgui_draw() {
+
+    ImGui::Text("welcome to wdock");
+    ImGui::Text("%s", get_uname_string().c_str());
+    ImGui::Text(" %s", get_time_string().c_str());
+    ImGui::Text(" %s", get_date_string().c_str());
+
+    ImGui::Text("Memory");
+    ImGui::SameLine();
+    ImGui::ProgressBar(get_memory_usage());
+
+}
 
 
 
@@ -143,14 +143,19 @@ namespace {
 
 int main() {
 
-    wayland_layer_surface window(500, 500, "wdock", wayland_layer_surface::anchor::top);
+    wayland_layer_surface surface(500, 500, "wdock", wayland_layer_surface::anchor::top);
 
-    window.on_draw([] {
+    imgui_init();
+
+    surface.on_draw([] {
         glClearColor(1.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // with_imgui_frame_context(imgui_draw);
+
     });
 
-    window.run();
+    surface.dispatch();
 
 }
 
