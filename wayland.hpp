@@ -121,7 +121,7 @@ class wayland_layer_surface {
 
     static void bind_globals(void *data, struct wl_registry *wl_registry, uint32_t name, const char *interface, uint32_t version);
     static void configure_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height);
-    static void draw_frame(void* data, struct wl_callback* wl_callback, [[maybe_unused]] uint32_t callback_data);
+    static void draw_frame(void* data, struct wl_callback* wl_callback, uint32_t callback_data);
 
     static inline wl_registry_listener m_registry_listener {
         .global = bind_globals,

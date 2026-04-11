@@ -9,7 +9,6 @@ project(Wdock)
 
 find_package(PkgConfig REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
 pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET GLOBAL cairomm-1.16)
 
 
@@ -17,7 +16,6 @@ file(GLOB IMGUI_CORE_SRC imgui/*.cpp)
 list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC}
 imgui/misc/cpp/imgui_stdlib.cpp
 imgui/backends/imgui_impl_opengl3.cpp
-imgui/backends/imgui_impl_glfw.cpp
 imgui/backends/imgui_impl_null.cpp)
 
 add_executable(wdock main.cpp ${IMGUI_SOURCES} wayland.cpp ui.cpp)
@@ -60,4 +58,4 @@ target_compile_options(wdock PRIVATE -fsanitize=address,undefined -ggdb -Wall -W
 target_link_options(wdock PRIVATE -fsanitize=address,undefined)
 target_include_directories(wdock PRIVATE glad/include/ imgui/ imgui/backends/ imgui/misc/cpp/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
-target_link_libraries(wdock PRIVATE glfw OpenGL PkgConfig::Cairo wayland-client wayland-egl EGL)
+target_link_libraries(wdock PRIVATE OpenGL PkgConfig::Cairo wayland-client wayland-egl EGL)
