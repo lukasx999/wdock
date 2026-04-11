@@ -2,22 +2,23 @@
 #include <cassert>
 #include <chrono>
 
+#define USE_GLFW
+
+#ifdef USE_GLFW
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
+#endif // USE_GLFW
 
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
 
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_null.h>
-#include <imgui_stdlib.h>
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
 #include "wayland.hpp"
+#include "ui.hpp"
 
 namespace {
 
