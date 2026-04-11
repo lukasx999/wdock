@@ -2,15 +2,11 @@
 
 #include "wayland.hpp"
 
-#ifdef USE_GLAD
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
-#endif // USE_GLAD
 
-#ifdef USE_GLAD
 #define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
-#endif // USE_GLAD
 
 window::window(int width, int height, const char* title, anchor anchor, margin margin) {
 
