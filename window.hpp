@@ -54,12 +54,12 @@ class window {
     }
 
     void run() const {
-        while (wl_display_dispatch(m_state.wl_display) != -1);
+        while (wl_display_dispatch(m_state.wl_display) != -1 && !m_state.should_close);
     }
 
     bool run_async() const {
         bool should_quit = wl_display_dispatch(m_state.wl_display) == -1;
-        return should_quit;
+        return should_quit || m_state.should_close;
     }
 
     private:
@@ -87,6 +87,7 @@ class window {
         EGLConfig  egl_config  = nullptr;
 
         std::function<void()> draw_callback;
+        bool should_close = false;
     };
 
     state m_state;
@@ -138,7 +139,10 @@ class window {
 
     static inline xdg_toplevel_listener m_xdg_toplevel_listener {
         .configure = configure_toplevel,
-        .close = []([[maybe_unused]] void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel) { },
+        .close = [](void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel) {
+            state& state = *static_cast<struct state*>(data);
+            state.should_close = true;
+        },
         .configure_bounds = []([[maybe_unused]] void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, [[maybe_unused]] int32_t width, [[maybe_unused]] int32_t height) { },
         .wm_capabilities = []([[maybe_unused]] void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, [[maybe_unused]] struct wl_array* capabilities) { },
     };

@@ -1,0 +1,12 @@
+- dashboard
+  - date
+  - time
+  - spotify
+
+- launcher
+  - button
+    - text: "browser"
+    - onclick: "chromium"
+  - button
+    - text: "terminal"
+    - onclick: "kitty"

@@ -49,6 +49,11 @@ namespace {
         ImGui::SameLine();
         ImGui::ProgressBar(get_memory_usage());
 
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 20));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15);
+        ImGui::Button("click me");
+        ImGui::PopStyleVar(2);
+
         ImGui::Button("<");
         ImGui::SameLine();
         ImGui::Button("||");
