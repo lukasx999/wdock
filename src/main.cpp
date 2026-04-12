@@ -41,11 +41,18 @@ namespace {
 
     };
 
-    [[nodiscard]] std::string get_uname_string() {
-        struct utsname buf;
-        assert(uname(&buf) == 0);
-        return std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
-    }
+    class uname_widget : public widget {
+        public:
+        uname_widget() = default;
+
+        void draw() const override {
+            struct utsname buf;
+            assert(uname(&buf) == 0);
+            auto fmt = std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
+            ImGui::Text("%s", fmt.c_str());
+        }
+
+    };
 
     [[nodiscard]] float get_memory_usage() {
         struct sysinfo buf;
@@ -71,13 +78,13 @@ int main() {
 
     int width = 700;
     int height = 800;
-    const char* title = "wdock";
 
-    window window(width, height, title, window::anchor::right, {0, 200, 0, 0});
+    window window(width, height, "wdock", window::anchor::right, {0, 200, 0, 0});
     ui ui;
 
     date_widget date;
     time_widget time;
+    uname_widget uname;
 
     glDebugMessageCallback(opengl_debug_message_callback, nullptr);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -87,9 +94,9 @@ int main() {
         ui.draw(window.get_width(), window.get_height(), [&] {
             date.draw();
             time.draw();
+            uname.draw();
 
             ImGui::Text("welcome to wdock");
-            ImGui::Text("%s", get_uname_string().c_str());
 
             ImGui::Text("Memory");
             ImGui::SameLine();
