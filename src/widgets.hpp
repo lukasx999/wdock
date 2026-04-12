@@ -16,6 +16,21 @@ namespace widgets {
         virtual void draw() const = 0;
     };
 
+    class custom : public widget {
+        public:
+        explicit custom(std::string_view command)
+        : m_command(command)
+        { }
+
+        void draw() const override {
+            // TODO: run the shell command and display its output
+        }
+
+        private:
+        const std::string_view m_command;
+
+    };
+
     class memory : public widget {
         public:
         memory() = default;

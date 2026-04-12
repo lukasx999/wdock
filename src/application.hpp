@@ -15,8 +15,6 @@ class application {
     , m_ui(m_window.get_wl_display(), m_window.get_wl_egl_window())
     , m_widgets(std::move(widgets))
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
         m_window.on_draw([&] {
             draw();
         });
@@ -32,6 +30,7 @@ class application {
     const widgets m_widgets;
 
     void draw() const {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         m_ui.draw([&] {
@@ -39,6 +38,7 @@ class application {
                 widget->draw();
             }
         });
+
     }
 
 };
