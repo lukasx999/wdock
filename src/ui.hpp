@@ -61,7 +61,7 @@ class ui {
 
     void configure() const {
         ImGuiStyle& style = ImGui::GetStyle();
-        style.FontSizeBase = 40.0f;
+        style.FontSizeBase = 30.0f;
 
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;

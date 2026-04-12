@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <string_view>
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
@@ -17,25 +18,35 @@ namespace widgets {
 
     class date : public widget {
         public:
-        date() = default;
+        explicit date(std::string_view timezone)
+        : m_timezone(timezone)
+        { }
 
         void draw() const override {
             auto now = std::chrono::system_clock::now();
-            std::chrono::zoned_time zt("Europe/Vienna", now);
+            std::chrono::zoned_time zt(m_timezone, now);
             ImGui::Text(" %s", std::format("{:%d.%m.%Y}", zt).c_str());
         }
+
+        private:
+        const std::string_view m_timezone;
 
     };
 
     class time : public widget {
         public:
-        time() = default;
+        explicit time(std::string_view timezone)
+        : m_timezone(timezone)
+        { }
 
         void draw() const override {
             auto now = std::chrono::system_clock::now();
-            std::chrono::zoned_time zt("Europe/Vienna", now);
+            std::chrono::zoned_time zt(m_timezone, now);
             ImGui::Text(" %s", std::format("{:%H:%M}", zt).c_str());
         }
+
+        private:
+        const std::string_view m_timezone;
 
     };
 
@@ -45,8 +56,7 @@ namespace widgets {
 
         void draw() const override {
             struct utsname buf;
-            assert(uname(&buf) == 0);
-            auto fmt = std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
+            assert(uname(&buf) == 0); auto fmt = std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
             ImGui::Text("%s", fmt.c_str());
         }
 

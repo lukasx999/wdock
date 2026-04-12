@@ -1,5 +1,7 @@
 {
   "general": {
+    "font": "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf",
+    "fontsize": 30,
     "width": 500,
     "height": 500,
     "anchor": "right",
@@ -13,14 +15,17 @@
   "modules": ["date", "time", "uname"],
   "configuration": {
     "date": {
+      "preset": "date",
       "timezone": "Europe/Vienna",
       "format": "{:%d.%m.%Y}",
     },
     "time": {
+      "type": "time",
       "timezone": "Europe/Vienna",
       "format": "{:%H:%M}",
     },
     "uname": {
+      "type": "kernel",
       "format": "{sysname} {nodename} {release} {machine}",
     },
   },
