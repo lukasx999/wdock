@@ -1,7 +1,6 @@
 #include <print>
 #include <cassert>
 #include <chrono>
-#include <thread>
 
 #include <cairomm/surface.h>
 #include <cairomm/context.h>

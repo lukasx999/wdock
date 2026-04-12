@@ -18,10 +18,7 @@ imgui/misc/cpp/imgui_stdlib.cpp
 imgui/backends/imgui_impl_opengl3.cpp
 imgui/backends/imgui_impl_null.cpp)
 
-add_executable(wdock main.cpp ${IMGUI_SOURCES} window.cpp ui.cpp)
-
-
-
+add_executable(wdock ${IMGUI_SOURCES})
 
 add_custom_command(
   OUTPUT xdg-shell.c
@@ -53,6 +50,7 @@ add_custom_command(
 )
 target_sources(wdock PRIVATE wlr-layer-shell-unstable-v1.c)
 
+add_subdirectory(src)
 
 target_compile_options(wdock PRIVATE -fsanitize=address,undefined -ggdb -Wall -Wextra -pedantic -Wno-c23-extensions)
 target_link_options(wdock PRIVATE -fsanitize=address,undefined)

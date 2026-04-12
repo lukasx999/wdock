@@ -65,6 +65,8 @@ class ui {
         style.FontSizeBase = 40.0f;
 
         ImGuiIO& io = ImGui::GetIO();
+        io.IniFilename = nullptr;
+
         auto font_path = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
         io.Fonts->AddFontFromFileTTF(font_path);
     }
