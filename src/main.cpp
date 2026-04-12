@@ -120,17 +120,3 @@ int main2() {
     return 0;
 
 }
-
-int main3() {
-
-    window a(500, 500, "a", window::anchor::left);
-    a.on_draw([&] {
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-    });
-    window b(std::move(a));
-    b.run();
-
-    return 0;
-
-}
