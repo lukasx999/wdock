@@ -34,9 +34,17 @@ class ui {
                 | ImGuiWindowFlags_NoMove;
 
             set_next_window_dimensions();
+
+            float padding = 25;
+            auto& style = ImGui::GetStyle();
+            style.WindowPadding = ImVec2(padding, padding);
+            style.WindowRounding = 15.0f;
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.75f));
             ImGui::Begin("main", nullptr, flags);
             fn();
             ImGui::End();
+            ImGui::PopStyleColor();
+
         }, width, height);
     }
 

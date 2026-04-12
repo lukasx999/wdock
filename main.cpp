@@ -79,7 +79,7 @@ namespace {
 
 } // namespace
 
-int main_() {
+int main() {
 
     int width = 700;
     int height = 800;
@@ -89,7 +89,7 @@ int main_() {
     ui ui;
 
     glDebugMessageCallback(opengl_debug_message_callback, nullptr);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     window.on_draw([&] {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -122,7 +122,7 @@ int main2() {
 
 }
 
-int main() {
+int main3() {
 
     window a(500, 500, "a", window::anchor::left);
     a.on_draw([&] {

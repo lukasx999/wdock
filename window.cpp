@@ -26,8 +26,8 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
     if (!init_egl(width, height))
         throw window_error("failed to initialize EGL");
 
-    // setup_layer_surface(width, height, title, anchor, margin);
-    setup_toplevel(title);
+    setup_layer_surface(width, height, title, anchor, margin);
+    // setup_toplevel(title);
 
     wl_surface_commit(m_state->wl_surface);
     wl_display_roundtrip(m_state->wl_display);
