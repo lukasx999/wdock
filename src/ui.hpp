@@ -15,6 +15,7 @@ class ui {
         ImGui_ImplWayland_Init(wl_display, wl_egl_window);
         ImGui_ImplOpenGL3_Init();
         configure();
+        set_style();
     }
 
     ~ui() {
@@ -42,13 +43,6 @@ class ui {
             ImGui::SetNextWindowPos({ 0, 0 });
             ImGui::SetNextWindowSize(io.DisplaySize);
 
-            float padding = 25;
-
-            auto& style = ImGui::GetStyle();
-            style.WindowPadding = ImVec2(padding, padding);
-            style.WindowRounding = 15.0f;
-            style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
-
             ImGui::Begin("main", nullptr, flags);
             fn();
             ImGui::End();
@@ -57,6 +51,15 @@ class ui {
     }
 
     private:
+    void set_style() const {
+        auto& style = ImGui::GetStyle();
+
+        float padding = 25;
+        style.WindowPadding = ImVec2(padding, padding);
+        style.WindowRounding = 15.0f;
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+    }
+
     void with_frame_context(std::invocable auto fn) const {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplWayland_NewFrame();

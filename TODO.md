@@ -1,5 +1,7 @@
 # TODO
 
+- mini process viewer (like htop)
+- uptime widget using sysinfo()
 - calendar api
 - spotify api
 - imgui wayland backend

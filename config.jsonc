@@ -31,5 +31,9 @@
       "type": "kernel",
       "format": "{sysname} {nodename} {release} {machine}",
     },
+    "say_hello": {
+      "type": "custom",
+      "run-sh": "echo hello",
+    },
   },
 }

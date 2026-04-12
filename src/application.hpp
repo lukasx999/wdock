@@ -1,7 +1,5 @@
 #pragma once
 
-#include <print>
-
 #include "window.hpp"
 #include "ui.hpp"
 #include "widgets.hpp"
@@ -14,10 +12,9 @@ class application {
 
     application(int width, int height, anchor anchor, margin margin, widgets widgets)
     : m_window("wdock", width, height, anchor, margin)
-    , m_ui(m_window.get_wl_display(), m_window.get_wl_egl_display())
+    , m_ui(m_window.get_wl_display(), m_window.get_wl_egl_window())
     , m_widgets(std::move(widgets))
     {
-        glDebugMessageCallback(opengl_debug_message_callback, nullptr);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         m_window.on_draw([&] {
@@ -41,15 +38,7 @@ class application {
             for (auto& widget : m_widgets) {
                 widget->draw();
             }
-
-            if (ImGui::Button("click me"))
-                std::println("hello");
-
         });
-    }
-
-    static void opengl_debug_message_callback([[maybe_unused]] GLenum src, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id, [[maybe_unused]] GLenum severity, [[maybe_unused]] GLsizei len, const char* msg, [[maybe_unused]] const void* args) {
-        std::println(stderr, "opengl error: {}", msg);
     }
 
 };

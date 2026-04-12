@@ -21,9 +21,6 @@ window::window(const char* title, int width, int height, anchor anchor, margin m
     wl_registry_add_listener(m_state->wl_registry, &m_registry_listener, m_state.get());
     wl_display_roundtrip(m_state->wl_display);
 
-    m_state->wl_pointer =  wl_seat_get_pointer(m_state->wl_seat);
-    wl_pointer_add_listener(m_state->wl_pointer, &m_wl_pointer_listener, m_state.get());
-
     m_state->wl_surface = wl_compositor_create_surface(m_state->wl_compositor);
 
     if (!init_egl(width, height))
@@ -58,6 +55,36 @@ window::~window() {
     gladLoaderUnloadEGL();
 
     wl_display_disconnect(m_state->wl_display);
+}
+
+void window::run() const {
+    while (!m_state->should_close) {
+        if (wl_display_dispatch(m_state->wl_display) == -1)
+            throw window_error("error handling wayland events");
+    }
+}
+
+void window::run_concurrent(std::span<const window*> windows) {
+    while (true) {
+        for (auto& window : windows) {
+
+            if (window->m_state->should_close)
+                continue;
+
+            if (wl_display_dispatch(window->m_state->wl_display) == -1)
+                throw window_error("error handling wayland events");
+        }
+    }
+}
+
+zwlr_layer_surface_v1_anchor window::anchor_to_wlr_anchor(anchor anchor) {
+    switch (anchor) {
+        case anchor::top:    return ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
+        case anchor::bottom: return ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+        case anchor::left:   return ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT;
+        case anchor::right:  return ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+        default: assert(!"unreachable");
+    }
 }
 
 bool window::init_egl(int width, int height) {
@@ -147,9 +174,6 @@ void window::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t 
 
     if (std::string_view(interface) == wl_compositor_interface.name)
         state.wl_compositor = static_cast<wl_compositor*>(bind_global(&wl_compositor_interface));
-
-    if (std::string_view(interface) == wl_seat_interface.name)
-        state.wl_seat = static_cast<wl_seat*>(bind_global(&wl_seat_interface));
 
     else if (std::string_view(interface) == zwlr_layer_shell_v1_interface.name)
         state.zwlr_layer_shell = static_cast<zwlr_layer_shell_v1*>(bind_global(&zwlr_layer_shell_v1_interface));

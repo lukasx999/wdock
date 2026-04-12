@@ -16,6 +16,32 @@ namespace widgets {
         virtual void draw() const = 0;
     };
 
+    class memory : public widget {
+        public:
+        memory() = default;
+
+        void draw() const override {
+            struct sysinfo buf{};
+            assert(sysinfo(&buf) == 0);
+            // TODO: get this right
+            size_t total = buf.totalram / 1'000'000'000;
+            size_t free = buf.freeram / 1'000'000'000;
+            size_t used = total - free;
+            auto fmt = std::format("{}Gib/{}Gib", used, total);
+            float frac = static_cast<float>(used) / total;
+
+            auto& style = ImGui::GetStyle();
+            style.FrameRounding = 20;
+            // style.Colors[ImGuiCol_FrameBgActive] = ImVec4(1.0, 1.0, 1.0, 1.0);
+
+            ImGui::TextUnformatted(fmt.c_str());
+            ImGui::SameLine();
+            ImGui::ProgressBar(frac);
+
+        }
+
+    };
+
     class date : public widget {
         public:
         explicit date(std::string_view timezone)

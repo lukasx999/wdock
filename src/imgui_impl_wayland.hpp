@@ -46,8 +46,8 @@ static wl_pointer_listener m_wl_pointer_listener {
     },
 
     .button = [](void* data, struct wl_pointer* wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state) {
-        imgui_impl_wayland_data& wdata = *static_cast<imgui_impl_wayland_data*>(data);
-        wdata.io->AddMouseButtonEvent(button, state);
+        // imgui_impl_wayland_data& wdata = *static_cast<imgui_impl_wayland_data*>(data);
+        // wdata.io->AddMouseButtonEvent(button, state);
     },
 
     .axis = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, [[maybe_unused]] uint32_t axis, [[maybe_unused]] wl_fixed_t value) { },
