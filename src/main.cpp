@@ -13,7 +13,6 @@ int main() {
     widgets.push_back(std::make_unique<widgets::time>("Europe/Vienna"));
     widgets.push_back(std::make_unique<widgets::kernel>());
 
-
     application app(width, height, anchor, margin, std::move(widgets));
     app.run();
 
