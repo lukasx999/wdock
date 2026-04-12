@@ -1,11 +1,12 @@
 #pragma once
 
 #include <cassert>
+#include <utility>
+#include <memory>
 #include <span>
 #include <functional>
 #include <stdexcept>
 
-#include <utility>
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 #include <wayland-egl.h>
@@ -16,8 +17,6 @@
 
 #include <glad/gl.h>
 #include <glad/egl.h>
-
-#include <poll.h>
 
 struct window_error : std::runtime_error {
     using runtime_error::runtime_error;
@@ -38,33 +37,29 @@ class window {
 
     ~window();
     window(const window&) = delete;
-    // window(window&&) noexcept = delete;
-    window(window&& other) noexcept
-    : m_state(std::exchange(other.m_state, state{}))
-    {
-    }
+    window(window&&) noexcept = default;
     window& operator=(const window&) = delete;
     window& operator=(window&&) noexcept = delete;
 
     void on_draw(std::function<void()> draw_callback) {
-        m_state.draw_callback = draw_callback;
+        m_state->draw_callback = draw_callback;
     }
 
     [[nodiscard]] int get_width() const {
         int width;
-        wl_egl_window_get_attached_size(m_state.egl_window, &width, nullptr);
+        wl_egl_window_get_attached_size(m_state->egl_window, &width, nullptr);
         return width;
     }
 
     [[nodiscard]] int get_height() const {
         int height;
-        wl_egl_window_get_attached_size(m_state.egl_window, nullptr, &height);
+        wl_egl_window_get_attached_size(m_state->egl_window, nullptr, &height);
         return height;
     }
 
     void run() const {
-        while (!m_state.should_close) {
-            if (wl_display_dispatch(m_state.wl_display) == -1)
+        while (!m_state->should_close) {
+            if (wl_display_dispatch(m_state->wl_display) == -1)
                 throw window_error("error handling wayland events");
         }
     }
@@ -73,10 +68,10 @@ class window {
         while (true) {
             for (auto& window : windows) {
 
-                if (window->m_state.should_close)
+                if (window->m_state->should_close)
                     continue;
 
-                if (wl_display_dispatch(window->m_state.wl_display) == -1)
+                if (wl_display_dispatch(window->m_state->wl_display) == -1)
                     throw window_error("error handling wayland events");
             }
         }
@@ -105,11 +100,15 @@ class window {
         EGLContext egl_context = nullptr;
         EGLConfig  egl_config  = nullptr;
 
-        std::function<void()> draw_callback;
+        std::function<void()> draw_callback = [] { };
         bool should_close = false;
     };
 
-    state m_state;
+    // we need to use unique_ptr here to make the class movable, as otherwise, if a window
+    // is moved from, the new owner will still have pointers to the state in the old,
+    // moved-from object. (the void* arg in the wayland event listeners)
+    // hence we need to allocate this struct on the heap.
+    std::unique_ptr<state> m_state;
 
     [[nodiscard]] static zwlr_layer_surface_v1_anchor anchor_to_wlr_anchor(anchor anchor) {
         switch (anchor) {

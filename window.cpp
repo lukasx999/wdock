@@ -6,20 +6,22 @@
 #define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
 
-window::window(int width, int height, const char* title, anchor anchor, margin margin) {
+window::window(int width, int height, const char* title, anchor anchor, margin margin)
+: m_state(std::make_unique<state>())
+{
 
-    m_state.wl_display = wl_display_connect(nullptr);
-    if (m_state.wl_display == nullptr)
+    m_state->wl_display = wl_display_connect(nullptr);
+    if (m_state->wl_display == nullptr)
         throw window_error("failed to connect to wayland display");
 
-    m_state.wl_registry = wl_display_get_registry(m_state.wl_display);
-    wl_registry_add_listener(m_state.wl_registry, &m_registry_listener, &m_state);
-    wl_display_roundtrip(m_state.wl_display);
+    m_state->wl_registry = wl_display_get_registry(m_state->wl_display);
+    wl_registry_add_listener(m_state->wl_registry, &m_registry_listener, m_state.get());
+    wl_display_roundtrip(m_state->wl_display);
 
-    m_state.wl_pointer =  wl_seat_get_pointer(m_state.wl_seat);
-    wl_pointer_add_listener(m_state.wl_pointer, &m_wl_pointer_listener, &m_state);
+    m_state->wl_pointer =  wl_seat_get_pointer(m_state->wl_seat);
+    wl_pointer_add_listener(m_state->wl_pointer, &m_wl_pointer_listener, m_state.get());
 
-    m_state.wl_surface = wl_compositor_create_surface(m_state.wl_compositor);
+    m_state->wl_surface = wl_compositor_create_surface(m_state->wl_compositor);
 
     if (!init_egl(width, height))
         throw window_error("failed to initialize EGL");
@@ -27,26 +29,29 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
     // setup_layer_surface(width, height, title, anchor, margin);
     setup_toplevel(title);
 
-    wl_surface_commit(m_state.wl_surface);
-    wl_display_roundtrip(m_state.wl_display);
+    wl_surface_commit(m_state->wl_surface);
+    wl_display_roundtrip(m_state->wl_display);
 
-    wl_callback* frame_callback = wl_surface_frame(m_state.wl_surface);
-    wl_callback_add_listener(frame_callback, &m_frame_callback_listener, &m_state);
+    wl_callback* frame_callback = wl_surface_frame(m_state->wl_surface);
+    wl_callback_add_listener(frame_callback, &m_frame_callback_listener, m_state.get());
 
-    eglSwapBuffers(m_state.egl_display, m_state.egl_surface);
+    eglSwapBuffers(m_state->egl_display, m_state->egl_surface);
 }
 
 window::~window() {
-    if (m_state.wl_display == nullptr) return;
+
+    // dont run dtor if the object has been moved from.
+    if (m_state == nullptr) return;
+
     gladLoaderUnloadGL();
 
-    eglDestroyContext(m_state.egl_display, m_state.egl_context);
-    eglDestroySurface(m_state.egl_display, m_state.egl_surface);
-    eglTerminate(m_state.egl_display);
+    eglDestroyContext(m_state->egl_display, m_state->egl_context);
+    eglDestroySurface(m_state->egl_display, m_state->egl_surface);
+    eglTerminate(m_state->egl_display);
 
     gladLoaderUnloadEGL();
 
-    wl_display_disconnect(m_state.wl_display);
+    wl_display_disconnect(m_state->wl_display);
 }
 
 bool window::init_egl(int width, int height) {
@@ -71,33 +76,33 @@ bool window::init_egl(int width, int height) {
     // for some reason we need to call gladLoaderLoadEGL() before and after eglInitialize().
     if (!gladLoaderLoadEGL(nullptr)) return false;
 
-    m_state.egl_display = eglGetDisplay(m_state.wl_display);
-    if (m_state.egl_display == EGL_NO_DISPLAY) return false;
+    m_state->egl_display = eglGetDisplay(m_state->wl_display);
+    if (m_state->egl_display == EGL_NO_DISPLAY) return false;
 
     EGLint major, minor;
-    if (eglInitialize(m_state.egl_display, &major, &minor) != EGL_TRUE) return false;
+    if (eglInitialize(m_state->egl_display, &major, &minor) != EGL_TRUE) return false;
 
-    if (!gladLoaderLoadEGL(m_state.egl_display)) return false;
+    if (!gladLoaderLoadEGL(m_state->egl_display)) return false;
 
     EGLint config_count;
-    eglGetConfigs(m_state.egl_display, nullptr, 0, &config_count);
+    eglGetConfigs(m_state->egl_display, nullptr, 0, &config_count);
 
     std::vector<EGLConfig> configs(config_count);
 
     if (!eglBindAPI(EGL_OPENGL_API)) return false;
 
     EGLint n;
-    eglChooseConfig(m_state.egl_display, config_attribs.data(), configs.data(), config_count, &n);
+    eglChooseConfig(m_state->egl_display, config_attribs.data(), configs.data(), config_count, &n);
 
-    m_state.egl_config = configs.front();
-    m_state.egl_context = eglCreateContext(m_state.egl_display, m_state.egl_config, EGL_NO_CONTEXT, context_attribs.data());
-    if (m_state.egl_context == EGL_NO_CONTEXT) return false;
+    m_state->egl_config = configs.front();
+    m_state->egl_context = eglCreateContext(m_state->egl_display, m_state->egl_config, EGL_NO_CONTEXT, context_attribs.data());
+    if (m_state->egl_context == EGL_NO_CONTEXT) return false;
 
-    m_state.egl_window = wl_egl_window_create(m_state.wl_surface, width, height);
-    if (m_state.egl_window == EGL_NO_SURFACE) return false;
+    m_state->egl_window = wl_egl_window_create(m_state->wl_surface, width, height);
+    if (m_state->egl_window == EGL_NO_SURFACE) return false;
 
-    m_state.egl_surface = eglCreateWindowSurface(m_state.egl_display, m_state.egl_config, m_state.egl_window, nullptr);
-    if (!eglMakeCurrent(m_state.egl_display, m_state.egl_surface, m_state.egl_surface, m_state.egl_context)) return false;
+    m_state->egl_surface = eglCreateWindowSurface(m_state->egl_display, m_state->egl_config, m_state->egl_window, nullptr);
+    if (!eglMakeCurrent(m_state->egl_display, m_state->egl_surface, m_state->egl_surface, m_state->egl_context)) return false;
 
     gladLoaderLoadGL();
 
@@ -106,26 +111,26 @@ bool window::init_egl(int width, int height) {
 
 void window::setup_toplevel(const char* title) {
 
-    xdg_wm_base_add_listener(m_state.xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
+    xdg_wm_base_add_listener(m_state->xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
 
-    m_state.xdg_surface = xdg_wm_base_get_xdg_surface(m_state.xdg_wm_base, m_state.wl_surface);
-    m_state.xdg_toplevel = xdg_surface_get_toplevel(m_state.xdg_surface);
-    xdg_toplevel_set_title(m_state.xdg_toplevel, title);
+    m_state->xdg_surface = xdg_wm_base_get_xdg_surface(m_state->xdg_wm_base, m_state->wl_surface);
+    m_state->xdg_toplevel = xdg_surface_get_toplevel(m_state->xdg_surface);
+    xdg_toplevel_set_title(m_state->xdg_toplevel, title);
 
-    xdg_toplevel_add_listener(m_state.xdg_toplevel, &m_xdg_toplevel_listener, &m_state);
-    xdg_surface_add_listener(m_state.xdg_surface, &m_xdg_surface_listener, nullptr);
+    xdg_toplevel_add_listener(m_state->xdg_toplevel, &m_xdg_toplevel_listener, m_state.get());
+    xdg_surface_add_listener(m_state->xdg_surface, &m_xdg_surface_listener, nullptr);
 
 }
 
 void window::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
 
-    m_state.zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state.zwlr_layer_shell, m_state.wl_surface,
+    m_state->zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state->zwlr_layer_shell, m_state->wl_surface,
         nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
 
-    zwlr_layer_surface_v1_add_listener(m_state.zwlr_layer_surface, &m_layer_surface_listener, &m_state);
-    zwlr_layer_surface_v1_set_size(m_state.zwlr_layer_surface, width, height);
-    zwlr_layer_surface_v1_set_anchor(m_state.zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
-    zwlr_layer_surface_v1_set_margin(m_state.zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
+    zwlr_layer_surface_v1_add_listener(m_state->zwlr_layer_surface, &m_layer_surface_listener, m_state.get());
+    zwlr_layer_surface_v1_set_size(m_state->zwlr_layer_surface, width, height);
+    zwlr_layer_surface_v1_set_anchor(m_state->zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
+    zwlr_layer_surface_v1_set_margin(m_state->zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
 }
 
 void window::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
