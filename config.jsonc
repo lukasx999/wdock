@@ -2,6 +2,9 @@
   "general": {
     "font": "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf",
     "fontsize": 30,
+    "background-color": "#0000007f",
+    "border-radius": 15,
+    "padding": 20,
     "width": 500,
     "height": 500,
     "anchor": "right",

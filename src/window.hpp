@@ -6,8 +6,6 @@
 #include <functional>
 #include <stdexcept>
 
-#include <wayland-client-core.h>
-#include <wayland-client-protocol.h>
 #include <wayland-egl.h>
 #include <wayland-client.h>
 
@@ -32,7 +30,7 @@ class window {
         int left   = 0;
     };
 
-    window(int width, int height, const char* title, anchor anchor, margin margin={0, 0, 0, 0});
+    window(const char* title, int width, int height, anchor anchor, margin margin={0, 0, 0, 0});
 
     ~window();
     window(const window&) = delete;

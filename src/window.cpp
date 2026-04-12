@@ -6,7 +6,10 @@
 #define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
 
-window::window(int width, int height, const char* title, anchor anchor, margin margin)
+// for debugging only
+#undef USE_XDG_TOPLEVEL_ROLE
+
+window::window(const char* title, int width, int height, anchor anchor, margin margin)
 : m_state(std::make_unique<state>())
 {
 
@@ -26,8 +29,11 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
     if (!init_egl(width, height))
         throw window_error("failed to initialize EGL");
 
+    #ifndef USE_XDG_TOPLEVEL_ROLE
     setup_layer_surface(width, height, title, anchor, margin);
-    // setup_toplevel(title);
+    #else
+    setup_toplevel(title);
+    #endif // USE_XDG_TOPLEVEL_ROLE
 
     wl_surface_commit(m_state->wl_surface);
     wl_display_roundtrip(m_state->wl_display);

@@ -13,7 +13,7 @@ class application {
     using widgets = std::vector<std::unique_ptr<widgets::widget>>;
 
     application(int width, int height, anchor anchor, margin margin, widgets widgets)
-    : m_window(width, height, "wdock", anchor, margin)
+    : m_window("wdock", width, height, anchor, margin)
     , m_widgets(std::move(widgets))
     {
         glDebugMessageCallback(opengl_debug_message_callback, nullptr);

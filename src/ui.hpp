@@ -40,9 +40,11 @@ class ui {
             style.WindowPadding = ImVec2(padding, padding);
             style.WindowRounding = 15.0f;
             ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.75f));
+
             ImGui::Begin("main", nullptr, flags);
             fn();
             ImGui::End();
+
             ImGui::PopStyleColor();
 
         }, width, height);
@@ -52,7 +54,6 @@ class ui {
     void with_frame_context(std::invocable auto fn, int width, int height) const {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplWayland_NewFrame(width, height);
-
         ImGui::NewFrame();
         fn();
         ImGui::Render();
