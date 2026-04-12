@@ -1,9 +1,12 @@
 #pragma once
 
 #include <cassert>
+#include <span>
 #include <functional>
 #include <stdexcept>
 
+#include <utility>
+#include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 #include <wayland-egl.h>
 #include <wayland-client.h>
@@ -13,6 +16,8 @@
 
 #include <glad/gl.h>
 #include <glad/egl.h>
+
+#include <poll.h>
 
 struct window_error : std::runtime_error {
     using runtime_error::runtime_error;
@@ -33,9 +38,13 @@ class window {
 
     ~window();
     window(const window&) = delete;
-    window(window&&) = delete;
+    // window(window&&) noexcept = delete;
+    window(window&& other) noexcept
+    : m_state(std::exchange(other.m_state, state{}))
+    {
+    }
     window& operator=(const window&) = delete;
-    window& operator=(window&&) = delete;
+    window& operator=(window&&) noexcept = delete;
 
     void on_draw(std::function<void()> draw_callback) {
         m_state.draw_callback = draw_callback;
@@ -54,16 +63,26 @@ class window {
     }
 
     void run() const {
-        while (wl_display_dispatch(m_state.wl_display) != -1 && !m_state.should_close);
+        while (!m_state.should_close) {
+            if (wl_display_dispatch(m_state.wl_display) == -1)
+                throw window_error("error handling wayland events");
+        }
     }
 
-    bool run_async() const {
-        bool should_quit = wl_display_dispatch(m_state.wl_display) == -1;
-        return should_quit || m_state.should_close;
+    static void run_concurrent(std::span<const window*> windows) {
+        while (true) {
+            for (auto& window : windows) {
+
+                if (window->m_state.should_close)
+                    continue;
+
+                if (wl_display_dispatch(window->m_state.wl_display) == -1)
+                    throw window_error("error handling wayland events");
+            }
+        }
     }
 
     private:
-
     struct state {
         struct wl_display*    wl_display    = nullptr;
         struct wl_surface*    wl_surface    = nullptr;

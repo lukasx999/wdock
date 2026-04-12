@@ -1,6 +1,7 @@
 #include <print>
 #include <cassert>
 #include <chrono>
+#include <thread>
 
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
@@ -39,6 +40,14 @@ namespace {
     }
 
     void imgui_draw() {
+        static int counter = 0;
+        static auto time = std::chrono::steady_clock::now();
+
+        if (auto now = std::chrono::steady_clock::now(); now >= time) {
+            using namespace std::chrono_literals;
+            counter++;
+            time = now + 10ms;
+        }
 
         ImGui::Text("welcome to wdock");
         ImGui::Text("%s", get_uname_string().c_str());
@@ -60,6 +69,8 @@ namespace {
         ImGui::SameLine();
         ImGui::Button(">");
 
+        ImGui::Text("counter: %d", counter);
+
     }
 
     void opengl_debug_message_callback([[maybe_unused]] GLenum src, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id, [[maybe_unused]] GLenum severity, [[maybe_unused]] GLsizei len, const char* msg, [[maybe_unused]] const void* args) {
@@ -68,7 +79,7 @@ namespace {
 
 } // namespace
 
-int main() {
+int main_() {
 
     int width = 700;
     int height = 800;
@@ -103,7 +114,19 @@ int main2() {
         glClear(GL_COLOR_BUFFER_BIT);
     });
 
-    while (!(a.run_async() ||  b.run_async()));
+    std::vector<const window*> windows{ &a, &b };
+
+    window::run_concurrent(windows);
+
+    return 0;
+
+}
+
+int main() {
+
+    window a(500, 500, "a", window::anchor::left);
+    window b(std::move(a));
+    b.run();
 
     return 0;
 

@@ -1,5 +1,4 @@
 #include "window.hpp"
-#include <wayland-client-protocol.h>
 
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
@@ -38,6 +37,7 @@ window::window(int width, int height, const char* title, anchor anchor, margin m
 }
 
 window::~window() {
+    if (m_state.wl_display == nullptr) return;
     gladLoaderUnloadGL();
 
     eglDestroyContext(m_state.egl_display, m_state.egl_context);
@@ -112,7 +112,7 @@ void window::setup_toplevel(const char* title) {
     m_state.xdg_toplevel = xdg_surface_get_toplevel(m_state.xdg_surface);
     xdg_toplevel_set_title(m_state.xdg_toplevel, title);
 
-    xdg_toplevel_add_listener(m_state.xdg_toplevel, &m_xdg_toplevel_listener, this);
+    xdg_toplevel_add_listener(m_state.xdg_toplevel, &m_xdg_toplevel_listener, &m_state);
     xdg_surface_add_listener(m_state.xdg_surface, &m_xdg_surface_listener, nullptr);
 
 }
