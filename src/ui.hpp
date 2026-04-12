@@ -49,7 +49,6 @@ class ui {
     }
 
     private:
-
     void with_frame_context(std::invocable auto fn, int width, int height) const {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplWayland_NewFrame(width, height);

@@ -2,9 +2,6 @@
 #include <cassert>
 #include <chrono>
 
-#include <cairomm/surface.h>
-#include <cairomm/context.h>
-
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
@@ -14,17 +11,35 @@
 
 namespace {
 
-    [[nodiscard]] std::string get_time_string() {
-        auto now = std::chrono::system_clock::now();
-        std::chrono::zoned_time zt("Europe/Vienna", now);
-        return std::format("{:%H:%M}", zt);
-    }
+    class widget {
+        public:
+        virtual ~widget() = default;
+        virtual void draw() const = 0;
+    };
 
-    [[nodiscard]] std::string get_date_string() {
-        auto now = std::chrono::system_clock::now();
-        std::chrono::zoned_time zt("Europe/Vienna", now);
-        return std::format("{:%d.%m.%Y}", zt);
-    }
+    class date_widget : public widget {
+        public:
+        date_widget() = default;
+
+        void draw() const override {
+            auto now = std::chrono::system_clock::now();
+            std::chrono::zoned_time zt("Europe/Vienna", now);
+            ImGui::Text(" %s", std::format("{:%d.%m.%Y}", zt).c_str());
+        }
+
+    };
+
+    class time_widget : public widget {
+        public:
+        time_widget() = default;
+
+        void draw() const override {
+            auto now = std::chrono::system_clock::now();
+            std::chrono::zoned_time zt("Europe/Vienna", now);
+            ImGui::Text(" %s", std::format("{:%H:%M}", zt).c_str());
+        }
+
+    };
 
     [[nodiscard]] std::string get_uname_string() {
         struct utsname buf;
@@ -38,43 +53,17 @@ namespace {
         return static_cast<float>(buf.totalram - buf.freeram) / buf.totalram;
     }
 
-    void imgui_draw() {
-        static int counter = 0;
-        static auto time = std::chrono::steady_clock::now();
-
-        if (auto now = std::chrono::steady_clock::now(); now >= time) {
-            using namespace std::chrono_literals;
-            counter++;
-            time = now + 10ms;
-        }
-
-        ImGui::Text("welcome to wdock");
-        ImGui::Text("%s", get_uname_string().c_str());
-        ImGui::Text(" %s", get_time_string().c_str());
-        ImGui::Text(" %s", get_date_string().c_str());
-
-        ImGui::Text("Memory");
-        ImGui::SameLine();
-        ImGui::ProgressBar(get_memory_usage());
-
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 20));
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15);
-        ImGui::Button("click me");
-        ImGui::PopStyleVar(2);
-
-        ImGui::Button("<");
-        ImGui::SameLine();
-        ImGui::Button("||");
-        ImGui::SameLine();
-        ImGui::Button(">");
-
-        ImGui::Text("counter: %d", counter);
-
-    }
-
     void opengl_debug_message_callback([[maybe_unused]] GLenum src, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id, [[maybe_unused]] GLenum severity, [[maybe_unused]] GLsizei len, const char* msg, [[maybe_unused]] const void* args) {
         std::println(stderr, "opengl error: {}", msg);
     }
+
+    class application {
+        public:
+        application() = default;
+
+        private:
+
+    };
 
 } // namespace
 
@@ -87,12 +76,38 @@ int main() {
     window window(width, height, title, window::anchor::right, {0, 200, 0, 0});
     ui ui;
 
+    date_widget date;
+    time_widget time;
+
     glDebugMessageCallback(opengl_debug_message_callback, nullptr);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     window.on_draw([&] {
         glClear(GL_COLOR_BUFFER_BIT);
-        ui.draw(window.get_width(), window.get_height(), imgui_draw);
+        ui.draw(window.get_width(), window.get_height(), [&] {
+            date.draw();
+            time.draw();
+
+            ImGui::Text("welcome to wdock");
+            ImGui::Text("%s", get_uname_string().c_str());
+
+            ImGui::Text("Memory");
+            ImGui::SameLine();
+            ImGui::ProgressBar(get_memory_usage());
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3, 0.3, 0.3, 1.0)),
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 20));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15);
+            ImGui::Button("click me");
+            ImGui::PopStyleVar(2);
+            ImGui::PopStyleColor();
+
+            ImGui::Button("<");
+            ImGui::SameLine();
+            ImGui::Button("||");
+            ImGui::SameLine();
+            ImGui::Button(">");
+        });
     });
 
     window.run();
