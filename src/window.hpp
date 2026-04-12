@@ -8,7 +8,6 @@
 
 #include <wayland-egl.h>
 #include <wayland-client.h>
-
 #include <wlr-layer-shell-unstable-v1.h>
 #include <xdg-shell.h>
 
@@ -44,13 +43,13 @@ class window {
 
     [[nodiscard]] int get_width() const {
         int width;
-        wl_egl_window_get_attached_size(m_state->egl_window, &width, nullptr);
+        wl_egl_window_get_attached_size(m_state->wl_egl_window, &width, nullptr);
         return width;
     }
 
     [[nodiscard]] int get_height() const {
         int height;
-        wl_egl_window_get_attached_size(m_state->egl_window, nullptr, &height);
+        wl_egl_window_get_attached_size(m_state->wl_egl_window, nullptr, &height);
         return height;
     }
 
@@ -74,6 +73,14 @@ class window {
         }
     }
 
+    [[nodiscard]] struct wl_display* get_wl_display() const {
+        return m_state->wl_display;
+    }
+
+    [[nodiscard]] struct wl_egl_window* get_wl_egl_display() const {
+        return m_state->wl_egl_window;
+    }
+
     private:
     struct state {
         struct wl_display*    wl_display    = nullptr;
@@ -90,7 +97,7 @@ class window {
         struct zwlr_layer_shell_v1*   zwlr_layer_shell   = nullptr;
         struct zwlr_layer_surface_v1* zwlr_layer_surface = nullptr;
 
-        struct wl_egl_window* egl_window = nullptr;
+        struct wl_egl_window* wl_egl_window = nullptr;
 
         EGLDisplay egl_display = nullptr;
         EGLSurface egl_surface = nullptr;

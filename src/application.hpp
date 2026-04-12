@@ -14,6 +14,7 @@ class application {
 
     application(int width, int height, anchor anchor, margin margin, widgets widgets)
     : m_window("wdock", width, height, anchor, margin)
+    , m_ui(m_window.get_wl_display(), m_window.get_wl_egl_display())
     , m_widgets(std::move(widgets))
     {
         glDebugMessageCallback(opengl_debug_message_callback, nullptr);
@@ -36,10 +37,14 @@ class application {
     void draw() const {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        m_ui.draw(m_window.get_width(), m_window.get_height(), [&] {
+        m_ui.draw([&] {
             for (auto& widget : m_widgets) {
                 widget->draw();
             }
+
+            if (ImGui::Button("click me"))
+                std::println("hello");
+
         });
     }
 

@@ -9,10 +9,10 @@
 
 class ui {
     public:
-    ui() {
+    ui(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGui_ImplWayland_Init();
+        ImGui_ImplWayland_Init(wl_display, wl_egl_window);
         ImGui_ImplOpenGL3_Init();
         configure();
     }
@@ -28,7 +28,7 @@ class ui {
     ui& operator=(const ui&) = delete;
     ui& operator=(ui&&) = delete;
 
-    void draw(int width, int height, std::invocable auto fn) const {
+    void draw(std::invocable auto fn) const {
         with_frame_context([&] {
             int flags = ImGuiWindowFlags_NoDecoration
                 | ImGuiWindowFlags_NoScrollbar
@@ -53,13 +53,13 @@ class ui {
             fn();
             ImGui::End();
 
-        }, width, height);
+        });
     }
 
     private:
-    void with_frame_context(std::invocable auto fn, int width, int height) const {
+    void with_frame_context(std::invocable auto fn) const {
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplWayland_NewFrame(width, height);
+        ImGui_ImplWayland_NewFrame();
         ImGui::NewFrame();
         fn();
         ImGui::Render();

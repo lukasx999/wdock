@@ -104,10 +104,10 @@ bool window::init_egl(int width, int height) {
     m_state->egl_context = eglCreateContext(m_state->egl_display, m_state->egl_config, EGL_NO_CONTEXT, context_attribs.data());
     if (m_state->egl_context == EGL_NO_CONTEXT) return false;
 
-    m_state->egl_window = wl_egl_window_create(m_state->wl_surface, width, height);
-    if (m_state->egl_window == EGL_NO_SURFACE) return false;
+    m_state->wl_egl_window = wl_egl_window_create(m_state->wl_surface, width, height);
+    if (m_state->wl_egl_window == EGL_NO_SURFACE) return false;
 
-    m_state->egl_surface = eglCreateWindowSurface(m_state->egl_display, m_state->egl_config, m_state->egl_window, nullptr);
+    m_state->egl_surface = eglCreateWindowSurface(m_state->egl_display, m_state->egl_config, m_state->wl_egl_window, nullptr);
     if (!eglMakeCurrent(m_state->egl_display, m_state->egl_surface, m_state->egl_surface, m_state->egl_context)) return false;
 
     gladLoaderLoadGL();
@@ -176,11 +176,11 @@ void window::configure_layer_surface(void* data, struct zwlr_layer_surface_v1* z
     zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface_v1, serial);
     state& state = *static_cast<struct state*>(data);
     glViewport(0, 0, width, height);
-    wl_egl_window_resize(state.egl_window, width, height, 0, 0);
+    wl_egl_window_resize(state.wl_egl_window, width, height, 0, 0);
 }
 
 void window::configure_toplevel(void* data, [[maybe_unused]] struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, [[maybe_unused]] struct wl_array* states) {
     state& state = *static_cast<struct state*>(data);
     glViewport(0, 0, width, height);
-    wl_egl_window_resize(state.egl_window, width, height, 0, 0);
+    wl_egl_window_resize(state.wl_egl_window, width, height, 0, 0);
 }
