@@ -8,16 +8,19 @@ class application {
     public:
     using anchor = window::anchor;
     using margin = window::margin;
-    using widgets = std::vector<std::unique_ptr<widgets::widget>>;
 
-    application(int width, int height, anchor anchor, margin margin, widgets widgets)
+    application(int width, int height, anchor anchor, margin margin)
     : m_window("wdock", width, height, anchor, margin)
     , m_ui(m_window.get_wl_display(), m_window.get_wl_egl_window())
-    , m_widgets(std::move(widgets))
     {
         m_window.on_draw([&] {
             draw();
         });
+    }
+
+    template <class Widget> requires std::is_base_of_v<widgets::widget, Widget>
+    void add_widget(auto&&... args) {
+        m_widgets.push_back(std::make_unique<Widget>(std::forward<decltype(args)>(args)...));
     }
 
     void run() {
@@ -27,7 +30,7 @@ class application {
     private:
     window m_window;
     ui m_ui;
-    const widgets m_widgets;
+    std::vector<std::unique_ptr<widgets::widget>> m_widgets;
 
     void draw() const {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

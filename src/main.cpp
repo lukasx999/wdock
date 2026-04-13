@@ -8,13 +8,16 @@ int main() {
     auto anchor = window::anchor::right;
     window::margin margin =  {0, 200, 0, 0};
 
-    std::vector<std::unique_ptr<widgets::widget>> widgets;
-    widgets.push_back(std::make_unique<widgets::date>("Europe/Vienna"));
-    widgets.push_back(std::make_unique<widgets::time>("Europe/Vienna"));
-    widgets.push_back(std::make_unique<widgets::kernel>());
-    widgets.push_back(std::make_unique<widgets::memory>());
+    application app(width, height, anchor, margin);
 
-    application app(width, height, anchor, margin, std::move(widgets));
+    // widgets must be added AFTER the application has been constructed, as this
+    // is when the opengl context gets initialized, which a widget might use
+    app.add_widget<widgets::date>("Europe/Vienna");
+    app.add_widget<widgets::time>("Europe/Vienna");
+    app.add_widget<widgets::kernel>();
+    app.add_widget<widgets::memory>();
+    app.add_widget<widgets::image>("./image.jpg");
+
     app.run();
 
 }

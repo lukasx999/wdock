@@ -1,14 +1,25 @@
 #pragma once
 
 #include <chrono>
+#include <filesystem>
+#include <stdexcept>
 #include <string_view>
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#include <glad/gl.h>
+
 #include "imgui.h"
 
 namespace widgets {
+
+    struct widget_error : std::runtime_error {
+        using std::runtime_error::runtime_error;
+    };
 
     class widget {
         public:
@@ -28,6 +39,57 @@ namespace widgets {
 
         private:
         const std::string_view m_command;
+
+    };
+
+    class image : public widget {
+        public:
+        explicit image(const std::filesystem::path& path) {
+            int channels;
+
+            unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &channels, 0);
+            if (data == nullptr)
+                throw widget_error(std::format("failed to load image at {}", path.c_str()));
+
+            GLenum format = [&] {
+                switch (channels) {
+                    case 3: return GL_RGB;
+                    case 4: return GL_RGBA;
+                    default: throw widget_error(std::format("invalid amount of channels ({})", channels));
+                }
+            }();
+
+            glGenTextures(1, &m_texture_id);
+            // glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, m_texture_id);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            // glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+
+            stbi_image_free(data);
+
+        }
+
+        ~image() {
+            glDeleteTextures(1, &m_texture_id);
+        }
+
+        image(const image&) = delete;
+        image(image&&) = delete;
+        image& operator=(const image&) = delete;
+        image& operator=(image&&) = delete;
+
+        void draw() const override {
+            ImGui::Image(m_texture_id, ImVec2(m_width, m_height));
+        }
+
+        private:
+        int m_width;
+        int m_height;
+        GLuint m_texture_id;
 
     };
 
