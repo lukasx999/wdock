@@ -1,5 +1,10 @@
+#include <cstdlib>
+#include <iostream>
+#include <print>
+
 #include "application.hpp"
 #include "widgets.hpp"
+#include "window.hpp"
 
 int main() {
 
@@ -8,16 +13,27 @@ int main() {
     auto anchor = window::anchor::right;
     window::margin margin =  {0, 200, 0, 0};
 
-    application app(width, height, anchor, margin);
+    try {
+        application app(width, height, anchor, margin);
 
-    // widgets must be added AFTER the application has been constructed, as this
-    // is when the opengl context gets initialized, which a widget might use
-    app.add_widget<widgets::date>("Europe/Vienna");
-    app.add_widget<widgets::time>("Europe/Vienna");
-    app.add_widget<widgets::kernel>();
-    app.add_widget<widgets::memory>();
-    app.add_widget<widgets::image>("./image.jpg");
+        // widgets must be added AFTER the application has been constructed, as this
+        // is when the opengl context gets initialized, which a widget might use
+        app.add_widget<widgets::date>("Europe/Vienna");
+        app.add_widget<widgets::time>("Europe/Vienna");
+        app.add_widget<widgets::kernel>();
+        app.add_widget<widgets::memory>();
 
-    app.run();
+        app.run();
 
+        // TODO: these exceptions dont get handled
+    } catch (const window_error& error) {
+        std::println(std::cerr, "failed to open window: {}", error.what());
+        return EXIT_FAILURE;
+
+    } catch (const widgets::widget_error& error) {
+        std::println(std::cerr, "failed to add widget: {}", error.what());
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }

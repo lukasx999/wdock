@@ -42,6 +42,7 @@ namespace widgets {
 
     };
 
+    // TODO: add scaling option
     class image : public widget {
         public:
         explicit image(const std::filesystem::path& path) {
@@ -55,22 +56,20 @@ namespace widgets {
                 switch (channels) {
                     case 3: return GL_RGB;
                     case 4: return GL_RGBA;
-                    default: throw widget_error(std::format("invalid amount of channels ({})", channels));
+                    default:
+                    stbi_image_free(data);
+                    throw widget_error(std::format("invalid amount of channels ({})", channels));
                 }
             }();
 
             glGenTextures(1, &m_texture_id);
-            // glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_texture_id);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            // glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
             glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
-
             stbi_image_free(data);
-
         }
 
         ~image() {
@@ -87,9 +86,9 @@ namespace widgets {
         }
 
         private:
-        int m_width;
-        int m_height;
-        GLuint m_texture_id;
+        int m_width = 0;
+        int m_height = 0;
+        GLuint m_texture_id = 0;
 
     };
 
