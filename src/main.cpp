@@ -25,7 +25,6 @@ int main() {
 
         app.run();
 
-        // TODO: these exceptions dont get handled
     } catch (const window_error& error) {
         std::println(std::cerr, "failed to open window: {}", error.what());
         return EXIT_FAILURE;

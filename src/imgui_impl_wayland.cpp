@@ -1,5 +1,9 @@
-#include "imgui_impl_wayland.hpp"
 #include <print>
+#include <functional>
+
+#include <linux/input-event-codes.h>
+
+#include "imgui_impl_wayland.hpp"
 
 struct imgui_impl_wayland_data {
     struct wl_display* wl_display = nullptr;
@@ -9,12 +13,12 @@ struct imgui_impl_wayland_data {
     struct wl_pointer* wl_pointer = nullptr;
 };
 
-[[nodiscard]] inline imgui_impl_wayland_data& get_data() {
+[[nodiscard]] static imgui_impl_wayland_data& get_data() {
     return *static_cast<imgui_impl_wayland_data*>(ImGui::GetIO().BackendPlatformUserData);
 }
 
-inline void bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
-    imgui_impl_wayland_data& state = *static_cast<imgui_impl_wayland_data*>(data);
+static void bind_globals([[maybe_unused]] void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
+    auto& state = get_data();
 
     using namespace std::placeholders;
     auto bind_global = std::bind(wl_registry_bind, wl_registry, name, _1, version);
@@ -39,8 +43,20 @@ static wl_pointer_listener m_wl_pointer_listener {
         ImGui::GetIO().AddMousePosEvent(x, y);
     },
 
-    .button = [](void* data, struct wl_pointer* wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state) {
-        // ImGui::GetIO().AddMouseButtonEvent(button, state);
+    .button = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t serial, [[maybe_unused]] uint32_t time, uint32_t button, uint32_t state) {
+
+        int imgui_button = [&]() {
+            switch (button) {
+                case BTN_LEFT: return 0;
+                case BTN_RIGHT: return 1;
+                case BTN_MIDDLE: return 2;
+                default: return -1;
+            }
+        }();
+
+        if (imgui_button != -1)
+            ImGui::GetIO().AddMouseButtonEvent(imgui_button, state);
+
     },
 
     .axis = [](auto...) { },
@@ -66,11 +82,11 @@ void ImGui_ImplWayland_Init(struct wl_display* wl_display, struct wl_egl_window*
     data.wl_egl_window = wl_egl_window;
 
     data.wl_registry = wl_display_get_registry(data.wl_display);
-    wl_registry_add_listener(data.wl_registry, &m_registry_listener, &data);
+    wl_registry_add_listener(data.wl_registry, &m_registry_listener, nullptr);
     wl_display_roundtrip(data.wl_display);
 
     data.wl_pointer = wl_seat_get_pointer(data.wl_seat);
-    wl_pointer_add_listener(data.wl_pointer, &m_wl_pointer_listener, &data);
+    wl_pointer_add_listener(data.wl_pointer, &m_wl_pointer_listener, nullptr);
 }
 
 void ImGui_ImplWayland_Shutdown() {
