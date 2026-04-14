@@ -7,6 +7,7 @@
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
+#include <ctime>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -124,7 +125,7 @@ namespace widgets {
 
     class datetime : public widget {
         public:
-        datetime(std::string_view timezone, std::string_view format)
+        datetime(std::string_view timezone, const char* format)
         : m_timezone(timezone)
         , m_format(format)
         { }
@@ -132,9 +133,15 @@ namespace widgets {
         void draw() const override {
             auto now = std::chrono::system_clock::now();
             try {
-                // TODO: use strftime instead, to allow inserting characters between placeholders
                 std::chrono::zoned_time zt(m_timezone, now);
-                ImGui::TextUnformatted(std::vformat(m_format, std::make_format_args(zt)).c_str());
+
+                time_t time = std::chrono::system_clock::to_time_t(zt);
+                tm* tm = localtime(&time);
+
+                std::stringstream fmt_stream;
+                fmt_stream << std::put_time(tm, m_format);
+
+                ImGui::TextUnformatted(fmt_stream.str().c_str());
 
             } catch (const std::runtime_error& error) {
                 throw widget_error(std::format("invalid time zone: {}", m_timezone));
@@ -143,7 +150,7 @@ namespace widgets {
 
         private:
         const std::string_view m_timezone;
-        const std::string_view m_format;
+        const char* m_format;
 
     };
 
