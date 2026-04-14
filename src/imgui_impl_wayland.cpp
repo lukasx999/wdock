@@ -1,5 +1,6 @@
 #include <print>
 #include <functional>
+#include <string_view>
 
 #include <linux/input-event-codes.h>
 
@@ -28,37 +29,37 @@ static void bind_globals([[maybe_unused]] void* data, struct wl_registry* wl_reg
 
 }
 
-static wl_registry_listener m_registry_listener {
+static void handle_pointer_button([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t serial, [[maybe_unused]] uint32_t time, uint32_t button, uint32_t state) {
+    int imgui_button = [&]() {
+        switch (button) {
+            case BTN_LEFT: return 0;
+            case BTN_RIGHT: return 1;
+            case BTN_MIDDLE: return 2;
+            default: return -1;
+        }
+    }();
+
+    if (imgui_button != -1)
+        ImGui::GetIO().AddMouseButtonEvent(imgui_button, state);
+
+}
+
+static void handle_pointer_motion([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+    double x = wl_fixed_to_double(surface_x);
+    double y = wl_fixed_to_double(surface_y);
+    ImGui::GetIO().AddMousePosEvent(x, y);
+}
+
+static wl_registry_listener registry_listener {
     .global = bind_globals,
     .global_remove = [](auto...) { }
 };
 
-static wl_pointer_listener m_wl_pointer_listener {
+static wl_pointer_listener pointer_listener {
     .enter = [](auto...) { },
     .leave = [](auto...) { },
-
-    .motion = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
-        double x = wl_fixed_to_double(surface_x);
-        double y = wl_fixed_to_double(surface_y);
-        ImGui::GetIO().AddMousePosEvent(x, y);
-    },
-
-    .button = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t serial, [[maybe_unused]] uint32_t time, uint32_t button, uint32_t state) {
-
-        int imgui_button = [&]() {
-            switch (button) {
-                case BTN_LEFT: return 0;
-                case BTN_RIGHT: return 1;
-                case BTN_MIDDLE: return 2;
-                default: return -1;
-            }
-        }();
-
-        if (imgui_button != -1)
-            ImGui::GetIO().AddMouseButtonEvent(imgui_button, state);
-
-    },
-
+    .motion = handle_pointer_motion,
+    .button =  handle_pointer_button,
     .axis = [](auto...) { },
     .frame = [](auto...) { },
     .axis_source = [](auto...) { },
@@ -82,15 +83,14 @@ void ImGui_ImplWayland_Init(struct wl_display* wl_display, struct wl_egl_window*
     data.wl_egl_window = wl_egl_window;
 
     data.wl_registry = wl_display_get_registry(data.wl_display);
-    wl_registry_add_listener(data.wl_registry, &m_registry_listener, nullptr);
+    wl_registry_add_listener(data.wl_registry, &registry_listener, nullptr);
     wl_display_roundtrip(data.wl_display);
 
     data.wl_pointer = wl_seat_get_pointer(data.wl_seat);
-    wl_pointer_add_listener(data.wl_pointer, &m_wl_pointer_listener, nullptr);
+    wl_pointer_add_listener(data.wl_pointer, &pointer_listener, nullptr);
 }
 
 void ImGui_ImplWayland_Shutdown() {
-
     ImGuiIO& io = ImGui::GetIO();
     auto& data = get_data();
 
