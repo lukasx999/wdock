@@ -20,6 +20,10 @@ struct imgui_impl_wayland_data {
     struct wl_pointer* wl_pointer = nullptr;
 };
 
+[[nodiscard]] inline imgui_impl_wayland_data& get_data() {
+    return *static_cast<imgui_impl_wayland_data*>(ImGui::GetIO().BackendPlatformUserData);
+}
+
 inline void bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {
     imgui_impl_wayland_data& state = *static_cast<imgui_impl_wayland_data*>(data);
 
@@ -50,13 +54,13 @@ static wl_pointer_listener m_wl_pointer_listener {
         // wdata.io->AddMouseButtonEvent(button, state);
     },
 
-    .axis = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, [[maybe_unused]] uint32_t axis, [[maybe_unused]] wl_fixed_t value) { },
-    .frame = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer) { },
-    .axis_source = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis_source) { },
-    .axis_stop = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t time, [[maybe_unused]] uint32_t axis) { },
-    .axis_discrete = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis, [[maybe_unused]] int32_t discrete) { },
-    .axis_value120 = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis, [[maybe_unused]] int32_t value120) { },
-    .axis_relative_direction = []([[maybe_unused]] void* data, [[maybe_unused]] struct wl_pointer* wl_pointer, [[maybe_unused]] uint32_t axis, [[maybe_unused]] uint32_t direction) { },
+    .axis = [](auto...) { },
+    .frame = [](auto...) { },
+    .axis_source = [](auto...) { },
+    .axis_stop = [](auto...) { },
+    .axis_discrete = [](auto...) { },
+    .axis_value120 = [](auto...) { },
+    .axis_relative_direction = [](auto...) { },
 };
 
 inline void ImGui_ImplWayland_Init(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
@@ -64,34 +68,40 @@ inline void ImGui_ImplWayland_Init(struct wl_display* wl_display, struct wl_egl_
     io.BackendPlatformName = "imgui_impl_wayland";
     io.BackendPlatformUserData = IM_NEW(imgui_impl_wayland_data)();
 
-    imgui_impl_wayland_data* data = static_cast<imgui_impl_wayland_data*>(io.BackendPlatformUserData);
-    data->wl_display = wl_display;
-    data->wl_egl_window = wl_egl_window;
-    data->io = &io;
+    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 
-    data->wl_registry = wl_display_get_registry(data->wl_display);
-    wl_registry_add_listener(data->wl_registry, &m_registry_listener, data);
-    wl_display_roundtrip(data->wl_display);
+    auto& data = get_data();
+    data.wl_display = wl_display;
+    data.wl_egl_window = wl_egl_window;
+    data.io = &io;
 
-    data->wl_pointer = wl_seat_get_pointer(data->wl_seat);
-    wl_pointer_add_listener(data->wl_pointer, &m_wl_pointer_listener, data);
+    data.wl_registry = wl_display_get_registry(data.wl_display);
+    wl_registry_add_listener(data.wl_registry, &m_registry_listener, &data);
+    wl_display_roundtrip(data.wl_display);
+
+    data.wl_pointer = wl_seat_get_pointer(data.wl_seat);
+    wl_pointer_add_listener(data.wl_pointer, &m_wl_pointer_listener, &data);
 }
 
 inline void ImGui_ImplWayland_Shutdown() {
+
     ImGuiIO& io = ImGui::GetIO();
-    imgui_impl_wayland_data* data = static_cast<imgui_impl_wayland_data*>(io.BackendPlatformUserData);
-    IM_DELETE(data);
+    auto& data = get_data();
+
+    io.BackendFlags &= ~ImGuiBackendFlags_HasMouseCursors;
+
+    IM_DELETE(&data);
+    io.BackendPlatformUserData = nullptr;
+    io.BackendPlatformName = nullptr;
 }
 
 inline void ImGui_ImplWayland_NewFrame() {
-    ImGuiIO& io = ImGui::GetIO();
-
-    imgui_impl_wayland_data* data = static_cast<imgui_impl_wayland_data*>(io.BackendPlatformUserData);
+    auto& data = get_data();
 
     int width, height;
-    wl_egl_window_get_attached_size(data->wl_egl_window, &width, &height);
+    wl_egl_window_get_attached_size(data.wl_egl_window, &width, &height);
 
+    ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(width, height);
-
     io.DeltaTime = 1.0f / 60.0f;
 }

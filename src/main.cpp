@@ -11,7 +11,7 @@ int main() {
     int width = 700;
     int height = 800;
     auto anchor = window::anchor::right;
-    window::margin margin =  {0, 200, 0, 0};
+    window::margin margin = {0, 200, 0, 0};
 
     try {
         application app(width, height, anchor, margin);

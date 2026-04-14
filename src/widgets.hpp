@@ -126,8 +126,13 @@ namespace widgets {
 
         void draw() const override {
             auto now = std::chrono::system_clock::now();
-            std::chrono::zoned_time zt(m_timezone, now);
-            ImGui::Text(" %s", std::format("{:%d.%m.%Y}", zt).c_str());
+            try {
+                std::chrono::zoned_time zt(m_timezone, now);
+                ImGui::Text(" %s", std::format("{:%d.%m.%Y}", zt).c_str());
+
+            } catch (const std::runtime_error& error) {
+                throw widget_error(std::format("invalid time zone: {}", m_timezone));
+            }
         }
 
         private:
@@ -143,8 +148,13 @@ namespace widgets {
 
         void draw() const override {
             auto now = std::chrono::system_clock::now();
-            std::chrono::zoned_time zt(m_timezone, now);
-            ImGui::Text(" %s", std::format("{:%H:%M}", zt).c_str());
+            try {
+                std::chrono::zoned_time zt(m_timezone, now);
+                ImGui::Text(" %s", std::format("{:%H:%M}", zt).c_str());
+
+            } catch (const std::runtime_error& error) {
+                throw widget_error(std::format("invalid time zone: {}", m_timezone));
+            }
         }
 
         private:
