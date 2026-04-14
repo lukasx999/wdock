@@ -19,22 +19,6 @@ struct window_error : std::runtime_error {
     using runtime_error::runtime_error;
 };
 
-// a ridiculous metafunction, to deal with unused wayland callbacks
-
-template <typename T>
-struct default_function;
-
-template <typename... Args>
-struct default_function<void(Args...)> {
-    static constexpr void value(Args...) { }
-};
-
-template <typename... Args>
-struct default_function<void(*)(Args...)> : default_function<void(Args...)> { };
-
-template <typename Function>
-inline Function default_function_v = default_function<Function>::value;
-
 class window {
     public:
     enum class anchor { top, bottom, left, right };
@@ -87,7 +71,6 @@ class window {
         struct wl_surface*    wl_surface    = nullptr;
         struct wl_registry*   wl_registry   = nullptr;
         struct wl_compositor* wl_compositor = nullptr;
-        struct wl_output*     wl_output     = nullptr;
 
         struct xdg_wm_base*  xdg_wm_base  = nullptr;
         struct xdg_surface*  xdg_surface  = nullptr;
@@ -122,22 +105,6 @@ class window {
     static void draw_frame(void* data, struct wl_callback* wl_callback, uint32_t callback_data);
     static void configure_toplevel(void* data, struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, struct wl_array* states);
 
-    static inline wl_output_listener m_wl_output_listener {
-        .geometry = default_function_v<decltype(wl_output_listener::geometry)>,
-        .mode = default_function_v<decltype(wl_output_listener::mode)>,
-        .done = default_function_v<decltype(wl_output_listener::done)>,
-        .scale = default_function_v<decltype(wl_output_listener::scale)>,
-        .name = default_function_v<decltype(wl_output_listener::name)>,
-        .description = default_function_v<decltype(wl_output_listener::description)>,
-    };
-
-    static inline wl_surface_listener m_wl_surface_listener {
-        .enter =  default_function_v<decltype(wl_surface_listener::enter)>,
-        .leave = default_function_v<decltype(wl_surface_listener::leave)>,
-        .preferred_buffer_scale = default_function_v<decltype(wl_surface_listener::preferred_buffer_scale)>,
-        .preferred_buffer_transform = default_function_v<decltype(wl_surface_listener::preferred_buffer_transform)>,
-    };
-
     static inline xdg_wm_base_listener m_xdg_wm_base_listener {
         .ping = []([[maybe_unused]] void* data, struct xdg_wm_base* xdg_wm_base, uint32_t serial) {
             xdg_wm_base_pong(xdg_wm_base, serial);
@@ -150,8 +117,8 @@ class window {
             state& state = *static_cast<struct state*>(data);
             state.should_close = true;
         },
-        .configure_bounds = default_function_v<decltype(xdg_toplevel_listener::configure_bounds)>,
-        .wm_capabilities = default_function_v<decltype(xdg_toplevel_listener::wm_capabilities)>,
+        .configure_bounds = [](auto...) { },
+        .wm_capabilities = [](auto...) { },
     };
 
     static inline xdg_surface_listener m_xdg_surface_listener {
@@ -162,12 +129,12 @@ class window {
 
     static inline wl_registry_listener m_registry_listener {
         .global = bind_globals,
-        .global_remove = default_function_v<decltype(wl_registry_listener::global_remove)>,
+        .global_remove = [](auto...) { },
     };
 
     static inline zwlr_layer_surface_v1_listener m_layer_surface_listener {
         .configure = configure_layer_surface,
-        .closed = default_function_v<decltype(zwlr_layer_surface_v1_listener::closed)>,
+        .closed = [](auto...) { },
     };
 
     static inline wl_callback_listener m_frame_callback_listener {

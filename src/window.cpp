@@ -179,9 +179,6 @@ void window::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t 
     else if (std::string_view(interface) == zwlr_layer_shell_v1_interface.name)
         state.zwlr_layer_shell = static_cast<zwlr_layer_shell_v1*>(bind_global(&zwlr_layer_shell_v1_interface));
 
-    else if (std::string_view(interface) == wl_output_interface.name)
-        state.wl_output = static_cast<wl_output*>(bind_global(&wl_output_interface));
-
     else if (std::string_view(interface) == xdg_wm_base_interface.name)
         state.xdg_wm_base = static_cast<xdg_wm_base*>(bind_global(&xdg_wm_base_interface));
 
