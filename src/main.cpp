@@ -18,8 +18,8 @@ int main() {
 
         // widgets must be added AFTER the application has been constructed, as this
         // is when the opengl context gets initialized, which a widget might use
-        app.add_widget<widgets::date>("Europe/Vienna", " {:%d.%m.%Y}");
-        app.add_widget<widgets::time>("Europe/Vienna", " {:%H:%M}");
+        app.add_widget<widgets::datetime>("Europe/Vienna", " {:%d.%m.%Y}");
+        app.add_widget<widgets::datetime>("Europe/Vienna", " {:%H:%M}");
         app.add_widget<widgets::kernel>();
         app.add_widget<widgets::memory>();
 

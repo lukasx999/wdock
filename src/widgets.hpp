@@ -122,34 +122,9 @@ namespace widgets {
 
     };
 
-    class date : public widget {
+    class datetime : public widget {
         public:
-        date(std::string_view timezone, std::string_view format)
-        : m_timezone(timezone)
-        , m_format(format)
-        { }
-
-        void draw() const override {
-            auto now = std::chrono::system_clock::now();
-            try {
-                // TODO: use strftime instead, to allow inserting characters between placeholders
-                std::chrono::zoned_time zt(m_timezone, now);
-                ImGui::TextUnformatted(std::vformat(m_format, std::make_format_args(zt)).c_str());
-
-            } catch (const std::runtime_error& error) {
-                throw widget_error(std::format("invalid time zone: {}", m_timezone));
-            }
-        }
-
-        private:
-        const std::string_view m_timezone;
-        const std::string_view m_format;
-
-    };
-
-    class time : public widget {
-        public:
-        time(std::string_view timezone, std::string_view format)
+        datetime(std::string_view timezone, std::string_view format)
         : m_timezone(timezone)
         , m_format(format)
         { }
