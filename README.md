@@ -14,5 +14,5 @@ sudo cmake --install .
 
 ## Configuration
 
-The config file is located at `~/.config/config.kdl`.
+The config file is located at `~/.config/config.kdl`. \
 wdock uses the [KDL](https://kdl.dev/) language for configuration.
