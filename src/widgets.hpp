@@ -21,7 +21,7 @@ namespace widgets {
 
     };
 
-    struct error : std::runtime_error {
+    struct widget_error : std::runtime_error {
         using std::runtime_error::runtime_error;
     };
 
@@ -54,7 +54,7 @@ namespace widgets {
 
             unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &channels, 0);
             if (data == nullptr)
-                throw error(std::format("failed to load image at {}", path.c_str()));
+                throw widget_error(std::format("failed to load image at {}", path.c_str()));
 
             GLenum format = [&] {
                 switch (channels) {
@@ -62,7 +62,7 @@ namespace widgets {
                     case 4: return GL_RGBA;
                     default:
                     stbi_image_free(data);
-                    throw error(std::format("invalid amount of channels ({})", channels));
+                    throw widget_error(std::format("invalid amount of channels ({})", channels));
                 }
             }();
 
@@ -124,45 +124,51 @@ namespace widgets {
 
     class date : public widget {
         public:
-        explicit date(std::string_view timezone)
+        date(std::string_view timezone, std::string_view format)
         : m_timezone(timezone)
+        , m_format(format)
         { }
 
         void draw() const override {
             auto now = std::chrono::system_clock::now();
             try {
+                // TODO: use strftime instead, to allow inserting characters between placeholders
                 std::chrono::zoned_time zt(m_timezone, now);
-                ImGui::Text(" %s", std::format("{:%d.%m.%Y}", zt).c_str());
+                ImGui::TextUnformatted(std::vformat(m_format, std::make_format_args(zt)).c_str());
 
             } catch (const std::runtime_error& error) {
-                throw error(std::format("invalid time zone: {}", m_timezone));
+                throw widget_error(std::format("invalid time zone: {}", m_timezone));
             }
         }
 
         private:
         const std::string_view m_timezone;
+        const std::string_view m_format;
 
     };
 
     class time : public widget {
         public:
-        explicit time(std::string_view timezone)
+        time(std::string_view timezone, std::string_view format)
         : m_timezone(timezone)
+        , m_format(format)
         { }
 
         void draw() const override {
             auto now = std::chrono::system_clock::now();
             try {
+                // TODO: use strftime instead, to allow inserting characters between placeholders
                 std::chrono::zoned_time zt(m_timezone, now);
-                ImGui::Text(" %s", std::format("{:%H:%M}", zt).c_str());
+                ImGui::TextUnformatted(std::vformat(m_format, std::make_format_args(zt)).c_str());
 
             } catch (const std::runtime_error& error) {
-                throw error(std::format("invalid time zone: {}", m_timezone));
+                throw widget_error(std::format("invalid time zone: {}", m_timezone));
             }
         }
 
         private:
         const std::string_view m_timezone;
+        const std::string_view m_format;
 
     };
 
