@@ -6,6 +6,14 @@
 
 #include "imgui_impl_wayland.hpp"
 
+struct window_style {
+    float padding = 25.0f;
+    float rounding = 15.0f;
+    float font_size = 30.0f;
+    std::string_view font_family;
+    ImVec4 bg_color = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+};
+
 class ui {
     public:
     ui(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
@@ -57,6 +65,7 @@ class ui {
         style.WindowPadding = ImVec2(padding, padding);
         style.WindowRounding = 15.0f;
         style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+        style.FontSizeBase = 30.0f;
     }
 
     void with_frame_context(std::invocable auto fn) const {
@@ -69,9 +78,6 @@ class ui {
     }
 
     void configure() const {
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.FontSizeBase = 30.0f;
-
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;
 
