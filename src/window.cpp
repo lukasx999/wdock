@@ -1,5 +1,4 @@
 #include "window.hpp"
-#include <wayland-client-protocol.h>
 
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>

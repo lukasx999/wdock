@@ -7,10 +7,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 project(Wdock)
 
-find_package(PkgConfig REQUIRED)
 find_package(OpenGL REQUIRED)
-pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET GLOBAL cairomm-1.16)
-
 
 file(GLOB IMGUI_CORE_SRC deps/imgui/*.cpp)
 list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC}
@@ -56,4 +53,4 @@ target_compile_options(wdock PRIVATE -fsanitize=address,undefined -ggdb -Wall -W
 target_link_options(wdock PRIVATE -fsanitize=address,undefined)
 target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/imgui/backends/ deps/imgui/misc/cpp/ deps/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
-target_link_libraries(wdock PRIVATE PkgConfig::Cairo wayland-client wayland-egl OpenGL EGL)
+target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL EGL)

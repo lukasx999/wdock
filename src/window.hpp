@@ -6,9 +6,9 @@
 #include <functional>
 #include <stdexcept>
 
-#include <wayland-client-protocol.h>
 #include <wayland-egl.h>
 #include <wayland-client.h>
+
 #include <wlr-layer-shell-unstable-v1.h>
 #include <xdg-shell.h>
 

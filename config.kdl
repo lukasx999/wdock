@@ -1,31 +1,32 @@
-  window {
-      font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
-      fontsize 30
-      background-color "#0000007f"
-      border-radius 15
-      padding 20
-      width 500
-      height 500
-      anchor "right"
-      margin top=0 right=0 bottom=0 left=0
-      }
-
-  modules date time kernel say_hello
-
-  module date preset=datetime {
+window {
+    font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
+    fontsize 30
+    background-color "#0000007f"
+    border-radius 15
+    padding 20
+    width 500
+    height 500
+    anchor right
+    margin top=0 right=0 bottom=0 left=0
+}
+modules {
+    date time kernel
+}
+module date preset=datetime {
     timezone "Europe/Vienna"
     format " %d.%m.%Y"
-  }
-
-  module time preset=datetime {
-      timezone "Europe/Vienna"
-      format " %H:%M"
-      }
-
-  module kernel preset=kernel {
-      format "{sysname} {nodename} {release} {machine}"
-      }
-
-  module say_hello preset=custom {
-      run-sh "echo hello"
-      }
+}
+module time preset=datetime {
+    timezone "Europe/Vienna"
+    format " %H:%M"
+}
+module kernel preset=kernel {
+    format "{sysname} {nodename} {release} {machine}"
+}
+module say_hello preset=custom {
+    run-sh "echo hello"
+}
+module img preset=image {
+    path image.png
+    scaling 1.0
+}
