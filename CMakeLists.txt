@@ -16,7 +16,7 @@ file(GLOB IMGUI_CORE_SRC deps/imgui/*.cpp)
 list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC}
 deps/imgui/misc/cpp/imgui_stdlib.cpp
 deps/imgui/backends/imgui_impl_opengl3.cpp
-deps/imgui/backends/imgui_impl_null.cpp)
+src/imgui_impl_wayland.cpp)
 
 add_executable(wdock ${IMGUI_SOURCES})
 
