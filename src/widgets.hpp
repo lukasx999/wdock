@@ -47,12 +47,12 @@ namespace widgets {
 
     };
 
-    // TODO: add scaling option
     class image : public widget {
         public:
-        explicit image(const std::filesystem::path& path) {
+        image(const std::filesystem::path& path, float scaling)
+        : m_scaling(scaling)
+        {
             int channels;
-
             unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &channels, 0);
             if (data == nullptr)
                 throw widget_error(std::format("failed to load image at {}", path.c_str()));
@@ -87,12 +87,14 @@ namespace widgets {
         image& operator=(image&&) = delete;
 
         void draw() const override {
-            ImGui::Image(m_texture_id, ImVec2(m_width, m_height));
+            ImVec2 size(m_width * m_scaling, m_height * m_scaling);
+            ImGui::Image(m_texture_id, size);
         }
 
         private:
-        int m_width = 0;
-        int m_height = 0;
+        const float m_scaling;
+        int m_width;
+        int m_height;
         GLuint m_texture_id = 0;
 
     };
@@ -131,26 +133,31 @@ namespace widgets {
         { }
 
         void draw() const override {
-            auto now = std::chrono::system_clock::now();
-            try {
-                std::chrono::zoned_time zt(m_timezone, now);
-
-                time_t time = std::chrono::system_clock::to_time_t(zt);
-                tm* tm = localtime(&time);
-
-                std::stringstream fmt_stream;
-                fmt_stream << std::put_time(tm, m_format);
-
-                ImGui::TextUnformatted(fmt_stream.str().c_str());
-
-            } catch (const std::runtime_error& error) {
-                throw widget_error(std::format("invalid time zone: {}", m_timezone));
-            }
+            auto time = get_formatted_time();
+            ImGui::TextUnformatted(time.c_str());
         }
 
         private:
         const std::string_view m_timezone;
         const char* m_format;
+
+        [[nodiscard]] std::string get_formatted_time() const {
+            try {
+                auto now = std::chrono::system_clock::now();
+                std::chrono::zoned_time zt(m_timezone, now);
+
+                time_t time = std::chrono::system_clock::to_time_t(zt);
+                tm* tm = localtime(&time);
+
+                std::stringstream fmt;
+                fmt << std::put_time(tm, m_format);
+                return fmt.str();
+
+            } catch (const std::runtime_error& error) {
+                throw widget_error(std::format("invalid time zone: {}", m_timezone));
+            }
+
+        }
 
     };
 

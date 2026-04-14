@@ -22,6 +22,7 @@ int main() {
         app.add_widget<widgets::datetime>("Europe/Vienna", " %H:%M");
         app.add_widget<widgets::kernel>();
         app.add_widget<widgets::memory>();
+        app.add_widget<widgets::image>("image.png", 1);
 
         app.run();
 
