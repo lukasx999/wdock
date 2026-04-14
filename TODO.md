@@ -4,6 +4,7 @@
 - uptime widget using sysinfo()
 - calendar api
 - spotify api
-- imgui wayland backend
 - font name parsing using fontconfig
+- make window moveable
+- add zoom when hovering
 - support for multiple windows
