@@ -9,24 +9,24 @@ window {
     anchor right
     margin top=0 right=0 bottom=0 left=0
 }
-modules {
+widgets {
     date time kernel
 }
-module date preset=datetime {
+widget date preset=datetime {
     timezone "Europe/Vienna"
     format " %d.%m.%Y"
 }
-module time preset=datetime {
+widget time preset=datetime {
     timezone "Europe/Vienna"
     format " %H:%M"
 }
-module kernel preset=kernel {
+widget kernel preset=kernel {
     format "{sysname} {nodename} {release} {machine}"
 }
-module say_hello preset=custom {
+widget say_hello preset=custom {
     run-sh "echo hello"
 }
-module img preset=image {
+widget img preset=image {
     path image.png
     scaling 1.0
 }

@@ -7,6 +7,11 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 project(Wdock)
 
+Include(FetchContent)
+
+FetchContent_Declare(ckdl GIT_REPOSITORY https://github.com/tjol/ckdl.git GIT_TAG 1.0)
+FetchContent_MakeAvailable(ckdl)
+
 find_package(OpenGL REQUIRED)
 
 file(GLOB IMGUI_CORE_SRC deps/imgui/*.cpp)
@@ -53,4 +58,5 @@ target_compile_options(wdock PRIVATE -fsanitize=address,undefined -ggdb -Wall -W
 target_link_options(wdock PRIVATE -fsanitize=address,undefined)
 target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/imgui/backends/ deps/imgui/misc/cpp/ deps/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
-target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL EGL)
+target_include_directories(wdock PRIVATE ${ckdl_SOURCE_DIR}/include/ ${ckdl_SOURCE_DIR}/bindings/cpp/include/)
+target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL EGL kdl kdlpp)
