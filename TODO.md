@@ -5,6 +5,5 @@
 - calendar api
 - spotify api
 - font name parsing using fontconfig
-- make window moveable
-- add zoom when hovering
+- make window moveable?
 - support for multiple windows
