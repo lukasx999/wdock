@@ -127,9 +127,9 @@ namespace widgets {
 
     class datetime : public widget {
         public:
-        datetime(std::string_view timezone, const char* format)
-        : m_timezone(timezone)
-        , m_format(format)
+        datetime(std::string timezone, std::string format)
+        : m_timezone(std::move(timezone))
+        , m_format(std::move(format))
         { }
 
         void draw() const override {
@@ -138,8 +138,8 @@ namespace widgets {
         }
 
         private:
-        const std::string_view m_timezone;
-        const char* m_format;
+        const std::string m_timezone;
+        const std::string m_format;
 
         [[nodiscard]] std::string get_formatted_time() const {
             try {
@@ -150,7 +150,7 @@ namespace widgets {
                 tm* tm = localtime(&time);
 
                 std::stringstream fmt;
-                fmt << std::put_time(tm, m_format);
+                fmt << std::put_time(tm, m_format.c_str());
                 return fmt.str();
 
             } catch (const std::runtime_error& error) {

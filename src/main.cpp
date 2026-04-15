@@ -25,11 +25,16 @@ int main() {
         for (auto& widget : config.used_widgets) {
             auto def = config.widget_definitions[widget];
 
-            if (def.preset == u8"datetime") {
-                auto timezone = def.properties[u8"timezone"].front().as<std::u8string>();
-                auto format = def.properties[u8"format"].front().as<std::u8string>();
+            if (def.preset == "datetime") {
+                auto timezone = string_from_u8string(def.properties["timezone"].front().as<std::u8string>());
+                auto format = string_from_u8string(def.properties["format"].front().as<std::u8string>());
+                app.add_widget<widgets::datetime>(timezone, format);
 
-                app.add_widget<widgets::datetime>("Europe/Vienna", " %d.%m.%Y");
+            } else if (def.preset == "image") {
+                auto path = string_from_u8string(def.properties["path"].front().as<std::u8string>());
+                auto scaling = def.properties["scaling"].front().as<float>();
+                app.add_widget<widgets::image>(path, scaling);
+
             }
 
         }
