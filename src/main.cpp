@@ -10,29 +10,31 @@
 
 namespace {
 
+    // TODO: add checking for invalid options
     void add_widgets(application& app, const config& config) {
         for (auto& widget_name : config.widgets) {
+
             if (!config.widget_definitions.contains(widget_name))
                 throw std::runtime_error(std::format("widget \"{}\" does not exist.", widget_name));
 
             auto widget_def = config.widget_definitions.at(widget_name);
+            auto preset = widget_def.preset;
 
-            if (widget_def.preset == "datetime") {
-                // TODO: add checking for invalid options
+            if (preset == "datetime") {
                 auto timezone = string_from_u8(widget_def.properties["timezone"].front().as<std::u8string>());
                 auto format = string_from_u8(widget_def.properties["format"].front().as<std::u8string>());
 
                 app.add_widget<widgets::datetime>(timezone, format);
 
-            } else if (widget_def.preset == "image") {
+            } else if (preset == "image") {
                 auto path = string_from_u8(widget_def.properties["path"].front().as<std::u8string>());
                 auto scaling = widget_def.properties["scaling"].front().as<float>();
                 app.add_widget<widgets::image>(path, scaling);
 
-            } else if (widget_def.preset == "kernel") {
+            } else if (preset == "kernel") {
                 app.add_widget<widgets::kernel>();
 
-            } else if (widget_def.preset == "button") {
+            } else if (preset == "button") {
                 auto label = string_from_u8(widget_def.properties["label"].front().as<std::u8string>());
                 app.add_widget<widgets::button>(label);
 
@@ -51,7 +53,7 @@ int main() {
 
     config config;
     try {
-        config = parse_config_file(config_path);
+        config = parse_config(config_path);
 
     } catch (const config_error& error) {
         std::println(std::cerr, "failed to parse config file: {}", error.what());
