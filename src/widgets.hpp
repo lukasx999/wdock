@@ -9,7 +9,6 @@
 #include <sys/sysinfo.h>
 #include <ctime>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <glad/gl.h>
