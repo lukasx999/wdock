@@ -29,8 +29,9 @@ struct config {
     };
 
     struct widget_definition {
+        using widget_properties = std::unordered_map<std::string, std::vector<kdl::Value>>;
         std::string preset;
-        std::unordered_map<std::string, std::vector<kdl::Value>> properties;
+        widget_properties properties;
     };
 
     window window;

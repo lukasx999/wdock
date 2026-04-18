@@ -30,7 +30,7 @@ class application {
 
         if (not config.widgets.empty()) {
             m_widgets.clear();
-            parse_widgets(config);
+            load_widgets(config);
         }
 
     }
@@ -40,6 +40,8 @@ class application {
     }
 
     private:
+    using widget_properties = config::widget_definition::widget_properties;
+
     window m_window;
     ui m_ui;
     std::vector<std::unique_ptr<widgets::widget>> m_widgets;
@@ -63,23 +65,41 @@ class application {
         m_widgets.push_back(std::make_unique<Widget>(std::forward<decltype(args)>(args)...));
     }
 
+    // TODO: parse widgets in config.hpp?
+    void parse_widget_datetime(const widget_properties& props) {
+        std::string timezone = "Europe/Vienna";
+        std::string format = "%d.%m.%Y";
+
+        for (auto& [name, values] : props) {
+
+            if (name == "timezone")
+                timezone = string_from_u8(values.front().as<std::u8string>());
+
+            else if (name == "format")
+                format = string_from_u8(values.front().as<std::u8string>());
+
+            else
+                throw config_error(std::format("property \"{}\" does not exist in widget \"datetime\".", name));
+        }
+
+        add_widget<widgets::datetime>(timezone, format);
+
+    }
+
     // TODO: add checking for invalid options
-    void parse_widgets(const config& config) {
+    void load_widgets(const config& config) {
 
         for (auto& widget_name : config.widgets) {
 
             if (!config.widget_definitions.contains(widget_name))
-                throw std::runtime_error(std::format("widget \"{}\" has not been defined.", widget_name));
+                throw config_error(std::format("widget \"{}\" has not been defined.", widget_name));
 
             auto widget_def = config.widget_definitions.at(widget_name);
             auto preset = widget_def.preset;
             auto& props = widget_def.properties;
 
             if (preset == "datetime") {
-                auto timezone = string_from_u8(props["timezone"].front().as<std::u8string>());
-                auto format = string_from_u8(props["format"].front().as<std::u8string>());
-
-                add_widget<widgets::datetime>(timezone, format);
+                parse_widget_datetime(props);
 
             } else if (preset == "image") {
                 auto path = string_from_u8(props["path"].front().as<std::u8string>());
