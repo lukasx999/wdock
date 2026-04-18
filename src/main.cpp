@@ -19,24 +19,28 @@ namespace {
 
             auto widget_def = config.widget_definitions.at(widget_name);
             auto preset = widget_def.preset;
+            auto& props = widget_def.properties;
 
             if (preset == "datetime") {
-                auto timezone = string_from_u8(widget_def.properties["timezone"].front().as<std::u8string>());
-                auto format = string_from_u8(widget_def.properties["format"].front().as<std::u8string>());
+                auto timezone = string_from_u8(props["timezone"].front().as<std::u8string>());
+                auto format = string_from_u8(props["format"].front().as<std::u8string>());
 
                 app.add_widget<widgets::datetime>(timezone, format);
 
             } else if (preset == "image") {
-                auto path = string_from_u8(widget_def.properties["path"].front().as<std::u8string>());
-                auto scaling = widget_def.properties["scaling"].front().as<float>();
+                auto path = string_from_u8(props["path"].front().as<std::u8string>());
+                auto scaling = props["scaling"].front().as<float>();
+
                 app.add_widget<widgets::image>(path, scaling);
 
             } else if (preset == "kernel") {
                 app.add_widget<widgets::kernel>();
 
             } else if (preset == "button") {
-                auto label = string_from_u8(widget_def.properties["label"].front().as<std::u8string>());
-                app.add_widget<widgets::button>(label);
+                auto label = string_from_u8(props["label"].front().as<std::u8string>());
+                auto on_click = string_from_u8(props["on_click"].front().as<std::u8string>());
+
+                app.add_widget<widgets::button>(label, on_click);
 
             } else
                 throw std::runtime_error(std::format("widget preset \"{}\" does not exist.", widget_def.preset));
@@ -51,22 +55,15 @@ int main() {
 
     const char* config_path = "config.kdl";
 
-    config config;
     try {
-        config = parse_config(config_path);
+        config config = parse_config(config_path);
 
-    } catch (const config_error& error) {
-        std::println(std::cerr, "failed to parse config file: {}", error.what());
-        return EXIT_FAILURE;
-    }
+        auto window = config.window;
+        int width   = window.width;
+        int height  = window.height;
+        auto anchor = window.anchor;
+        auto margin = window.margin;
 
-    auto window = config.window;
-    int width   = window.width;
-    int height  = window.height;
-    auto anchor = window.anchor;
-    auto margin = window.margin;
-
-    try {
         application app(width, height, anchor, margin);
 
         // widgets must be added AFTER the application has been constructed, as this
@@ -74,6 +71,10 @@ int main() {
         add_widgets(app, config);
 
         app.run();
+
+    } catch (const config_error& error) {
+        std::println(std::cerr, "failed to parse config file: {}", error.what());
+        return EXIT_FAILURE;
 
     } catch (const window_error& error) {
         std::println(std::cerr, "failed to open window: {}", error.what());

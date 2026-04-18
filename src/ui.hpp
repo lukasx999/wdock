@@ -21,6 +21,7 @@ class ui {
         ImGui::CreateContext();
         ImGui_ImplWayland_Init(wl_display, wl_egl_window);
         ImGui_ImplOpenGL3_Init();
+
         configure();
         set_style();
     }

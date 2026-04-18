@@ -1,9 +1,12 @@
+#include <fstream>
+#include <ranges>
+
 #include "config.hpp"
 
 namespace {
 
 // TODO: handle type errors
-void parse_window(kdl::Node& node, struct config::window& window) {
+void parse_window(const kdl::Node& node, struct config::window& window) {
 
     for (auto& child : node.children()) {
         auto name = string_from_u8(child.name());
@@ -49,10 +52,18 @@ void parse_window(kdl::Node& node, struct config::window& window) {
 
         } else if (name == "margin") {
             auto& props = child.properties();
-            window.margin.top    = props[u8"top"].as<int>();
-            window.margin.right  = props[u8"right"].as<int>();
-            window.margin.bottom = props[u8"bottom"].as<int>();
-            window.margin.left   = props[u8"left"].as<int>();
+
+            if (props.contains(u8"top"))
+                window.margin.top = props.at(u8"top").as<int>();
+
+            if (props.contains(u8"right"))
+                window.margin.right = props.at(u8"right").as<int>();
+
+            if (props.contains(u8"bottom"))
+                window.margin.bottom = props.at(u8"bottom").as<int>();
+
+            if (props.contains(u8"left"))
+                window.margin.left = props.at(u8"left").as<int>();
 
         } else
             throw config_error(std::format("invalid window option \"{}\"", name));
@@ -70,6 +81,7 @@ void parse_widget_definition(const kdl::Node& node, config& config) {
     auto& def = config.widget_definitions[name];
     try {
         def.preset = string_from_u8(node.properties().at(u8"preset").as<std::u8string>());
+
     } catch (const std::out_of_range&) {
         throw config_error("widget definition must include \"preset\" property");
     }
@@ -88,7 +100,8 @@ void parse_widgets(const kdl::Node& node, config& config) {
 
 } // namespace
 
-[[nodiscard]] config parse_config(const std::filesystem::path& config_path) {
+config parse_config(const std::filesystem::path& config_path) {
+
     std::ifstream stream(config_path);
     std::u8string config_src(std::istreambuf_iterator<char>(stream), {});
     auto doc = kdl::parse(config_src);

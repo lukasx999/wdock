@@ -175,16 +175,19 @@ namespace widgets {
 
     class button : public widget {
         public:
-        explicit button(std::string label)
+        button(std::string label, std::string on_click)
         : m_label(std::move(label))
+        , m_on_click(std::move(on_click))
         { }
 
         void draw() const override {
-            ImGui::Button(m_label.c_str());
+            if (ImGui::Button(m_label.c_str()))
+                system(m_on_click.c_str());
         }
 
         private:
         const std::string m_label;
+        const std::string m_on_click;
 
     };
 

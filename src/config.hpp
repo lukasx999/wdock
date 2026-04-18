@@ -1,8 +1,6 @@
 #pragma once
 
-#include <fstream>
 #include <filesystem>
-#include <ranges>
 
 #include <kdl/kdl.h>
 #include <kdlpp.h>
@@ -15,15 +13,17 @@ struct config_error : std::runtime_error {
 
 struct config {
     struct window {
+        ::window::anchor anchor;
+        int width;
+        int height;
+        ::window::margin margin;
+
+        // TODO: this should be a struct window_style
         std::string font;
         float fontsize;
         std::string background_color;
         float border_radius;
         float padding;
-        int width;
-        int height;
-        ::window::anchor anchor;
-        ::window::margin margin;
     };
 
     struct widget_definition {

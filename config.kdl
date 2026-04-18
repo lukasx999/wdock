@@ -1,13 +1,13 @@
 window {
-    font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
+    anchor right
+    width 700
+    height 800
+    margin top=0 right=200 bottom=0 left=0
     fontsize 30
     background-color "#0000007f"
     border-radius 15
     padding 20
-    width 700
-    height 800
-    anchor right
-    margin top=0 right=200 bottom=0 left=0
+    font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
 }
 
 widgets date time kernel img button
@@ -37,4 +37,5 @@ define-widget img preset=image {
 
 define-widget button preset=button {
     label "hello"
+    on_click "chromium"
 }
