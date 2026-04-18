@@ -9,22 +9,32 @@ window {
     anchor right
     margin top=0 right=200 bottom=0 left=0
 }
-widgets date time kernel
-widget date preset=datetime {
+
+widgets date time kernel img button
+
+define-widget date preset=datetime {
     timezone "Europe/Vienna"
     format " %d.%m.%Y"
 }
-widget time preset=datetime {
+
+define-widget time preset=datetime {
     timezone "Europe/Vienna"
     format " %H:%M"
 }
-widget kernel preset=kernel {
+
+define-widget kernel preset=kernel {
     format "{sysname} {nodename} {release} {machine}"
 }
-widget say_hello preset=custom {
+
+define-widget say_hello preset=custom {
     run-sh "echo hello"
 }
-widget img preset=image {
+
+define-widget img preset=image {
     path image.png
     scaling 1.0
+}
+
+define-widget button preset=button {
+    label "hello"
 }

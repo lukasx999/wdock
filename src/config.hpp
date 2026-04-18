@@ -24,52 +24,54 @@ struct config {
         int height;
         ::window::anchor anchor;
         ::window::margin margin;
-    } window;
+    };
 
     struct widget_definition {
         std::string preset;
         std::unordered_map<std::string, std::vector<kdl::Value>> properties;
     };
 
+    window window;
+    std::vector<std::string> widgets;
     std::unordered_map<std::string, widget_definition> widget_definitions;
-    std::vector<std::string> used_widgets;
 
 };
 
-[[nodiscard]] inline std::string string_from_u8string(std::u8string str) {
+[[nodiscard]] inline std::string string_from_u8(std::u8string str) {
     return { str.begin(), str.end() };
 }
 
 // TODO: handle type errors
 [[nodiscard]] inline struct config::window parse_window_config(kdl::Node& node) {
+
     struct config::window window;
 
     for (auto& child : node.children()) {
-        auto& name = child.name();
+        auto name = string_from_u8(child.name());
         auto& args = child.args();
 
-        if (name == u8"font") {
-            window.font = string_from_u8string(args[0].as<std::u8string>());
+        if (name == "font") {
+            window.font = string_from_u8(args[0].as<std::u8string>());
 
-        } else if (name == u8"fontsize") {
+        } else if (name == "fontsize") {
             window.fontsize = args[0].as<float>();
 
-        } else if (name == u8"background-color") {
-            window.background_color = string_from_u8string(args[0].as<std::u8string>());
+        } else if (name == "background-color") {
+            window.background_color = string_from_u8(args[0].as<std::u8string>());
 
-        } else if (name == u8"border-radius") {
+        } else if (name == "border-radius") {
             window.border_radius = args[0].as<float>();
 
-        } else if (name == u8"padding") {
+        } else if (name == "padding") {
             window.padding = args[0].as<float>();
 
-        } else if (name == u8"width") {
+        } else if (name == "width") {
             window.width = args[0].as<int>();
 
-        } else if (name == u8"height") {
+        } else if (name == "height") {
             window.height = args[0].as<int>();
 
-        } else if (name == u8"anchor") {
+        } else if (name == "anchor") {
             auto anchor_str = args[0].as<std::u8string>();
 
             window.anchor = [&] {
@@ -80,17 +82,34 @@ struct config {
                 else throw config_error("invalid anchor value");
             }();
 
-        } else if (name == u8"margin") {
+        } else if (name == "margin") {
             auto& props = child.properties();
             window.margin.top    = props[u8"top"].as<int>();
             window.margin.right  = props[u8"right"].as<int>();
             window.margin.bottom = props[u8"bottom"].as<int>();
             window.margin.left   = props[u8"left"].as<int>();
-        }
+
+        } else
+            throw config_error(std::format("invalid window option \"{}\"", name));
 
     }
 
     return window;
+}
+
+inline void parse_widget_definition(kdl::Node& node, config& config) {
+    std::string name = string_from_u8(node.args()[0].as<std::u8string>());
+
+    if (config.widget_definitions.contains(name))
+        throw config_error(std::format("widget named \"{}\" has been defined multiple times", name));
+
+    auto& def = config.widget_definitions[name];
+    def.preset =  string_from_u8(node.properties()[u8"preset"].as<std::u8string>());
+
+    for (auto& child : node.children()) {
+        def.properties[string_from_u8(child.name())] = child.args();
+    }
+
 }
 
 [[nodiscard]] inline config parse_config_file(const std::filesystem::path& config_path) {
@@ -100,27 +119,21 @@ struct config {
 
     config config;
     for (auto& node : doc.nodes()) {
-        auto& name = node.name();
+        auto name = string_from_u8(node.name());
 
-        if (name == u8"window") {
+        if (name == "window") {
             config.window = parse_window_config(node);
 
-        } else if (name == u8"widgets") {
-            config.used_widgets = node.args()
+        } else if (name == "widgets") {
+            config.widgets = node.args()
                 | std::views::transform(&kdl::Value::as<std::u8string>)
                 | std::ranges::to<std::vector<std::string>>();
 
-        } else if (name == u8"widget") {
-            std::string name = string_from_u8string(node.args()[0].as<std::u8string>());
-            std::string preset = string_from_u8string(node.properties()[u8"preset"].as<std::u8string>());
-            std::unordered_map<std::string, std::vector<kdl::Value>> properties;
+        } else if (name == "define-widget") {
+            parse_widget_definition(node, config);
 
-            for (auto& child : node.children()) {
-                properties[string_from_u8string(child.name())] = child.args();
-            }
-
-            config.widget_definitions[name] = { preset, properties };
-        }
+        } else
+            throw config_error(std::format("invalid config option: \"{}\"", name));
 
     }
 

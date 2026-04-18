@@ -173,4 +173,19 @@ namespace widgets {
 
     };
 
+    class button : public widget {
+        public:
+        explicit button(std::string label)
+        : m_label(std::move(label))
+        { }
+
+        void draw() const override {
+            ImGui::Button(m_label.c_str());
+        }
+
+        private:
+        const std::string m_label;
+
+    };
+
 } // namespace widgets
