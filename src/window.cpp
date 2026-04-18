@@ -9,7 +9,7 @@
 // for debugging only
 #undef USE_XDG_TOPLEVEL_ROLE
 
-window::window(const char* title, int width, int height, anchor anchor, margin margin)
+window::window(const char* title, int width, int height)
 : m_state(std::make_unique<state>())
 {
 
@@ -27,7 +27,7 @@ window::window(const char* title, int width, int height, anchor anchor, margin m
         throw window_error("failed to initialize EGL");
 
     #ifndef USE_XDG_TOPLEVEL_ROLE
-    setup_layer_surface(width, height, title, anchor, margin);
+    setup_layer_surface(title, width, height);
     #else
     setup_toplevel(title);
     #endif // USE_XDG_TOPLEVEL_ROLE
@@ -57,7 +57,7 @@ window::~window() {
     wl_display_disconnect(m_state->wl_display);
 }
 
-void window::run() const {
+void window::run() {
     while (!m_state->should_close) {
         if (wl_display_dispatch(m_state->wl_display) == -1)
             throw window_error("error handling wayland events");
@@ -155,15 +155,15 @@ void window::setup_toplevel(const char* title) {
 
 }
 
-void window::setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin) {
+void window::setup_layer_surface(const char* title, int width, int height) {
 
     m_state->zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state->zwlr_layer_shell, m_state->wl_surface,
         nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
 
     zwlr_layer_surface_v1_add_listener(m_state->zwlr_layer_surface, &m_layer_surface_listener, m_state.get());
-    zwlr_layer_surface_v1_set_size(m_state->zwlr_layer_surface, width, height);
-    zwlr_layer_surface_v1_set_anchor(m_state->zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
-    zwlr_layer_surface_v1_set_margin(m_state->zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
+
+    set_size(width, height);
+    set_anchor(anchor::top);
 }
 
 void window::bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version) {

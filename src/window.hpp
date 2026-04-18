@@ -30,7 +30,7 @@ class window {
         int left   = 0;
     };
 
-    window(const char* title, int width, int height, anchor anchor, margin margin={0, 0, 0, 0});
+    window(const char* title, int width, int height);
 
     ~window();
     window(const window&) = delete;
@@ -38,7 +38,7 @@ class window {
     window& operator=(const window&) = delete;
     window& operator=(window&&) noexcept = delete;
 
-    void run() const;
+    void run();
     static void run_concurrent(std::span<const window*> windows);
 
     void on_draw(std::function<void()> draw_callback) {
@@ -55,6 +55,18 @@ class window {
         int height;
         wl_egl_window_get_attached_size(m_state->wl_egl_window, nullptr, &height);
         return height;
+    }
+
+    void set_size(int width, int height) {
+        zwlr_layer_surface_v1_set_size(m_state->zwlr_layer_surface, width, height);
+    }
+
+    void set_anchor(anchor anchor) {
+        zwlr_layer_surface_v1_set_anchor(m_state->zwlr_layer_surface, anchor_to_wlr_anchor(anchor));
+    }
+
+    void set_margin(margin margin) {
+        zwlr_layer_surface_v1_set_margin(m_state->zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
     }
 
     [[nodiscard]] struct wl_display* get_wl_display() const {
@@ -99,7 +111,7 @@ class window {
     [[nodiscard]] static zwlr_layer_surface_v1_anchor anchor_to_wlr_anchor(anchor anchor);
     [[nodiscard]] bool init_egl(int width, int height);
     void setup_toplevel(const char* title);
-    void setup_layer_surface(int width, int height, const char* title, anchor anchor, margin margin);
+    void setup_layer_surface(const char* title, int width, int height);
     static void bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version);
     static void configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height);
     static void draw_frame(void* data, struct wl_callback* wl_callback, uint32_t callback_data);

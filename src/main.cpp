@@ -8,69 +8,15 @@
 #include "window.hpp"
 #include "config.hpp"
 
-namespace {
-
-    // TODO: add checking for invalid options
-    void add_widgets(application& app, const config& config) {
-        for (auto& widget_name : config.widgets) {
-
-            if (!config.widget_definitions.contains(widget_name))
-                throw std::runtime_error(std::format("widget \"{}\" does not exist.", widget_name));
-
-            auto widget_def = config.widget_definitions.at(widget_name);
-            auto preset = widget_def.preset;
-            auto& props = widget_def.properties;
-
-            if (preset == "datetime") {
-                auto timezone = string_from_u8(props["timezone"].front().as<std::u8string>());
-                auto format = string_from_u8(props["format"].front().as<std::u8string>());
-
-                app.add_widget<widgets::datetime>(timezone, format);
-
-            } else if (preset == "image") {
-                auto path = string_from_u8(props["path"].front().as<std::u8string>());
-                auto scaling = props["scaling"].front().as<float>();
-
-                app.add_widget<widgets::image>(path, scaling);
-
-            } else if (preset == "kernel") {
-                app.add_widget<widgets::kernel>();
-
-            } else if (preset == "button") {
-                auto label = string_from_u8(props["label"].front().as<std::u8string>());
-                auto on_click = string_from_u8(props["on_click"].front().as<std::u8string>());
-
-                app.add_widget<widgets::button>(label, on_click);
-
-            } else
-                throw std::runtime_error(std::format("widget preset \"{}\" does not exist.", widget_def.preset));
-
-        }
-
-    }
-
-} // namespace
-
 int main() {
 
     const char* config_path = "config.kdl";
 
     try {
+        application app(100, 100);
+
         config config = parse_config(config_path);
-
-        auto window = config.window;
-        int width   = window.width;
-        int height  = window.height;
-        auto anchor = window.anchor;
-        auto margin = window.margin;
-
-        // TODO: make config hot-reloadable
-        application app(width, height, anchor, margin);
-
-        // widgets must be added AFTER the application has been constructed, as this
-        // is when the opengl context gets initialized, which a widget might use
-        add_widgets(app, config);
-
+        app.load_config(config);
         app.run();
 
     } catch (const config_error& error) {

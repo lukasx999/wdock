@@ -27,11 +27,15 @@ void parse_window(const kdl::Node& node, struct config::window& window) {
         } else if (name == "padding") {
             window.padding = args[0].as<float>();
 
-        } else if (name == "width") {
-            window.width = args[0].as<int>();
+        } else if (name == "size") {
+            auto& props = child.properties();
 
-        } else if (name == "height") {
-            window.height = args[0].as<int>();
+            if (!props.contains(u8"width") || !props.contains(u8"height"))
+                throw config_error("property \"size\" must specify both \"width\" and \"height\".");
+
+            int width = props.at(u8"width").as<int>();
+            int height = props.at(u8"height").as<int>();
+            window.size = { width, height };
 
         } else if (name == "anchor") {
             auto anchor_str = args[0].as<std::u8string>();
@@ -53,17 +57,14 @@ void parse_window(const kdl::Node& node, struct config::window& window) {
         } else if (name == "margin") {
             auto& props = child.properties();
 
-            if (props.contains(u8"top"))
-                window.margin.top = props.at(u8"top").as<int>();
+            if (!props.contains(u8"top") ||  !props.contains(u8"right") ||  !props.contains(u8"bottom") ||  !props.contains(u8"left"))
+                throw config_error("property \"margin\" must specify \"top\", \"right\", \"bottom\" and \"left\".");
 
-            if (props.contains(u8"right"))
-                window.margin.right = props.at(u8"right").as<int>();
-
-            if (props.contains(u8"bottom"))
-                window.margin.bottom = props.at(u8"bottom").as<int>();
-
-            if (props.contains(u8"left"))
-                window.margin.left = props.at(u8"left").as<int>();
+            int top    = props.at(u8"top").as<int>();
+            int right  = props.at(u8"right").as<int>();
+            int bottom = props.at(u8"bottom").as<int>();
+            int left   = props.at(u8"left").as<int>();
+            window.margin = { top, right, bottom, left };
 
         } else
             throw config_error(std::format("invalid window option \"{}\"", name));

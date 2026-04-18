@@ -13,10 +13,12 @@ struct config_error : std::runtime_error {
 
 struct config {
     struct window {
-        ::window::anchor anchor;
-        int width;
-        int height;
-        ::window::margin margin;
+        struct size {
+            int width, height;
+        };
+        std::optional<size> size;
+        std::optional<::window::anchor> anchor;
+        std::optional<::window::margin> margin;
 
         // TODO: this should be a struct window_style
         std::string font;
