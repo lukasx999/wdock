@@ -6,6 +6,7 @@
 #include <kdlpp.h>
 
 #include "window.hpp"
+#include "widgets.hpp"
 
 struct config_error : std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -29,14 +30,17 @@ struct config {
     };
 
     struct widget_definition {
-        using widget_properties = std::unordered_map<std::string, std::vector<kdl::Value>>;
+        using properties = std::unordered_map<std::string, std::vector<kdl::Value>>;
         std::string preset;
-        widget_properties properties;
+        properties props;
     };
 
     window window;
     std::vector<std::string> widgets;
     std::unordered_map<std::string, widget_definition> widget_definitions;
+
+    // TODO:
+    // std::vector<std::unique_ptr<widgets::widget>> used_widgets;
 
 };
 

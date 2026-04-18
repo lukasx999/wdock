@@ -88,7 +88,7 @@ void parse_widget_definition(const kdl::Node& node, config& config) {
     }
 
     for (auto& child : node.children()) {
-        def.properties[string_from_u8(child.name())] = child.args();
+        def.props[string_from_u8(child.name())] = child.args();
     }
 
 }

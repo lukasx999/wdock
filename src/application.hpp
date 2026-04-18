@@ -40,13 +40,13 @@ class application {
     }
 
     private:
-    using widget_properties = config::widget_definition::widget_properties;
+    using widget_properties = config::widget_definition::properties;
 
     window m_window;
     ui m_ui;
     std::vector<std::unique_ptr<widgets::widget>> m_widgets;
 
-    void draw() {
+    void draw() const {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -96,7 +96,7 @@ class application {
 
             auto widget_def = config.widget_definitions.at(widget_name);
             auto preset = widget_def.preset;
-            auto& props = widget_def.properties;
+            auto& props = widget_def.props;
 
             if (preset == "datetime") {
                 parse_widget_datetime(props);
