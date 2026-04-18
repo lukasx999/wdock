@@ -87,6 +87,17 @@ zwlr_layer_surface_v1_anchor window::anchor_to_wlr_anchor(anchor anchor) {
     }
 }
 
+zwlr_layer_shell_v1_layer window::layer_to_wlr_layer(layer layer) {
+    switch (layer) {
+        case layer::background: return ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND;
+        case layer::bottom:     return ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM;
+        case layer::top:        return ZWLR_LAYER_SHELL_V1_LAYER_TOP;
+        case layer::overlay:    return ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY;
+        default: assert(!"unreachable");
+    }
+
+}
+
 bool window::init_egl(int width, int height) {
 
     std::array config_attribs {
@@ -157,8 +168,13 @@ void window::setup_toplevel(const char* title) {
 
 void window::setup_layer_surface(const char* title, int width, int height) {
 
-    m_state->zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(m_state->zwlr_layer_shell, m_state->wl_surface,
-        nullptr, ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, title);
+    m_state->zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(
+        m_state->zwlr_layer_shell,
+        m_state->wl_surface,
+        nullptr,
+        ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND,
+        title
+    );
 
     zwlr_layer_surface_v1_add_listener(m_state->zwlr_layer_surface, &m_layer_surface_listener, m_state.get());
 

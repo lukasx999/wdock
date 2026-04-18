@@ -21,7 +21,19 @@ struct window_error : std::runtime_error {
 
 class window {
     public:
-    enum class anchor { top, bottom, left, right };
+    enum class anchor {
+        top,
+        bottom,
+        left,
+        right,
+    };
+
+    enum class layer {
+        background,
+        bottom,
+        top,
+        overlay,
+    };
 
     struct margin {
         int top    = 0;
@@ -69,6 +81,10 @@ class window {
         zwlr_layer_surface_v1_set_margin(m_state->zwlr_layer_surface, margin.top, margin.right, margin.bottom, margin.left);
     }
 
+    void set_layer(layer layer) {
+        zwlr_layer_surface_v1_set_layer(m_state->zwlr_layer_surface, layer_to_wlr_layer(layer));
+    }
+
     [[nodiscard]] struct wl_display* get_wl_display() const {
         return m_state->wl_display;
     }
@@ -109,6 +125,7 @@ class window {
     std::unique_ptr<state> m_state;
 
     [[nodiscard]] static zwlr_layer_surface_v1_anchor anchor_to_wlr_anchor(anchor anchor);
+    [[nodiscard]] static zwlr_layer_shell_v1_layer layer_to_wlr_layer(layer layer);
     [[nodiscard]] bool init_egl(int width, int height);
     void setup_toplevel(const char* title);
     void setup_layer_surface(const char* title, int width, int height);

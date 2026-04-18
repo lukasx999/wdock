@@ -25,6 +25,9 @@ class application {
         if (window.anchor)
             m_window.set_anchor(*window.anchor);
 
+        if (window.layer)
+            m_window.set_layer(*window.layer);
+
         if (window.margin)
             m_window.set_margin(*window.margin);
 

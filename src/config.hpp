@@ -19,6 +19,7 @@ struct config {
         };
         std::optional<size> size;
         std::optional<::window::anchor> anchor;
+        std::optional<::window::layer> layer;
         std::optional<::window::margin> margin;
 
         // TODO: this should be a struct window_style
