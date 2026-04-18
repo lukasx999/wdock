@@ -64,6 +64,7 @@ int main() {
         auto anchor = window.anchor;
         auto margin = window.margin;
 
+        // TODO: make config hot-reloadable
         application app(width, height, anchor, margin);
 
         // widgets must be added AFTER the application has been constructed, as this
