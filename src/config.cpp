@@ -130,7 +130,7 @@ namespace {
         | std::ranges::to<std::vector<std::string>>();
     }
 
-    [[nodiscard]] auto parse_datetime(const widget_definition::properties& props) -> std::unique_ptr<widgets::datetime> {
+    [[nodiscard]] auto parse_widget_datetime(const widget_definition::properties& props) -> std::unique_ptr<widgets::datetime> {
 
         std::string timezone = "Europe/Vienna";
         std::string format = "%d.%m.%Y";
@@ -147,7 +147,57 @@ namespace {
                 throw config_error("property \"{}\" does not exist in widget \"datetime\".", name);
         }
 
-        return std::make_unique<widgets::datetime>(timezone, format);
+        return std::make_unique<widgets::datetime>(std::move(timezone), std::move(format));
+    }
+
+    [[nodiscard]] auto parse_widget_image(const widget_definition::properties& props) -> std::unique_ptr<widgets::image> {
+
+        std::optional<std::string> path;
+        float scaling = 1.0f;
+
+        for (auto& [name, values] : props) {
+
+            if (name == "path")
+                path = string_from_u8(values.front().as<std::u8string>());
+
+            else if (name == "scaling")
+                scaling = values.front().as<float>();
+
+            else
+                throw config_error("property \"{}\" does not exist in widget \"image\".", name);
+
+        }
+
+        if (!path)
+            throw config_error("property \"path\" in widget preset \"image\" does not have a default value.");
+
+        return std::make_unique<widgets::image>(*path, scaling);
+    }
+
+    [[nodiscard]] auto parse_widget_button(const widget_definition::properties& props) -> std::unique_ptr<widgets::button> {
+
+        std::optional<std::string> label;
+        std::optional<std::string> on_click;
+
+        for (auto& [name, values] : props) {
+            if (name == "label")
+                label = string_from_u8(values.front().as<std::u8string>());
+
+            else if (name == "on_click")
+                on_click = string_from_u8(values.front().as<std::u8string>());
+
+            else
+                throw config_error("property \"{}\" does not exist in widget \"button\".", name);
+
+        }
+
+        if (!label)
+            throw config_error("property \"label\" in widget preset \"button\" does not have a default value.");
+
+        if (!on_click)
+            throw config_error("property \"on_click\" in widget preset \"button\" does not have a default value.");
+
+        return std::make_unique<widgets::button>(*label, *on_click);
     }
 
     [[nodiscard]] auto parse_widgets(std::span<widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widgets::widget>> {
@@ -156,22 +206,16 @@ namespace {
         for (auto& [preset, props] : widget_definitions) {
 
             if (preset == "datetime") {
-                widgets.push_back(parse_datetime(props));
+                widgets.push_back(parse_widget_datetime(props));
 
             } else if (preset == "image") {
-                auto path = string_from_u8(props["path"].front().as<std::u8string>());
-                auto scaling = props["scaling"].front().as<float>();
-
-                widgets.push_back(std::make_unique<widgets::image>(path, scaling));
+                widgets.push_back(parse_widget_image(props));
 
             } else if (preset == "kernel") {
                 widgets.push_back(std::make_unique<widgets::kernel>());
 
             } else if (preset == "button") {
-                auto label = string_from_u8(props["label"].front().as<std::u8string>());
-                auto on_click = string_from_u8(props["on_click"].front().as<std::u8string>());
-
-                widgets.push_back(std::make_unique<widgets::button>(label, on_click));
+                widgets.push_back(parse_widget_button(props));
 
             } else
                 throw config_error("widget preset \"{}\" does not exist.", preset);
