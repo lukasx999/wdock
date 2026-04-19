@@ -19,8 +19,8 @@ class application {
     void load_config(config& config) {
         load_window_config(config.window);
 
-        if (not config.used_widgets.empty()) {
-            m_widgets = std::move(config.used_widgets);
+        if (not config.widgets.empty()) {
+            m_widgets = std::move(config.widgets);
         }
 
     }

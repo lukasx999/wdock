@@ -1,6 +1,9 @@
 #include <fstream>
 #include <ranges>
 
+#include <kdl/kdl.h>
+#include <kdlpp.h>
+
 #include "config.hpp"
 #include "utils.hpp"
 #include "widgets.hpp"
@@ -14,6 +17,10 @@ namespace {
         std::string preset;
         properties props;
     };
+
+    [[nodiscard]] std::string string_from_u8(const std::u8string& str) {
+        return { str.begin(), str.end() };
+    }
 
     [[nodiscard]] struct config::window parse_window(const kdl::Node& node) {
         struct config::window window;
@@ -217,7 +224,7 @@ config parse_config(const std::filesystem::path& config_path) {
         })
         | std::ranges::to<std::vector<widget_definition>>();
 
-    config.used_widgets = parse_widgets(widgets);
+    config.widgets = parse_widgets(widgets);
 
     return config;
 }
