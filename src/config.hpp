@@ -22,12 +22,14 @@ struct config {
         std::optional<::window::layer> layer;
         std::optional<::window::margin> margin;
 
-        // TODO: this should be a struct window_style
-        std::string font;
-        float fontsize;
-        std::string background_color;
-        float border_radius;
-        float padding;
+        struct style {
+            std::optional<float> padding;
+            std::optional<float> border_radius;
+            std::optional<float> fontsize;
+            std::optional<std::string> font;
+            std::optional<std::string> background_color;
+        } style;
+
     };
 
     struct widget_definition {

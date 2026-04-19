@@ -13,19 +13,19 @@ void parse_window(const kdl::Node& node, struct config::window& window) {
         auto& args = child.args();
 
         if (name == "font") {
-            window.font = string_from_u8(args[0].as<std::u8string>());
+            window.style.font = string_from_u8(args[0].as<std::u8string>());
 
         } else if (name == "fontsize") {
-            window.fontsize = args[0].as<float>();
+            window.style.fontsize = args[0].as<float>();
 
         } else if (name == "background-color") {
-            window.background_color = string_from_u8(args[0].as<std::u8string>());
+            window.style.background_color = string_from_u8(args[0].as<std::u8string>());
 
         } else if (name == "border-radius") {
-            window.border_radius = args[0].as<float>();
+            window.style.border_radius = args[0].as<float>();
 
         } else if (name == "padding") {
-            window.padding = args[0].as<float>();
+            window.style.padding = args[0].as<float>();
 
         } else if (name == "size") {
             auto& props = child.properties();
