@@ -15,6 +15,7 @@ struct config_error : std::runtime_error {
 
 };
 
+// TODO: set default values in the code or always load a default config first?
 struct config {
     private:
     template <typename T> using opt = std::optional<T>;

@@ -4,15 +4,15 @@ window {
     anchor right
     layer overlay // https://wayland.app/protocols/wlr-layer-shell-unstable-v1#zwlr_layer_shell_v1:enum:layer
     margin top=0 right=200 bottom=0 left=0
+    font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
     fontsize 30
     background-color "#0000007f"
     border-radius 15
     padding 20
-    font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
 }
 
 // declare the widgets you are going to use.
-declare-widgets date time kernel button say_hello
+declare-widgets date time kernel button say_hello img
 
 // define the widgets which may be used in the list of declared widgets.
 // a widget definition must contain a name (used in declare-widgets), aswell as a preset.
@@ -40,7 +40,7 @@ define-widget say_hello preset=custom {
 
 define-widget img preset=image {
     path image.png // required
-    scaling 1.0
+    scaling 0.25
 }
 
 define-widget button preset=button {
