@@ -38,22 +38,28 @@ void parse_window(const kdl::Node& node, struct config::window& window) {
             window.size = { width, height };
 
         } else if (name == "anchor") {
-            auto anchor = args[0].as<std::u8string>();
 
-            if (anchor == u8"top")
+            std::string anchor;
+            try {
+                anchor = string_from_u8(args[0].as<std::u8string>());
+            } catch (const kdl::TypeError&) {
+                throw config_error("\"anchor\" value must be of type string.");
+            }
+
+            if (anchor == "top")
                 window.anchor = window::anchor::top;
 
-            else if (anchor == u8"right")
+            else if (anchor == "right")
                 window.anchor = window::anchor::right;
 
-            else if (anchor == u8"bottom")
+            else if (anchor == "bottom")
                 window.anchor = window::anchor::bottom;
 
-            else if (anchor == u8"left")
+            else if (anchor == "left")
                 window.anchor = window::anchor::left;
 
             else
-                throw config_error(std::format("invalid anchor value: \"{}\"", string_from_u8(anchor)));
+                throw config_error(std::format("invalid \"anchor\" value: \"{}\" (must be one of \"top\", \"right\", \"bottom\" or \"left\" )", anchor));
 
         } else if (name == "layer") {
             auto layer = args[0].as<std::u8string>();
@@ -71,7 +77,7 @@ void parse_window(const kdl::Node& node, struct config::window& window) {
                 window.layer = window::layer::overlay;
 
             else
-                throw config_error(std::format("invalid layer value: \"{}\"", string_from_u8(layer)));
+                throw config_error(std::format("invalid \"layer\" value: \"{}\"", string_from_u8(layer)));
 
         } else if (name == "margin") {
             auto& props = child.properties();
