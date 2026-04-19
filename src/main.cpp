@@ -8,12 +8,6 @@
 #include "window.hpp"
 #include "config.hpp"
 
-// TODO: use this for custom exceptions
-// template <typename... Args>
-// auto f(std::format_string<Args...> fmt, Args&&... args) {
-//     return std::vformat(fmt.get(), std::make_format_args(args...));
-// }
-
 int main() {
 
     auto config_path = "config.kdl";
