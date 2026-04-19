@@ -10,7 +10,7 @@
 
 int main() {
 
-    const char* config_path = "config.kdl";
+    auto config_path = "config.kdl";
 
     try {
         application app(100, 100);
