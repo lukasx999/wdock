@@ -198,12 +198,16 @@ config parse_config(const std::filesystem::path& config_path) {
         auto name = string_from_u8(node.name());
 
         if (name == "window")
+            // TODO: check for multiple definitions
             config.window = parse_window(node);
 
-        else if (name == "widgets")
+        else if (name == "widgets") {
+            if (not used_widgets.empty())
+                throw config_error("there may only be one \"widgets\" definition.");
+
             used_widgets = parse_widgets(node);
 
-        else if (name == "define-widget") {
+        } else if (name == "define-widget") {
             auto [name, def] = parse_widget_definition(node);
 
             if (widget_definitions.contains(name))

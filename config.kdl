@@ -1,7 +1,7 @@
 window {
     size width=700 height=800
     anchor right
-    layer overlay
+    layer overlay // https://wayland.app/protocols/wlr-layer-shell-unstable-v1#zwlr_layer_shell_v1:enum:layer
     margin top=0 right=200 bottom=0 left=0
     fontsize 30
     background-color "#0000007f"
@@ -10,6 +10,7 @@ window {
     font "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
 }
 
+// define the widgets you are going to use
 widgets date time kernel img button
 
 define-widget date preset=datetime {
