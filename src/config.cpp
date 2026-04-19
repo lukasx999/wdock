@@ -9,6 +9,12 @@
 
 namespace {
 
+    struct widget_definition {
+        using properties = std::unordered_map<std::string, std::vector<kdl::Value>>;
+        std::string preset;
+        properties props;
+    };
+
 [[nodiscard]] struct config::window parse_window(const kdl::Node& node) {
     struct config::window window;
 
@@ -93,13 +99,10 @@ namespace {
     return window;
 }
 
-void parse_widget_definition(const kdl::Node& node, config& config) {
+[[nodiscard]] auto parse_widget_definition(const kdl::Node& node) -> std::pair<std::string, widget_definition> {
     std::string name = string_from_u8(node.args()[0].as<std::u8string>());
 
-    if (config.widget_definitions.contains(name))
-        throw config_error(std::format("widget named \"{}\" has been defined multiple times", name));
-
-    auto& def = config.widget_definitions[name];
+    widget_definition def;
 
     try {
         def.preset = string_from_u8(node.properties().at(u8"preset").as<std::u8string>());
@@ -111,6 +114,7 @@ void parse_widget_definition(const kdl::Node& node, config& config) {
         def.props[string_from_u8(child.name())] = child.args();
     }
 
+    return { name, def };
 }
 
 [[nodiscard]] auto parse_widgets(const kdl::Node& node) -> std::vector<std::string> {
@@ -119,7 +123,7 @@ void parse_widget_definition(const kdl::Node& node, config& config) {
         | std::ranges::to<std::vector<std::string>>();
 }
 
-[[nodiscard]] auto parse_datetime(const config::widget_definition::properties& props) -> std::unique_ptr<widgets::datetime> {
+[[nodiscard]] auto parse_datetime(const widget_definition::properties& props) -> std::unique_ptr<widgets::datetime> {
 
     std::string timezone = "Europe/Vienna";
     std::string format = "%d.%m.%Y";
@@ -139,40 +143,35 @@ void parse_widget_definition(const kdl::Node& node, config& config) {
     return std::make_unique<widgets::datetime>(timezone, format);
 }
 
-void parse_widgets(config& config) {
+[[nodiscard]] auto parse_widgets(std::span<widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widgets::widget>> {
+    std::vector<std::unique_ptr<widgets::widget>> widgets;
 
-    for (auto& widget_name : config.widgets) {
-
-        if (!config.widget_definitions.contains(widget_name))
-            throw config_error(std::format("widget \"{}\" has not been defined.", widget_name));
-
-        auto widget_def = config.widget_definitions.at(widget_name);
-        auto preset = widget_def.preset;
-        auto& props = widget_def.props;
+    for (auto& [preset, props] : widget_definitions) {
 
         if (preset == "datetime") {
-            config.used_widgets.push_back(parse_datetime(props));
+            widgets.push_back(parse_datetime(props));
 
         } else if (preset == "image") {
             auto path = string_from_u8(props["path"].front().as<std::u8string>());
             auto scaling = props["scaling"].front().as<float>();
 
-            config.used_widgets.push_back(std::make_unique<widgets::image>(path, scaling));
+            widgets.push_back(std::make_unique<widgets::image>(path, scaling));
 
         } else if (preset == "kernel") {
-            config.used_widgets.push_back(std::make_unique<widgets::kernel>());
+            widgets.push_back(std::make_unique<widgets::kernel>());
 
         } else if (preset == "button") {
             auto label = string_from_u8(props["label"].front().as<std::u8string>());
             auto on_click = string_from_u8(props["on_click"].front().as<std::u8string>());
 
-            config.used_widgets.push_back(std::make_unique<widgets::button>(label, on_click));
+            widgets.push_back(std::make_unique<widgets::button>(label, on_click));
 
         } else
-            throw std::runtime_error(std::format("widget preset \"{}\" does not exist.", widget_def.preset));
+            throw std::runtime_error(std::format("widget preset \"{}\" does not exist.", preset));
 
     }
 
+    return widgets;
 }
 
 } // namespace
@@ -185,24 +184,40 @@ config parse_config(const std::filesystem::path& config_path) {
 
     config config;
 
+    std::vector<std::string> widgets;
+    std::unordered_map<std::string, widget_definition> widget_definitions;
+
     for (auto& node : doc.nodes()) {
         auto name = string_from_u8(node.name());
 
         if (name == "window")
-            config.window =  parse_window(node);
+            config.window = parse_window(node);
 
         else if (name == "widgets")
-            config.widgets =  parse_widgets(node);
+            widgets = parse_widgets(node);
 
-        else if (name == "define-widget")
-            parse_widget_definition(node, config);
+        else if (name == "define-widget") {
+            auto [name, def] = parse_widget_definition(node);
 
-        else
+            if (widget_definitions.contains(name))
+                throw config_error(std::format("widget \"{}\" has been defined multiple times.", name));
+
+            widget_definitions.insert({name, def});
+
+        } else
             throw config_error(std::format("invalid config option: \"{}\"", name));
 
     }
 
-    parse_widgets(config);
+    auto definitions = widgets
+        | std::views::transform([&](const std::string& name) {
+            if (not widget_definitions.contains(name))
+                throw config_error(std::format("widget \"{}\" has not been defined.", name));
+            return widget_definitions[name];
+        })
+        | std::ranges::to<std::vector<widget_definition>>();
+
+    config.used_widgets = parse_widgets(definitions);
 
     return config;
 }

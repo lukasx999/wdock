@@ -37,17 +37,7 @@ struct config {
 
     };
 
-    struct widget_definition {
-        using properties = std::unordered_map<std::string, std::vector<kdl::Value>>;
-        std::string preset;
-        properties props;
-    };
-
     window window;
-
-    std::vector<std::string> widgets;
-    std::unordered_map<std::string, widget_definition> widget_definitions;
-
     std::vector<std::unique_ptr<widgets::widget>> used_widgets;
 
 };
