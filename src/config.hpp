@@ -44,11 +44,11 @@ struct config {
     };
 
     window window;
+
     std::vector<std::string> widgets;
     std::unordered_map<std::string, widget_definition> widget_definitions;
 
-    // TODO:
-    // std::vector<std::unique_ptr<widgets::widget>> used_widgets;
+    std::vector<std::unique_ptr<widgets::widget>> used_widgets;
 
 };
 
