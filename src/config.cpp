@@ -199,6 +199,22 @@ namespace {
 
         return std::make_unique<widgets::button>(*label, *on_click);
     }
+ [[nodiscard]] auto parse_widget_custom(const widget_definition::properties& props) -> std::unique_ptr<widgets::custom> {
+
+        std::optional<std::string> command;
+
+        for (auto& [name, values] : props) {
+            if (name == "command")
+                command = string_from_u8(values.front().as<std::u8string>());
+            else
+                throw config_error("property \"{}\" does not exist in widget \"custom\".", name);
+        }
+
+        if (!command)
+            throw config_error("property \"command\" in widget preset \"custom\" does not have a default value.");
+
+        return std::make_unique<widgets::custom>(*command);
+    }
 
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
         std::vector<std::unique_ptr<widget>> widgets;
@@ -216,6 +232,9 @@ namespace {
 
             else if (preset == "button")
                 widgets.push_back(parse_widget_button(props));
+
+            else if (preset == "custom")
+                widgets.push_back(parse_widget_custom(props));
 
             else
                 throw config_error("widget preset \"{}\" does not exist.", preset);
@@ -245,9 +264,9 @@ config parse_config(const std::filesystem::path& config_path) {
             // TODO: check for multiple definitions
             config.window = parse_window(node);
 
-        else if (name == "widgets") {
+        else if (name == "declare-widgets") {
             if (not used_widgets.empty())
-                throw config_error("there may only be one \"widgets\" definition.");
+                throw config_error("there may only be one \"declare-widgets\" definition.");
 
             used_widgets = parse_widgets(node);
 

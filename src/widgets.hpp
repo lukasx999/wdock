@@ -3,7 +3,7 @@
 #include <chrono>
 #include <filesystem>
 #include <stdexcept>
-#include <string_view>
+#include <cstdio>
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
@@ -17,6 +17,11 @@
 
 struct widget_error : std::runtime_error {
     using std::runtime_error::runtime_error;
+
+    template <typename... Args>
+    widget_error(std::format_string<Args...> fmt, Args... args)
+    : widget_error(std::vformat(fmt.get(), std::make_format_args(args...)))
+    { }
 };
 
 class widget {
@@ -33,16 +38,33 @@ namespace widgets {
 
     class custom : public widget {
         public:
-        explicit custom(std::string_view command)
-        : m_command(command)
+        explicit custom(std::string command)
+        : m_command(std::move(command))
         { }
 
         void draw() const override {
-            // TODO: run the shell command and display its output
+            FILE* file = popen(m_command.c_str(), "r");
+            if (file == nullptr)
+                throw widget_error("error executing command: \"{}\"", m_command);
+
+            std::string buf;
+
+            char c;
+            while ((c = fgetc(file)) != EOF) {
+                buf += c;
+            }
+
+            // TODO: check for exit code
+            if (not feof(file))
+                throw widget_error("error reading output from command: \"{}\"", m_command);
+
+            ImGui::TextUnformatted(buf.c_str());
+
+            assert(pclose(file) != -1);
         }
 
         private:
-        const std::string_view m_command;
+        const std::string m_command;
 
     };
 
