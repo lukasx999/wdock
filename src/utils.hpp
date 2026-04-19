@@ -12,7 +12,7 @@ class string_switch {
     : m_string(std::move(string))
     { }
 
-    constexpr string_switch& with(std::string_view query, T value) {
+    constexpr string_switch& match(std::string_view query, T value) {
         if (m_string == query)
             m_value = std::move(value);
 
@@ -26,6 +26,14 @@ class string_switch {
         return *this;
     }
 
+    constexpr string_switch& if_empty(std::invocable auto fn) {
+        if (!m_value)
+            fn();
+
+        return *this;
+    }
+
+    // throws std::bad_optional_access if there is no matched value.
     [[nodiscard]] constexpr T done() const {
         return *m_value;
     }
@@ -39,16 +47,16 @@ class string_switch {
 consteval void test_string_switch() {
 
     constexpr int a = string_switch<int>("bar")
-        .with("foo", 1)
-        .with("bar", 2)
-        .with("baz", 3)
+        .match("foo", 1)
+        .match("bar", 2)
+        .match("baz", 3)
         .done();
     static_assert(a == 2);
 
     constexpr int b = string_switch<int>("qux")
-        .with("foo", 1)
-        .with("bar", 2)
-        .with("baz", 3)
+        .match("foo", 1)
+        .match("bar", 2)
+        .match("baz", 3)
         .catchall(45)
         .done();
     static_assert(b == 45);

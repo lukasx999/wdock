@@ -2,6 +2,7 @@
 #include <ranges>
 
 #include "config.hpp"
+#include "utils.hpp"
 
 namespace {
 
@@ -46,20 +47,15 @@ void parse_window(const kdl::Node& node, struct config::window& window) {
                 throw config_error("\"anchor\" value must be of type string.");
             }
 
-            if (anchor == "top")
-                window.anchor = window::anchor::top;
-
-            else if (anchor == "right")
-                window.anchor = window::anchor::right;
-
-            else if (anchor == "bottom")
-                window.anchor = window::anchor::bottom;
-
-            else if (anchor == "left")
-                window.anchor = window::anchor::left;
-
-            else
-                throw config_error(std::format("invalid \"anchor\" value: \"{}\" (must be one of \"top\", \"right\", \"bottom\" or \"left\" )", anchor));
+            window.anchor = string_switch<window::anchor>(anchor)
+                .match("top",    window::anchor::top)
+                .match("right",  window::anchor::right)
+                .match("bottom", window::anchor::bottom)
+                .match("left",   window::anchor::left)
+                .if_empty([&] {
+                    throw config_error(std::format("invalid \"anchor\" value: \"{}\" (must be one of \"top\", \"right\", \"bottom\" or \"left\" )", anchor));
+                })
+                .done();
 
         } else if (name == "layer") {
             auto layer = args[0].as<std::u8string>();
