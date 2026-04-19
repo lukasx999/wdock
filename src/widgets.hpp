@@ -15,20 +15,20 @@
 
 #include "imgui.h"
 
+struct widget_error : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
+class widget {
+    public:
+    virtual ~widget() = default;
+    virtual void draw() const = 0;
+};
+
 namespace widgets {
 
     struct style {
-
-    };
-
-    struct widget_error : std::runtime_error {
-        using std::runtime_error::runtime_error;
-    };
-
-    class widget {
-        public:
-        virtual ~widget() = default;
-        virtual void draw() const = 0;
+        // TODO:
     };
 
     class custom : public widget {

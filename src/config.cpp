@@ -200,24 +200,24 @@ namespace {
         return std::make_unique<widgets::button>(*label, *on_click);
     }
 
-    [[nodiscard]] auto parse_widgets(std::span<widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widgets::widget>> {
-        std::vector<std::unique_ptr<widgets::widget>> widgets;
+    [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
+        std::vector<std::unique_ptr<widget>> widgets;
 
         for (auto& [preset, props] : widget_definitions) {
 
-            if (preset == "datetime") {
+            if (preset == "datetime")
                 widgets.push_back(parse_widget_datetime(props));
 
-            } else if (preset == "image") {
+            else if (preset == "image")
                 widgets.push_back(parse_widget_image(props));
 
-            } else if (preset == "kernel") {
+            else if (preset == "kernel")
                 widgets.push_back(std::make_unique<widgets::kernel>());
 
-            } else if (preset == "button") {
+            else if (preset == "button")
                 widgets.push_back(parse_widget_button(props));
 
-            } else
+            else
                 throw config_error("widget preset \"{}\" does not exist.", preset);
 
         }

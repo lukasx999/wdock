@@ -32,7 +32,7 @@ class application {
     private:
     window m_window;
     ui m_ui;
-    std::vector<std::unique_ptr<widgets::widget>> m_widgets;
+    std::vector<std::unique_ptr<widget>> m_widgets;
 
     void draw() const {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

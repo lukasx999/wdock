@@ -27,7 +27,7 @@ int main() {
         std::println(std::cerr, "failed to open window: {}", error.what());
         return EXIT_FAILURE;
 
-    } catch (const widgets::widget_error& error) {
+    } catch (const widget_error& error) {
         std::println(std::cerr, "failed to add widget: {}", error.what());
         return EXIT_FAILURE;
     }

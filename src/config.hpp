@@ -41,7 +41,7 @@ struct config {
     };
 
     window window;
-    std::vector<std::unique_ptr<widgets::widget>> widgets;
+    std::vector<std::unique_ptr<widget>> widgets;
 
 };
 
