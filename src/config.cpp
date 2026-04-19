@@ -61,22 +61,17 @@ namespace {
                 .done();
 
         } else if (name == "layer") {
-            auto layer = args[0].as<std::u8string>();
+            auto layer = string_from_u8(args[0].as<std::u8string>());
 
-            if (layer == u8"background")
-                window.layer = window::layer::background;
-
-            else if (layer == u8"bottom")
-                window.layer = window::layer::bottom;
-
-            else if (layer == u8"top")
-                window.layer = window::layer::top;
-
-            else if (layer == u8"overlay")
-                window.layer = window::layer::overlay;
-
-            else
-                throw config_error(std::format("invalid \"layer\" value: \"{}\"", string_from_u8(layer)));
+            window.layer = string_switch<window::layer>(layer)
+                .match("background", window::layer::background)
+                .match("bottom",     window::layer::bottom)
+                .match("top",        window::layer::top)
+                .match("overlay",    window::layer::overlay)
+                .if_empty([&] {
+                    throw config_error(std::format("invalid \"layer\" value: \"{}\"", layer));
+                })
+                .done();
 
         } else if (name == "margin") {
             auto& props = child.properties();
