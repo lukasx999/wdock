@@ -13,21 +13,26 @@ struct config_error : std::runtime_error {
 };
 
 struct config {
+    private:
+    template <typename T>
+    using opt = std::optional<T>;
+
+    public:
     struct window {
         struct size {
             int width, height;
         };
-        std::optional<size> size;
-        std::optional<::window::anchor> anchor;
-        std::optional<::window::layer> layer;
-        std::optional<::window::margin> margin;
+        opt<size> size;
+        opt<::window::anchor> anchor;
+        opt<::window::layer> layer;
+        opt<::window::margin> margin;
 
         struct style {
-            std::optional<float> padding;
-            std::optional<float> border_radius;
-            std::optional<float> fontsize;
-            std::optional<std::string> font;
-            std::optional<std::string> background_color;
+            opt<float> padding;
+            opt<float> border_radius;
+            opt<float> fontsize;
+            opt<std::string> font;
+            opt<std::string> background_color;
         } style;
 
     };
