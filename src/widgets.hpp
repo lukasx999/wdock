@@ -76,7 +76,7 @@ namespace widgets {
             int channels;
             unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &channels, 0);
             if (data == nullptr)
-                throw widget_error(std::format("failed to load image at {}", path.c_str()));
+                throw widget_error("failed to load image at {}", path.c_str());
 
             GLenum format = [&] {
                 switch (channels) {
@@ -84,7 +84,7 @@ namespace widgets {
                     case 4: return GL_RGBA;
                     default:
                     stbi_image_free(data);
-                    throw widget_error(std::format("invalid amount of channels ({})", channels));
+                    throw widget_error("invalid amount of channels ({})", channels);
                 }
             }();
 
@@ -175,7 +175,7 @@ namespace widgets {
                 return fmt.str();
 
             } catch (const std::runtime_error& error) {
-                throw widget_error(std::format("invalid time zone: {}", m_timezone));
+                throw widget_error("invalid time zone: {}", m_timezone);
             }
 
         }
