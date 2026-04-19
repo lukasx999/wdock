@@ -252,6 +252,9 @@ namespace {
 // TODO: put all of this stuff into a config_parser class?
 config parse_config(const std::filesystem::path& config_path) {
 
+    if (not std::filesystem::exists(config_path))
+        throw config_error("config file at \"{}\" does not exist.", config_path.c_str());
+
     std::ifstream stream(config_path);
     std::u8string config_src(std::istreambuf_iterator<char>(stream), {});
     auto doc = kdl::parse(config_src);

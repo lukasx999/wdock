@@ -7,8 +7,8 @@
 
 class application {
     public:
-    application(int width, int height)
-    : m_window("wdock", width, height)
+    application()
+    : m_window("wdock", 100, 100)
     , m_ui(m_window.get_wl_display(), m_window.get_wl_egl_window())
     {
         m_window.on_draw([&] {

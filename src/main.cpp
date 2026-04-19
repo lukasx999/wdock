@@ -13,8 +13,10 @@ int main() {
     auto config_path = "config.kdl";
 
     try {
-        application app(100, 100);
+        application app;
 
+        // parse_config() must be called AFTER the application has been constructed, because it
+        // may call widget constructors, which may call into OpenGL functions.
         config config = parse_config(config_path);
         app.load_config(config);
         app.run();
