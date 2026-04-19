@@ -14,7 +14,7 @@ widgets date time kernel img button
 
 define-widget date preset=datetime {
     timezone "Europe/Vienna"
-    format " %d.%m.%Y"
+    format " %d.%m.%Y" // the format string is parsed by std::strftime (https://en.cppreference.com/cpp/chrono/c/strftime)
 }
 
 define-widget time preset=datetime {

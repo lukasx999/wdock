@@ -17,19 +17,7 @@ class application {
     }
 
     void load_config(const config& config) {
-        auto& window = config.window;
-
-        if (window.size)
-            m_window.set_size(window.size->width, window.size->height);
-
-        if (window.anchor)
-            m_window.set_anchor(*window.anchor);
-
-        if (window.layer)
-            m_window.set_layer(*window.layer);
-
-        if (window.margin)
-            m_window.set_margin(*window.margin);
+        load_window_config(config.window);
 
         if (not config.widgets.empty()) {
             m_widgets.clear();
@@ -124,6 +112,20 @@ class application {
 
         }
 
+    }
+
+    void load_window_config(const struct config::window& window) {
+        if (window.size)
+            m_window.set_size(window.size->width, window.size->height);
+
+        if (window.anchor)
+            m_window.set_anchor(*window.anchor);
+
+        if (window.layer)
+            m_window.set_layer(*window.layer);
+
+        if (window.margin)
+            m_window.set_margin(*window.margin);
     }
 
 };
