@@ -100,8 +100,6 @@ class window {
         struct wl_registry*   wl_registry   = nullptr;
         struct wl_compositor* wl_compositor = nullptr;
 
-        struct xdg_wm_base*  xdg_wm_base  = nullptr;
-
         struct zwlr_layer_shell_v1*   zwlr_layer_shell   = nullptr;
         struct zwlr_layer_surface_v1* zwlr_layer_surface = nullptr;
 
@@ -130,12 +128,6 @@ class window {
     static void configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height);
     static void draw_frame(void* data, struct wl_callback* wl_callback, uint32_t callback_data);
     static void configure_toplevel(void* data, struct xdg_toplevel* xdg_toplevel, int32_t width, int32_t height, struct wl_array* states);
-
-    static inline xdg_wm_base_listener m_xdg_wm_base_listener {
-        .ping = []([[maybe_unused]] void* data, struct xdg_wm_base* xdg_wm_base, uint32_t serial) {
-            xdg_wm_base_pong(xdg_wm_base, serial);
-        }
-    };
 
     static inline xdg_toplevel_listener m_xdg_toplevel_listener {
         .configure = configure_toplevel,
