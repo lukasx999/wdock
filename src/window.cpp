@@ -6,9 +6,6 @@
 #define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
 
-// for debugging only
-#undef USE_XDG_TOPLEVEL_ROLE
-
 window::window(const char* title, int width, int height)
 : m_state(std::make_unique<state>())
 {
@@ -26,11 +23,7 @@ window::window(const char* title, int width, int height)
     if (!init_egl(width, height))
         throw window_error("failed to initialize EGL");
 
-    #ifndef USE_XDG_TOPLEVEL_ROLE
     setup_layer_surface(title, width, height);
-    #else
-    setup_toplevel(title);
-    #endif // USE_XDG_TOPLEVEL_ROLE
 
     wl_surface_commit(m_state->wl_surface);
     wl_display_roundtrip(m_state->wl_display);
@@ -151,19 +144,6 @@ bool window::init_egl(int width, int height) {
     gladLoaderLoadGL();
 
     return true;
-}
-
-void window::setup_toplevel(const char* title) {
-
-    xdg_wm_base_add_listener(m_state->xdg_wm_base, &m_xdg_wm_base_listener, nullptr);
-
-    m_state->xdg_surface = xdg_wm_base_get_xdg_surface(m_state->xdg_wm_base, m_state->wl_surface);
-    m_state->xdg_toplevel = xdg_surface_get_toplevel(m_state->xdg_surface);
-    xdg_toplevel_set_title(m_state->xdg_toplevel, title);
-
-    xdg_toplevel_add_listener(m_state->xdg_toplevel, &m_xdg_toplevel_listener, m_state.get());
-    xdg_surface_add_listener(m_state->xdg_surface, &m_xdg_surface_listener, nullptr);
-
 }
 
 void window::setup_layer_surface(const char* title, int width, int height) {

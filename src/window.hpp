@@ -101,8 +101,6 @@ class window {
         struct wl_compositor* wl_compositor = nullptr;
 
         struct xdg_wm_base*  xdg_wm_base  = nullptr;
-        struct xdg_surface*  xdg_surface  = nullptr;
-        struct xdg_toplevel* xdg_toplevel = nullptr;
 
         struct zwlr_layer_shell_v1*   zwlr_layer_shell   = nullptr;
         struct zwlr_layer_surface_v1* zwlr_layer_surface = nullptr;
@@ -127,7 +125,6 @@ class window {
     [[nodiscard]] static zwlr_layer_surface_v1_anchor anchor_to_wlr_anchor(anchor anchor);
     [[nodiscard]] static zwlr_layer_shell_v1_layer layer_to_wlr_layer(layer layer);
     [[nodiscard]] bool init_egl(int width, int height);
-    void setup_toplevel(const char* title);
     void setup_layer_surface(const char* title, int width, int height);
     static void bind_globals(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version);
     static void configure_layer_surface(void* data, struct zwlr_layer_surface_v1* zwlr_layer_surface_v1, uint32_t serial, uint32_t width, uint32_t height);
