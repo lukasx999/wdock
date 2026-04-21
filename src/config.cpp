@@ -108,6 +108,18 @@ namespace {
         return std::make_unique<widgets::custom>(*command);
     }
 
+    [[nodiscard]] auto parse_widget_memory(const widget_definition::properties& props) -> std::unique_ptr<widgets::memory> {
+        static_cast<void>(props);
+
+        // for (auto& [name, values] : props) {
+            // if (name == "...")
+            // else
+            //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
+        // }
+
+        return std::make_unique<widgets::memory>();
+    }
+
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
         std::vector<std::unique_ptr<widget>> widgets;
 
@@ -127,6 +139,9 @@ namespace {
 
             else if (preset == "custom")
                 widgets.push_back(parse_widget_custom(props));
+
+            else if (preset == "memory")
+                widgets.push_back(parse_widget_memory(props));
 
             else
                 throw config_error("widget preset \"{}\" does not exist.", preset);

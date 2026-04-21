@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <print>
 #include <filesystem>
 #include <stdexcept>
 #include <cstdio>
@@ -33,7 +34,12 @@ class widget {
 namespace widgets {
 
     struct style {
-        // TODO:
+        std::string color_text;
+        std::string color_button_active;
+        std::string color_button;
+        std::string color_button_hovered;
+        std::string color_progress_fg;
+        std::string color_progress_bg;
     };
 
     class custom : public widget {
@@ -136,7 +142,8 @@ namespace widgets {
 
             auto& style = ImGui::GetStyle();
             style.FrameRounding = 20;
-            // style.Colors[ImGuiCol_FrameBgActive] = ImVec4(1.0, 1.0, 1.0, 1.0);
+            style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0, 1.0, 1.0, 1.0);
+            style.Colors[ImGuiCol_FrameBg] = ImVec4(1.0, 0.0, 0.0, 1.0);
 
             ImGui::TextUnformatted(fmt.c_str());
             ImGui::SameLine();
@@ -154,6 +161,9 @@ namespace widgets {
         { }
 
         void draw() const override {
+            auto& style = ImGui::GetStyle();
+            style.Colors[ImGuiCol_Text] = ImVec4(0, 0, 1, 1);
+
             auto time = get_formatted_time();
             ImGui::TextUnformatted(time.c_str());
         }
@@ -202,6 +212,12 @@ namespace widgets {
         { }
 
         void draw() const override {
+
+            auto& style = ImGui::GetStyle();
+            style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
+            style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
+            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
+
             if (ImGui::Button(m_label.c_str()))
                 system(m_on_click.c_str());
         }
