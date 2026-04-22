@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <print>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -25,6 +26,13 @@
     FcChar8* file = nullptr;
     if (FcPatternGetString(font, FC_FILE, 0, &file) != FcResultMatch)
         return {};
+
+    double size;
+    if (FcPatternGetDouble(font, FC_SIZE, 0, &size) != FcResultMatch)
+        return {};
+
+    std::println("{}", size);
+
     std::filesystem::path path = reinterpret_cast<const char*>(file);
 
     FcPatternDestroy(font);
