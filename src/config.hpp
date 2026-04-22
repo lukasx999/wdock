@@ -17,27 +17,25 @@ struct config_error : std::runtime_error {
 
 // TODO: set default values in the code or always load a default config first?
 struct config {
-    private:
-    template <typename T> using opt = std::optional<T>;
-
-    public:
     struct window {
         struct size {
-            int width, height;
+            int width = 700;
+            int height = 800;
         };
 
         struct style {
-            opt<float> padding;
-            opt<float> border_radius;
-            opt<float> fontsize;
-            opt<std::string> font;
-            opt<std::string> background_color;
+            float padding = 20.0f;
+            float border_radius = 15.0f;
+            float fontsize = 30.0f;
+            float item_spacing = 10.0f;
+            std::string font = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
+            std::string background_color = "#0000007f";
         };
 
-        opt<size> size;
-        opt<::window::anchor> anchor;
-        opt<::window::layer> layer;
-        opt<::window::margin> margin;
+        size size;
+        ::window::anchor anchor = ::window::anchor::right;
+        ::window::layer layer = ::window::layer::background;
+        ::window::margin margin = { 0, 200, 0, 0 };
         style style;
     };
 

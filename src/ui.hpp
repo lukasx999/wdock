@@ -6,6 +6,8 @@
 
 #include "imgui_impl_wayland.hpp"
 
+#include "config.hpp"
+
 class ui {
     public:
     ui(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
@@ -15,7 +17,6 @@ class ui {
         ImGui_ImplOpenGL3_Init();
 
         configure();
-        set_style();
     }
 
     ~ui() {
@@ -50,17 +51,21 @@ class ui {
         });
     }
 
-    private:
-    void set_style() const {
+    void load_style(struct config::window::style style_config) {
         auto& style = ImGui::GetStyle();
 
-        float padding = 25;
+        float spacing = style_config.item_spacing;
+        style.ItemSpacing = ImVec2(spacing, spacing);
+
+        float padding = style_config.padding;
         style.WindowPadding = ImVec2(padding, padding);
-        style.WindowRounding = 15.0f;
+
+        style.WindowRounding = style_config.border_radius;
         style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
-        style.FontSizeBase = 30.0f;
+        style.FontSizeBase = style_config.fontsize;
     }
 
+    private:
     void with_frame_context(std::invocable auto fn) const {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplWayland_NewFrame();

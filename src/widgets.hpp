@@ -40,6 +40,7 @@ namespace widgets {
         std::string color_button_hovered;
         std::string color_progress_fg;
         std::string color_progress_bg;
+        float frame_padding;
     };
 
     class custom : public widget {
@@ -217,6 +218,7 @@ namespace widgets {
             style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
             style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
             style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
+            style.FramePadding = ImVec2(20, 20);
 
             if (ImGui::Button(m_label.c_str()))
                 system(m_on_click.c_str());

@@ -17,7 +17,14 @@ class application {
     }
 
     void load_config(config& config) {
-        load_window_config(config.window);
+
+        auto& window = config.window;
+        m_window.set_size(window.size.width, window.size.height);
+        m_window.set_anchor(window.anchor);
+        m_window.set_layer(window.layer);
+        m_window.set_margin(window.margin);
+
+        m_ui.load_style(config.window.style);
 
         if (not config.widgets.empty()) {
             m_widgets = std::move(config.widgets);
@@ -44,20 +51,6 @@ class application {
             }
         });
 
-    }
-
-    void load_window_config(const struct config::window& window) {
-        if (window.size)
-            m_window.set_size(window.size->width, window.size->height);
-
-        if (window.anchor)
-            m_window.set_anchor(*window.anchor);
-
-        if (window.layer)
-            m_window.set_layer(*window.layer);
-
-        if (window.margin)
-            m_window.set_margin(*window.margin);
     }
 
 };
