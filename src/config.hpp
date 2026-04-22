@@ -29,6 +29,7 @@ struct config {
             float fontsize = 30.0f;
             float item_spacing = 10.0f;
             std::string font = "JetBrainsMonoNerdFontMono";
+            // TODO: add parsing for css colors
             std::string background_color = "#0000007f";
         };
 

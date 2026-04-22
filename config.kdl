@@ -4,7 +4,7 @@ window {
     anchor right
     layer overlay // https://wayland.app/protocols/wlr-layer-shell-unstable-v1#zwlr_layer_shell_v1:enum:layer
     margin top=0 right=200 bottom=0 left=0
-    font "JetBrainsMonoNerdFontMono"
+    font "JetBrainsMonoNerdFontMono" // this may be a fontconfig-compatible string
     fontsize 30
     background-color "#0000007f"
     border-radius 15
