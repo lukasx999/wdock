@@ -9,7 +9,7 @@ git clone https://github.com/lukasx999/wdock.git
 cd wdock
 cmake -Bbuild
 cmake --build build
-sudo cmake --install .
+sudo cmake --install build
 ```
 
 ## Configuration

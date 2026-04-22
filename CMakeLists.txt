@@ -62,3 +62,8 @@ target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/img
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
 target_include_directories(wdock PRIVATE ${ckdl_SOURCE_DIR}/include/ ${ckdl_SOURCE_DIR}/bindings/cpp/include/)
 target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL::OpenGL OpenGL::EGL kdl kdlpp Fontconfig::Fontconfig)
+
+install(
+TARGETS wdock
+DESTINATION bin
+)
