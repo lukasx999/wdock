@@ -66,7 +66,7 @@ class ui {
         style.FontSizeBase = style_config.fontsize;
 
         const char* font_name = style_config.font.c_str();
-        auto font = get_font_path(font_name);
+        auto font = parse_font_name(font_name);
         if (!font)
             throw config_error("failed to parse font \"{}\"", font_name);
 

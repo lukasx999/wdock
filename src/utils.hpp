@@ -1,15 +1,16 @@
 #pragma once
 
 #include <utility>
-#include <print>
+#include <cassert>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <filesystem>
 
+#include <sys/stat.h>
 #include <fontconfig/fontconfig.h>
 
-[[nodiscard]] inline auto get_font_path(const char* font_name) -> std::optional<std::filesystem::path> {
+[[nodiscard]] inline auto parse_font_name(const char* font_name) -> std::optional<std::filesystem::path> {
 
     FcInit();
     FcConfig* conf = FcInitLoadConfigAndFonts();
@@ -27,12 +28,6 @@
     if (FcPatternGetString(font, FC_FILE, 0, &file) != FcResultMatch)
         return {};
 
-    double size;
-    if (FcPatternGetDouble(font, FC_SIZE, 0, &size) != FcResultMatch)
-        return {};
-
-    std::println("{}", size);
-
     std::filesystem::path path = reinterpret_cast<const char*>(file);
 
     FcPatternDestroy(font);
@@ -40,6 +35,20 @@
     FcConfigDestroy(conf);
     FcFini();
     return path;
+}
+
+[[nodiscard]] inline bool has_file_changed(const std::filesystem::path& path) {
+    static auto prev_last_access = 0;
+
+    struct stat buf;
+    assert(stat(path.c_str(), &buf) == 0);
+    auto last_access = buf.st_atim.tv_nsec;
+
+    bool has_changed = last_access != prev_last_access;
+
+    prev_last_access = last_access;
+
+    return has_changed;
 }
 
 template <typename T>
