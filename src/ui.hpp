@@ -7,6 +7,7 @@
 #include "imgui_impl_wayland.hpp"
 
 #include "config.hpp"
+#include "utils.hpp"
 
 class ui {
     public:
@@ -63,6 +64,15 @@ class ui {
         style.WindowRounding = style_config.border_radius;
         style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
         style.FontSizeBase = style_config.fontsize;
+
+        const char* font_name = style_config.font.c_str();
+        auto font = get_font_path(font_name);
+        if (!font)
+            throw config_error("failed to parse font \"{}\"", font_name);
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.Fonts->ClearFonts();
+        io.Fonts->AddFontFromFileTTF(font->c_str());
     }
 
     private:
@@ -78,9 +88,6 @@ class ui {
     void configure() const {
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;
-
-        auto font_path = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
-        io.Fonts->AddFontFromFileTTF(font_path);
     }
 
 };

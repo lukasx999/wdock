@@ -28,7 +28,7 @@ struct config {
             float border_radius = 15.0f;
             float fontsize = 30.0f;
             float item_spacing = 10.0f;
-            std::string font = "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf";
+            std::string font = "JetBrainsMonoNerdFontMono";
             std::string background_color = "#0000007f";
         };
 

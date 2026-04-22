@@ -4,6 +4,35 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <filesystem>
+
+#include <fontconfig/fontconfig.h>
+
+[[nodiscard]] inline auto get_font_path(const char* font_name) -> std::optional<std::filesystem::path> {
+
+    FcInit();
+    FcConfig* conf = FcInitLoadConfigAndFonts();
+    FcPattern* pattern = FcNameParse(reinterpret_cast<const FcChar8*>(font_name));
+    if (pattern == nullptr) return {};
+
+    FcConfigSubstitute(conf, pattern, FcMatchPattern);
+    FcDefaultSubstitute(pattern);
+
+    FcResult result;
+   	FcPattern* font = FcFontMatch(conf, pattern, &result);
+    if (font == nullptr) return {};
+
+    FcChar8* file = nullptr;
+    if (FcPatternGetString(font, FC_FILE, 0, &file) != FcResultMatch)
+        return {};
+    std::filesystem::path path = reinterpret_cast<const char*>(file);
+
+    FcPatternDestroy(font);
+    FcPatternDestroy(pattern);
+    FcConfigDestroy(conf);
+    FcFini();
+    return path;
+}
 
 template <typename T>
 class string_switch {

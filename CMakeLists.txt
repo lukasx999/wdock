@@ -12,7 +12,8 @@ Include(FetchContent)
 FetchContent_Declare(ckdl GIT_REPOSITORY https://github.com/tjol/ckdl.git GIT_TAG 1.0)
 FetchContent_MakeAvailable(ckdl)
 
-find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL)
+find_package(Fontconfig REQUIRED)
 
 file(GLOB IMGUI_CORE_SRC deps/imgui/*.cpp)
 list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC}
@@ -60,4 +61,4 @@ target_compile_options(wdock PRIVATE -ggdb -Wall -Wextra -pedantic)
 target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/imgui/backends/ deps/imgui/misc/cpp/ deps/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
 target_include_directories(wdock PRIVATE ${ckdl_SOURCE_DIR}/include/ ${ckdl_SOURCE_DIR}/bindings/cpp/include/)
-target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL EGL kdl kdlpp)
+target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL::OpenGL OpenGL::EGL kdl kdlpp Fontconfig::Fontconfig)
