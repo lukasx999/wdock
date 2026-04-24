@@ -57,7 +57,12 @@ add_subdirectory(src)
 
 # target_compile_options(wdock PRIVATE -fsanitize=address,undefined -ggdb -Wall -Wextra -pedantic)
 # target_link_options(wdock PRIVATE -fsanitize=address,undefined)
-target_compile_options(wdock PRIVATE -ggdb -Wall -Wextra -pedantic)
+
+target_compile_options(wdock PRIVATE -fsanitize=thread,undefined -ggdb -Wall -Wextra -pedantic)
+target_link_options(wdock PRIVATE -fsanitize=thread,undefined)
+
+# target_compile_options(wdock PRIVATE -ggdb -Wall -Wextra -pedantic)
+
 target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/imgui/backends/ deps/imgui/misc/cpp/ deps/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
 target_include_directories(wdock PRIVATE ${ckdl_SOURCE_DIR}/include/ ${ckdl_SOURCE_DIR}/bindings/cpp/include/)
