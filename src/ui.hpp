@@ -52,7 +52,7 @@ class ui {
         });
     }
 
-    void load_style(struct config::window::style style_config) {
+    void load_style(const struct config::window::style& style_config) {
         auto& style = ImGui::GetStyle();
 
         float spacing = style_config.item_spacing;

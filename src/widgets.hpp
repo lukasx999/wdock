@@ -41,7 +41,21 @@ namespace widgets {
         std::string color_progress_fg;
         std::string color_progress_bg;
         float frame_padding;
+        float frame_rounding;
     };
+
+    inline void apply_style(const style& style_config) {
+        auto& style = ImGui::GetStyle();
+
+        style.FrameRounding = style_config.frame_rounding;
+        style.FramePadding = ImVec2(style_config.frame_padding, style_config.frame_padding);
+        style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0, 1.0, 1.0, 1.0);
+        style.Colors[ImGuiCol_FrameBg] = ImVec4(1.0, 0.0, 0.0, 1.0);
+        style.Colors[ImGuiCol_Text] = ImVec4(0, 0, 1, 1);
+        style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
+        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
+        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
+    }
 
     class custom : public widget {
         public:
@@ -141,11 +155,6 @@ namespace widgets {
             auto fmt = std::format("{}Gib/{}Gib", used, total);
             float frac = static_cast<float>(used) / total;
 
-            auto& style = ImGui::GetStyle();
-            style.FrameRounding = 20;
-            style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0, 1.0, 1.0, 1.0);
-            style.Colors[ImGuiCol_FrameBg] = ImVec4(1.0, 0.0, 0.0, 1.0);
-
             ImGui::TextUnformatted(fmt.c_str());
             ImGui::SameLine();
             ImGui::ProgressBar(frac);
@@ -162,9 +171,6 @@ namespace widgets {
         { }
 
         void draw() const override {
-            auto& style = ImGui::GetStyle();
-            style.Colors[ImGuiCol_Text] = ImVec4(0, 0, 1, 1);
-
             auto time = get_formatted_time();
             ImGui::TextUnformatted(time.c_str());
         }
@@ -213,13 +219,6 @@ namespace widgets {
         { }
 
         void draw() const override {
-
-            auto& style = ImGui::GetStyle();
-            style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
-            style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
-            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
-            style.FramePadding = ImVec2(20, 20);
-
             if (ImGui::Button(m_label.c_str()))
                 system(m_on_click.c_str());
         }

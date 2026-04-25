@@ -9,7 +9,7 @@
 #include "window.hpp"
 #include "config.hpp"
 
-int main() {
+int main2() {
     window a("a", 500, 500);
     window b("b", 500, 500);
 
@@ -40,7 +40,7 @@ int main() {
     return 0;
 }
 
-int main2() {
+int main() {
 
     auto config_path = "config.kdl";
 
