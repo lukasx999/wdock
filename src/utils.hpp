@@ -7,8 +7,22 @@
 #include <string_view>
 #include <filesystem>
 
-#include <sys/stat.h>
 #include <fontconfig/fontconfig.h>
+#include <sys/stat.h>
+
+[[nodiscard]] inline bool has_file_changed(const std::filesystem::path& path) {
+    static auto prev_last_access = 0;
+
+    struct stat buf;
+    assert(stat(path.c_str(), &buf) == 0);
+    auto last_access = buf.st_atim.tv_nsec;
+
+    bool has_changed = last_access != prev_last_access;
+
+    prev_last_access = last_access;
+
+    return has_changed;
+}
 
 [[nodiscard]] inline auto parse_font_name(const char* font_name) -> std::optional<std::filesystem::path> {
 
@@ -35,20 +49,6 @@
     FcConfigDestroy(conf);
     FcFini();
     return path;
-}
-
-[[nodiscard]] inline bool has_file_changed(const std::filesystem::path& path) {
-    static auto prev_last_access = 0;
-
-    struct stat buf;
-    assert(stat(path.c_str(), &buf) == 0);
-    auto last_access = buf.st_atim.tv_nsec;
-
-    bool has_changed = last_access != prev_last_access;
-
-    prev_last_access = last_access;
-
-    return has_changed;
 }
 
 template <typename T>

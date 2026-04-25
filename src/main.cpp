@@ -9,6 +9,8 @@
 #include "window.hpp"
 #include "config.hpp"
 
+#include <sys/inotify.h>
+
 int main2() {
     window a("a", 500, 500);
     window b("b", 500, 500);
@@ -40,7 +42,35 @@ int main2() {
     return 0;
 }
 
+void watch_file(const std::filesystem::path& path) {
+
+    int fd = inotify_init();
+    assert(fd != -1);
+
+    // int wd = inotify_add_watch(fd, path.c_str(), IN_MODIFY);
+    int wd = inotify_add_watch(fd, path.c_str(), IN_ALL_EVENTS);
+    assert(wd != -1);
+
+    constexpr size_t buf_size = sizeof(struct inotify_event);
+    std::array<char, buf_size> buf;
+
+    while (true) {
+        ssize_t bytes_read = read(fd, buf.data(), buf_size);
+        assert(bytes_read != -1);
+        if (bytes_read == 0) continue;
+
+        auto event = reinterpret_cast<struct inotify_event*>(buf.data());
+        // assert(event->mask & IN_MODIFY);
+        std::println("changed.");
+    }
+
+    assert(inotify_rm_watch(fd, wd) != -1);
+    assert(close(fd) != -1);
+}
+
 int main() {
+
+    watch_file("/home/lukas/code/repos/wdock/foo.txt");
 
     auto config_path = "config.kdl";
 
