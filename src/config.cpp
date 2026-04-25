@@ -92,7 +92,7 @@ namespace {
 
         return std::make_unique<widgets::button>(def.style, *label, *on_click);
     }
- [[nodiscard]] auto parse_widget_custom(const widget_definition& def) -> std::unique_ptr<widgets::custom> {
+    [[nodiscard]] auto parse_widget_custom(const widget_definition& def) -> std::unique_ptr<widgets::custom> {
 
         std::optional<std::string> command;
 
@@ -113,9 +113,9 @@ namespace {
         static_cast<void>(def);
 
         // for (auto& [name, values] : props) {
-            // if (name == "...")
-            // else
-            //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
+        // if (name == "...")
+        // else
+        //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
         // }
 
         return std::make_unique<widgets::memory>(def.style);
@@ -127,6 +127,7 @@ namespace {
         for (auto& def : widget_definitions) {
             auto preset = def.preset;
 
+            // TODO: string_switch
             if (preset == "datetime")
                 widgets.push_back(parse_widget_datetime(def));
 
@@ -151,6 +152,37 @@ namespace {
         }
 
         return widgets;
+    }
+
+    [[nodiscard]] struct config::window::style parse_style_window(const kdl::Node& node) {
+
+        struct config::window::style style;
+
+        for (auto& child : node.children()) {
+            auto args = child.args();
+            auto name = string_from_u8(child.name());
+
+            if (name == "font")
+                style.font = string_from_u8(args.front().as<std::u8string>());
+
+            else if (name == "fontsize")
+                style.fontsize = args.front().as<float>();
+
+            else if (name == "background-color")
+                style.background_color = string_from_u8(args.front().as<std::u8string>());
+
+            else if (name == "border-radius")
+                style.border_radius = args.front().as<float>();
+
+            else if (name == "padding")
+                style.padding = args.front().as<float>();
+
+            else
+                throw config_error("invalid window style property \"{}\".", name);
+
+        }
+
+        return style;
     }
 
     [[nodiscard]] struct config::window parse_window(const kdl::Node& node) {
@@ -214,20 +246,8 @@ namespace {
                 int left   = props.at(u8"left").as<int>();
                 window.margin = { top, right, bottom, left };
 
-            } else if (name == "font") {
-                window.style.font = string_from_u8(args[0].as<std::u8string>());
-
-            } else if (name == "fontsize") {
-                window.style.fontsize = args[0].as<float>();
-
-            } else if (name == "background-color") {
-                window.style.background_color = string_from_u8(args[0].as<std::u8string>());
-
-            } else if (name == "border-radius") {
-                window.style.border_radius = args[0].as<float>();
-
-            } else if (name == "padding") {
-                window.style.padding = args[0].as<float>();
+            } else if (name == "style") {
+                window.style = parse_style_window(child);
 
             } else
                 throw config_error("invalid window option \"{}\"", name);
@@ -237,17 +257,18 @@ namespace {
         return window;
     }
 
-    [[nodiscard]] widget_style parse_widget_style(const kdl::Node& node) {
+    [[nodiscard]] widget_style parse_style_widget(const kdl::Node& node) {
         widget_style style;
 
-        for (auto& node : node.children()) {
-            auto name = string_from_u8(node.name());
+        for (auto& child : node.children()) {
+            auto args = child.args();
+            auto name = string_from_u8(child.name());
 
             if (name == "frame_padding")
-                style.frame_padding = node.args()[0].as<float>();
+                style.frame_padding = args.front().as<float>();
 
             else if (name == "frame_rounding")
-                style.frame_rounding = node.args()[0].as<float>();
+                style.frame_rounding = args.front().as<float>();
 
             else
                 throw config_error("unknown style property \"{}\"", name);
@@ -272,7 +293,7 @@ namespace {
 
         for (auto& child : node.children()) {
             if (child.name() == u8"style")
-                def.style = parse_widget_style(child);
+                def.style = parse_style_widget(child);
             else
                 def.props[string_from_u8(child.name())] = child.args();
         }
