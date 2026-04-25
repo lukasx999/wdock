@@ -25,5 +25,5 @@ I do not intend do add support for X11, but I suppose that porting wdock to X11 
 
 ### What systems does this work on? Why doesn't it work on mine?
 
-wdock should work on all Wayland compositors implementing the `wlr_layer_shell` protocol, which is most of them, except most notably, [GNOME](https://gitlab.gnome.org/GNOME/mutter/-/issues/973).
+wdock should work on all Wayland compositors implementing the [wlr_layer_shell](https://wayland.app/protocols/wlr-layer-shell-unstable-v1) protocol, which is most of them, except most notably, [GNOME](https://gitlab.gnome.org/GNOME/mutter/-/issues/973).
 Here is a complete [list](https://wayland.app/protocols/wlr-layer-shell-unstable-v1#compositor-support).
