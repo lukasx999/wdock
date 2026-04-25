@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <print>
 #include <filesystem>
 #include <stdexcept>
 #include <cstdio>
@@ -11,7 +10,6 @@
 #include <ctime>
 
 #include <stb_image.h>
-
 #include <glad/gl.h>
 
 #include "imgui.h"
@@ -44,10 +42,14 @@ class widget {
 
     virtual ~widget() = default;
 
-    // TODO: nvi pattern?
-    virtual void draw() const = 0;
+    void draw() const {
+        apply_style();
+        on_draw();
+    }
 
     protected:
+    virtual void on_draw() const { };
+
     void apply_style() const {
         auto& style = ImGui::GetStyle();
 
@@ -63,6 +65,7 @@ class widget {
 
     private:
     const widget_style m_style;
+
 };
 
 namespace widgets {
@@ -75,9 +78,7 @@ namespace widgets {
         , m_command(std::move(command))
         { }
 
-        void draw() const override {
-            apply_style();
-
+        void on_draw() const override {
             FILE* file = popen(m_command.c_str(), "r");
             if (file == nullptr)
                 throw widget_error("error executing command: \"{}\"", m_command);
@@ -143,8 +144,7 @@ namespace widgets {
         image& operator=(const image&) = delete;
         image& operator=(image&&) = delete;
 
-        void draw() const override {
-            apply_style();
+        void on_draw() const override {
             ImVec2 size(m_width * m_scaling, m_height * m_scaling);
             ImGui::Image(m_texture_id, size);
         }
@@ -163,9 +163,7 @@ namespace widgets {
         : widget(style)
         { }
 
-        void draw() const override {
-            apply_style();
-
+        void on_draw() const {
             struct sysinfo buf{};
             assert(sysinfo(&buf) == 0);
             // TODO: get this right
@@ -191,8 +189,7 @@ namespace widgets {
         , m_format(std::move(format))
         { }
 
-        void draw() const override {
-            apply_style();
+        void on_draw() const {
             auto time = get_formatted_time();
             ImGui::TextUnformatted(time.c_str());
         }
@@ -227,9 +224,7 @@ namespace widgets {
         : widget(style)
         { }
 
-        void draw() const override {
-            apply_style();
-
+        void on_draw() const {
             struct utsname buf;
             assert(uname(&buf) == 0); auto fmt = std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
             ImGui::Text("%s", fmt.c_str());
@@ -245,9 +240,7 @@ namespace widgets {
         , m_on_click(std::move(on_click))
         { }
 
-        void draw() const override {
-            apply_style();
-
+        void on_draw() const {
             if (ImGui::Button(m_label.c_str()))
                 system(m_on_click.c_str());
         }
