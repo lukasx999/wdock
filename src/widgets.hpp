@@ -25,45 +25,59 @@ struct widget_error : std::runtime_error {
     { }
 };
 
+struct widget_style {
+    std::string color_text;
+    std::string color_button_active;
+    std::string color_button;
+    std::string color_button_hovered;
+    std::string color_progress_fg;
+    std::string color_progress_bg;
+    float frame_padding = 0;
+    float frame_rounding = 0;
+};
+
 class widget {
     public:
+    explicit widget(widget_style style)
+    : m_style(style)
+    { }
+
     virtual ~widget() = default;
+
+    // TODO: nvi pattern?
     virtual void draw() const = 0;
+
+    protected:
+    void apply_style() const {
+        auto& style = ImGui::GetStyle();
+
+        style.FrameRounding = m_style.frame_rounding;
+        style.FramePadding = ImVec2(m_style.frame_padding, m_style.frame_padding);
+        // style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0, 1.0, 1.0, 1.0);
+        // style.Colors[ImGuiCol_FrameBg] = ImVec4(1.0, 0.0, 0.0, 1.0);
+        // style.Colors[ImGuiCol_Text] = ImVec4(0, 0, 1, 1);
+        // style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
+        // style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
+        // style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
+    }
+
+    private:
+    const widget_style m_style;
 };
 
 namespace widgets {
 
-    struct style {
-        std::string color_text;
-        std::string color_button_active;
-        std::string color_button;
-        std::string color_button_hovered;
-        std::string color_progress_fg;
-        std::string color_progress_bg;
-        float frame_padding;
-        float frame_rounding;
-    };
-
-    inline void apply_style(const style& style_config) {
-        auto& style = ImGui::GetStyle();
-
-        style.FrameRounding = style_config.frame_rounding;
-        style.FramePadding = ImVec2(style_config.frame_padding, style_config.frame_padding);
-        style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0, 1.0, 1.0, 1.0);
-        style.Colors[ImGuiCol_FrameBg] = ImVec4(1.0, 0.0, 0.0, 1.0);
-        style.Colors[ImGuiCol_Text] = ImVec4(0, 0, 1, 1);
-        style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
-        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
-        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
-    }
 
     class custom : public widget {
         public:
-        explicit custom(std::string command)
-        : m_command(std::move(command))
+        custom(widget_style style, std::string command)
+        : widget(style)
+        , m_command(std::move(command))
         { }
 
         void draw() const override {
+            apply_style();
+
             FILE* file = popen(m_command.c_str(), "r");
             if (file == nullptr)
                 throw widget_error("error executing command: \"{}\"", m_command);
@@ -91,8 +105,9 @@ namespace widgets {
 
     class image : public widget {
         public:
-        image(const std::filesystem::path& path, float scaling)
-        : m_scaling(scaling)
+        image(widget_style style, const std::filesystem::path& path, float scaling)
+        : widget(style)
+        , m_scaling(scaling)
         {
             int channels;
             unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &channels, 0);
@@ -129,6 +144,7 @@ namespace widgets {
         image& operator=(image&&) = delete;
 
         void draw() const override {
+            apply_style();
             ImVec2 size(m_width * m_scaling, m_height * m_scaling);
             ImGui::Image(m_texture_id, size);
         }
@@ -143,9 +159,13 @@ namespace widgets {
 
     class memory : public widget {
         public:
-        memory() = default;
+        explicit memory(widget_style style)
+        : widget(style)
+        { }
 
         void draw() const override {
+            apply_style();
+
             struct sysinfo buf{};
             assert(sysinfo(&buf) == 0);
             // TODO: get this right
@@ -165,12 +185,14 @@ namespace widgets {
 
     class datetime : public widget {
         public:
-        datetime(std::string timezone, std::string format)
-        : m_timezone(std::move(timezone))
+        datetime(widget_style style, std::string timezone, std::string format)
+        : widget(style)
+        , m_timezone(std::move(timezone))
         , m_format(std::move(format))
         { }
 
         void draw() const override {
+            apply_style();
             auto time = get_formatted_time();
             ImGui::TextUnformatted(time.c_str());
         }
@@ -201,9 +223,13 @@ namespace widgets {
 
     class kernel : public widget {
         public:
-        kernel() = default;
+        explicit kernel(widget_style style)
+        : widget(style)
+        { }
 
         void draw() const override {
+            apply_style();
+
             struct utsname buf;
             assert(uname(&buf) == 0); auto fmt = std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
             ImGui::Text("%s", fmt.c_str());
@@ -213,12 +239,15 @@ namespace widgets {
 
     class button : public widget {
         public:
-        button(std::string label, std::string on_click)
-        : m_label(std::move(label))
+        button(widget_style style, std::string label, std::string on_click)
+        : widget(style)
+        , m_label(std::move(label))
         , m_on_click(std::move(on_click))
         { }
 
         void draw() const override {
+            apply_style();
+
             if (ImGui::Button(m_label.c_str()))
                 system(m_on_click.c_str());
         }

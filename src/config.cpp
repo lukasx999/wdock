@@ -16,18 +16,19 @@ namespace {
         using properties = std::unordered_map<std::string, std::vector<kdl::Value>>;
         std::string preset;
         properties props;
+        widget_style style;
     };
 
     [[nodiscard]] std::string string_from_u8(const std::u8string& str) {
         return { str.begin(), str.end() };
     }
 
-    [[nodiscard]] auto parse_widget_datetime(const widget_definition::properties& props) -> std::unique_ptr<widgets::datetime> {
+    [[nodiscard]] auto parse_widget_datetime(const widget_definition& def) -> std::unique_ptr<widgets::datetime> {
 
         std::string timezone = "Europe/Vienna";
         std::string format = "%d.%m.%Y";
 
-        for (auto& [name, values] : props) {
+        for (auto& [name, values] : def.props) {
 
             if (name == "timezone")
                 timezone = string_from_u8(values.front().as<std::u8string>());
@@ -39,15 +40,15 @@ namespace {
                 throw config_error("property \"{}\" does not exist in widget \"datetime\".", name);
         }
 
-        return std::make_unique<widgets::datetime>(std::move(timezone), std::move(format));
+        return std::make_unique<widgets::datetime>(def.style, std::move(timezone), std::move(format));
     }
 
-    [[nodiscard]] auto parse_widget_image(const widget_definition::properties& props) -> std::unique_ptr<widgets::image> {
+    [[nodiscard]] auto parse_widget_image(const widget_definition& def) -> std::unique_ptr<widgets::image> {
 
         std::optional<std::string> path;
         float scaling = 1.0f;
 
-        for (auto& [name, values] : props) {
+        for (auto& [name, values] : def.props) {
 
             if (name == "path")
                 path = string_from_u8(values.front().as<std::u8string>());
@@ -63,15 +64,15 @@ namespace {
         if (!path)
             throw config_error("property \"path\" in widget preset \"image\" does not have a default value.");
 
-        return std::make_unique<widgets::image>(*path, scaling);
+        return std::make_unique<widgets::image>(def.style, *path, scaling);
     }
 
-    [[nodiscard]] auto parse_widget_button(const widget_definition::properties& props) -> std::unique_ptr<widgets::button> {
+    [[nodiscard]] auto parse_widget_button(const widget_definition& def) -> std::unique_ptr<widgets::button> {
 
         std::optional<std::string> label;
         std::optional<std::string> on_click;
 
-        for (auto& [name, values] : props) {
+        for (auto& [name, values] : def.props) {
             if (name == "label")
                 label = string_from_u8(values.front().as<std::u8string>());
 
@@ -89,13 +90,13 @@ namespace {
         if (!on_click)
             throw config_error("property \"on_click\" in widget preset \"button\" does not have a default value.");
 
-        return std::make_unique<widgets::button>(*label, *on_click);
+        return std::make_unique<widgets::button>(def.style, *label, *on_click);
     }
- [[nodiscard]] auto parse_widget_custom(const widget_definition::properties& props) -> std::unique_ptr<widgets::custom> {
+ [[nodiscard]] auto parse_widget_custom(const widget_definition& def) -> std::unique_ptr<widgets::custom> {
 
         std::optional<std::string> command;
 
-        for (auto& [name, values] : props) {
+        for (auto& [name, values] : def.props) {
             if (name == "command")
                 command = string_from_u8(values.front().as<std::u8string>());
             else
@@ -105,11 +106,11 @@ namespace {
         if (!command)
             throw config_error("property \"command\" in widget preset \"custom\" does not have a default value.");
 
-        return std::make_unique<widgets::custom>(*command);
+        return std::make_unique<widgets::custom>(def.style, *command);
     }
 
-    [[nodiscard]] auto parse_widget_memory(const widget_definition::properties& props) -> std::unique_ptr<widgets::memory> {
-        static_cast<void>(props);
+    [[nodiscard]] auto parse_widget_memory(const widget_definition& def) -> std::unique_ptr<widgets::memory> {
+        static_cast<void>(def);
 
         // for (auto& [name, values] : props) {
             // if (name == "...")
@@ -117,31 +118,32 @@ namespace {
             //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
         // }
 
-        return std::make_unique<widgets::memory>();
+        return std::make_unique<widgets::memory>(def.style);
     }
 
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
         std::vector<std::unique_ptr<widget>> widgets;
 
-        for (auto& [preset, props] : widget_definitions) {
+        for (auto& def : widget_definitions) {
+            auto preset = def.preset;
 
             if (preset == "datetime")
-                widgets.push_back(parse_widget_datetime(props));
+                widgets.push_back(parse_widget_datetime(def));
 
             else if (preset == "image")
-                widgets.push_back(parse_widget_image(props));
+                widgets.push_back(parse_widget_image(def));
 
             else if (preset == "kernel")
-                widgets.push_back(std::make_unique<widgets::kernel>());
+                widgets.push_back(std::make_unique<widgets::kernel>(def.style));
 
             else if (preset == "button")
-                widgets.push_back(parse_widget_button(props));
+                widgets.push_back(parse_widget_button(def));
 
             else if (preset == "custom")
-                widgets.push_back(parse_widget_custom(props));
+                widgets.push_back(parse_widget_custom(def));
 
             else if (preset == "memory")
-                widgets.push_back(parse_widget_memory(props));
+                widgets.push_back(parse_widget_memory(def));
 
             else
                 throw config_error("widget preset \"{}\" does not exist.", preset);
@@ -235,6 +237,25 @@ namespace {
         return window;
     }
 
+    [[nodiscard]] widget_style parse_widget_style(const kdl::Node& node) {
+        widget_style style;
+
+        for (auto& node : node.children()) {
+            auto name = string_from_u8(node.name());
+
+            if (name == "frame_padding")
+                style.frame_padding = node.args()[0].as<float>();
+
+            else if (name == "frame_rounding")
+                style.frame_rounding = node.args()[0].as<float>();
+
+            else
+                throw config_error("unknown style property \"{}\"", name);
+        }
+
+        return style;
+    }
+
     [[nodiscard]] auto parse_widget_definition(const kdl::Node& node) -> std::pair<std::string, widget_definition> {
         std::string name = string_from_u8(node.args().front().as<std::u8string>());
 
@@ -250,7 +271,10 @@ namespace {
             throw config_error("widget definition must only include a single property called \"preset\"");
 
         for (auto& child : node.children()) {
-            def.props[string_from_u8(child.name())] = child.args();
+            if (child.name() == u8"style")
+                def.style = parse_widget_style(child);
+            else
+                def.props[string_from_u8(child.name())] = child.args();
         }
 
         return { name, def };
