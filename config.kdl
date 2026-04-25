@@ -1,3 +1,33 @@
+/*
+TODO:
+
+define-widget date preset=datetime {
+    style {
+    }
+}
+
+window "foo" {
+    anchor right
+
+    style {
+        fontsize 10
+    }
+
+}
+
+window "bar" {
+    anchor left
+
+    style {
+        fontsize 10
+    }
+
+    widgets date
+
+}
+
+*/
+
 // configure the appearance and behavior of the window
 window {
     size width=700 height=800

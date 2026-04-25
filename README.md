@@ -22,3 +22,8 @@ wdock uses the [KDL](https://kdl.dev/) language for configuration.
 ### What about X11?
 
 I do not intend do add support for X11, but I suppose that porting wdock to X11 would not be very hard, as you can just swap out the wayland initialization code, aswell as the Dear ImGui backend for the corresponding Xlib code. If someone wants to do that, then I'll happily merge the PR.
+
+### What systems does this work on? Why doesn't it work on mine?
+
+wdock should work on all Wayland compositors implementing the `wlr layer shell` protocol, which is most of them, except most notably, [GNOME](https://gitlab.gnome.org/GNOME/mutter/-/issues/973).
+Here is a complete [list](https://wayland.app/protocols/wlr-layer-shell-unstable-v1#compositor-support).
