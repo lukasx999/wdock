@@ -184,7 +184,6 @@ void window::draw_frame(void* data, struct wl_callback* wl_callback, [[maybe_unu
     wl_callback_add_listener(frame_callback, &m_frame_callback_listener, &state);
 
     eglMakeCurrent(state.egl_display, state.egl_surface, state.egl_surface, state.egl_context);
-
     state.draw_callback();
     eglSwapBuffers(state.egl_display, state.egl_surface);
 }
