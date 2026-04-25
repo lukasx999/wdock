@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <functional>
 #include <format>
 #include <print>
 #include <thread>
@@ -42,26 +43,29 @@ int main2() {
     return 0;
 }
 
-void watch_file(const std::filesystem::path& path) {
+void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
 
     int fd = inotify_init();
     assert(fd != -1);
 
-    // int wd = inotify_add_watch(fd, path.c_str(), IN_MODIFY);
-    int wd = inotify_add_watch(fd, path.c_str(), IN_ALL_EVENTS);
+    auto flags = IN_MODIFY;
+
+    int wd = inotify_add_watch(fd, path.c_str(), flags);
     assert(wd != -1);
 
-    constexpr size_t buf_size = sizeof(struct inotify_event);
-    std::array<char, buf_size> buf;
-
     while (true) {
-        ssize_t bytes_read = read(fd, buf.data(), buf_size);
+        struct inotify_event event;
+        ssize_t bytes_read = read(fd, &event, sizeof event);
         assert(bytes_read != -1);
-        if (bytes_read == 0) continue;
+        assert(bytes_read != 0);
 
-        auto event = reinterpret_cast<struct inotify_event*>(buf.data());
-        // assert(event->mask & IN_MODIFY);
-        std::println("changed.");
+        if (event.mask & IN_IGNORED) {
+            wd = -1;
+            while (wd == -1)
+                wd = inotify_add_watch(fd, path.c_str(), flags);
+        }
+
+        fn();
     }
 
     assert(inotify_rm_watch(fd, wd) != -1);
@@ -70,12 +74,30 @@ void watch_file(const std::filesystem::path& path) {
 
 int main() {
 
-    watch_file("/home/lukas/code/repos/wdock/foo.txt");
+    // watch_file("/home/lukas/code/repos/wdock/foo.txt", [&] {
+    // });
 
     auto config_path = "config.kdl";
 
     try {
         application app;
+
+        std::jthread watcher_thread([&] {
+            watch_file(config_path, [&] {
+                std::scoped_lock lock(mutex);
+                config config;
+
+                try {
+                    config = parse_config(config_path);
+                } catch (const config_error& error) {
+                    std::println(std::cerr, "failed to reload config: {}", error.what());
+                    return;
+                }
+
+                app.load_config(config);
+                std::println("config was reloaded");
+            });
+        });
 
         // parse_config() must be called AFTER the application has been constructed, because it
         // may call widget constructors, which may call into OpenGL functions.

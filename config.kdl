@@ -39,7 +39,7 @@ window {
         font "JetBrainsMonoNerdFontMono" // this may be a fontconfig-compatible string
         fontsize 30
         background-color "#0000007f"
-        border-radius 15
+        border-radius 30
         padding 20
     }
 }

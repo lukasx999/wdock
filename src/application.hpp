@@ -42,6 +42,7 @@ class application {
     std::vector<std::unique_ptr<widget>> m_widgets;
 
     void draw() const {
+        std::scoped_lock lock(mutex);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 

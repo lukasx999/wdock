@@ -6,9 +6,12 @@
 #include <string>
 #include <string_view>
 #include <filesystem>
+#include <mutex>
 
 #include <fontconfig/fontconfig.h>
 #include <sys/stat.h>
+
+inline std::mutex mutex;
 
 [[nodiscard]] inline bool has_file_changed(const std::filesystem::path& path) {
     static auto prev_last_access = 0;
