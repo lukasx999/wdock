@@ -110,7 +110,6 @@ namespace {
     }
 
     [[nodiscard]] auto parse_widget_memory(const widget_definition& def) -> std::unique_ptr<widgets::memory> {
-        static_cast<void>(def);
 
         // for (auto& [name, values] : props) {
         // if (name == "...")
@@ -119,6 +118,17 @@ namespace {
         // }
 
         return std::make_unique<widgets::memory>(def.style);
+    }
+
+    [[nodiscard]] auto parse_widget_player(const widget_definition& def) -> std::unique_ptr<widgets::player> {
+
+        // for (auto& [name, values] : props) {
+        // if (name == "...")
+        // else
+        //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
+        // }
+
+        return std::make_unique<widgets::player>(def.style);
     }
 
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
@@ -148,6 +158,9 @@ namespace {
 
             else if (preset == "disk")
                 widgets.push_back(std::make_unique<widgets::disk>(def.style));
+
+            else if (preset == "player")
+                widgets.push_back(parse_widget_player(def));
 
             else
                 throw config_error("widget preset \"{}\" does not exist.", preset);

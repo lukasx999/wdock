@@ -2,6 +2,7 @@
 
 #include <print>
 #include <cmath>
+#include <cstring>
 #include <chrono>
 #include <filesystem>
 #include <stdexcept>
@@ -15,6 +16,7 @@
 
 #include <stb_image.h>
 #include <glad/gl.h>
+#include <playerctl/playerctl.h>
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
@@ -286,6 +288,106 @@ namespace widgets {
         private:
         const std::string m_label;
         const std::string m_on_click;
+
+    };
+
+    class player : public widget {
+        public:
+        explicit player(widget_style style)
+        : widget(style)
+        {
+            GError* err = nullptr;
+
+            m_player = playerctl_player_new(nullptr, &err);
+            if (err != nullptr)
+                throw widget_error("failed to create player: \"{}\"", err->message);
+        }
+
+        ~player() {
+            g_object_unref(m_player);
+        }
+
+        player(const player&) = delete;
+        player(player&&) = delete;
+        player& operator=(const player&) = delete;
+        player& operator=(player&&) = delete;
+
+        void on_draw() const override {
+            GError* err = nullptr;
+
+            const char* title = playerctl_player_get_title(m_player, &err);
+            if (err != nullptr) {
+                title = "N/A";
+                g_clear_error(&err);
+            }
+
+            const char* album = playerctl_player_get_album(m_player, &err);
+            if (err != nullptr) {
+                album = "N/A";
+                g_clear_error(&err);
+            }
+
+            const char* artist = playerctl_player_get_artist(m_player, &err);
+            if (err != nullptr) {
+                artist = "N/A";
+                g_clear_error(&err);
+            }
+
+            int64_t position = playerctl_player_get_position(m_player, &err);
+            if (err != nullptr) {
+                position = -1;
+                g_clear_error(&err);
+            }
+
+            const char* length_str = playerctl_player_print_metadata_prop(m_player, "mpris:length", &err);
+            if (err != nullptr) {
+                g_clear_error(&err);
+            }
+
+            int64_t length;
+            std::from_chars<int64_t>(length_str, length_str + std::strlen(length_str), length);
+
+            std::chrono::seconds secs(position);
+
+            // TODO: show art as an image widget
+            // const char* art = playerctl_player_print_metadata_prop(m_player, "mpris:artUrl", &err);
+            // if (err != nullptr) {
+            //     art = nullptr;
+            //     g_clear_error(&err);
+            // }
+
+            g_main_context_iteration(nullptr, false);
+            PlayerctlPlaybackStatus status;
+            g_object_get(m_player, "playback-status", &status, nullptr);
+
+            ImGui::Text("%s - %s - %s", artist, album, title);
+
+            // TODO:
+            // ImGui::TextUnformatted(std::format("{:%M:%S}", secs).c_str());
+            // ImGui::SameLine();
+
+            ImGui::ProgressBar(static_cast<float>(position) / length);
+
+            if (ImGui::Button("prev"))
+                playerctl_player_previous(m_player, &err);
+
+            ImGui::SameLine();
+
+            auto play_text = status == PLAYERCTL_PLAYBACK_STATUS_PLAYING
+                ? "pause"
+                : "play";
+
+            if (ImGui::Button(play_text))
+                playerctl_player_play_pause(m_player, &err);
+
+            ImGui::SameLine();
+            if (ImGui::Button("next"))
+                playerctl_player_next(m_player, &err);
+
+        }
+
+        private:
+        PlayerctlPlayer* m_player;
 
     };
 

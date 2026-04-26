@@ -14,6 +14,9 @@ FetchContent_MakeAvailable(ckdl)
 
 find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL)
 find_package(Fontconfig REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(Playerctl REQUIRED playerctl)
 
 file(GLOB IMGUI_CORE_SRC deps/imgui/*.cpp)
 list(APPEND IMGUI_SOURCES ${IMGUI_CORE_SRC}
@@ -66,7 +69,8 @@ target_link_options(wdock PRIVATE -fsanitize=address,undefined)
 target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/imgui/backends/ deps/imgui/misc/cpp/ deps/)
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
 target_include_directories(wdock PRIVATE ${ckdl_SOURCE_DIR}/include/ ${ckdl_SOURCE_DIR}/bindings/cpp/include/)
-target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL::OpenGL OpenGL::EGL kdl kdlpp Fontconfig::Fontconfig)
+target_include_directories(wdock PRIVATE ${Playerctl_INCLUDE_DIRS})
+target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL::OpenGL OpenGL::EGL kdl kdlpp Fontconfig::Fontconfig ${Playerctl_LIBRARIES})
 
 install(
 TARGETS wdock
