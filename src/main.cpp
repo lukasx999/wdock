@@ -12,7 +12,6 @@
 namespace {
 
     void reload_config(application& app, const std::filesystem::path& config_path) {
-
         std::scoped_lock lock(g_application_lock);
 
         try {
@@ -40,10 +39,8 @@ int main() {
     }
 
     // TODO: stop this thread if an exception is thrown
-    std::jthread config_watcher([&]() {
-        watch_file(config_path, [&] {
-            reload_config(*app, config_path);
-        });
+    std::jthread config_watcher([&] {
+        watch_file(config_path, std::bind(reload_config, std::ref(*app), config_path));
     });
 
     try {
