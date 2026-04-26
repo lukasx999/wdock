@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <print>
 #include <utility>
 #include <cassert>
 #include <optional>
@@ -15,8 +17,8 @@
 inline std::mutex g_application_lock;
 
 // TODO: add some error handling in here?
-/// @brief calls a function whenever a file is modified
-void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
+/// @brief calls a function whenever a file is modified.
+inline void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
 
     // vim will only reliably produce IN_MOVE_SELF events, so we have to catch those
     auto flags = IN_MODIFY | IN_CLOSE_WRITE | IN_MOVE_SELF;

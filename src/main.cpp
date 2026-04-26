@@ -30,24 +30,28 @@ int main() {
 
     auto config_path = "config.kdl";
 
+    std::optional<application> app;
+
     try {
-        application app;
+        app.emplace();
+    } catch (const window_error& error) {
+        std::println(std::cerr, "failed to open window: {}", error.what());
+        return EXIT_FAILURE;
+    }
 
-        // std::jthread config_watcher([&] {
-        //     watch_file(config_path, [&] {
-        //         reload_config(app, config_path);
-        //     });
-        // });
+    // TODO: stop this thread if an exception is thrown
+    std::jthread config_watcher([&]() {
+        watch_file(config_path, [&] {
+            reload_config(*app, config_path);
+        });
+    });
 
-        app.load_config(config_path);
-        app.run();
+    try {
+        app->load_config(config_path);
+        app->run();
 
     } catch (const config_error& error) {
         std::println(std::cerr, "failed to parse config file: {}", error.what());
-        return EXIT_FAILURE;
-
-    } catch (const window_error& error) {
-        std::println(std::cerr, "failed to open window: {}", error.what());
         return EXIT_FAILURE;
 
     } catch (const widget_error& error) {
