@@ -20,20 +20,30 @@ inline std::mutex g_application_lock;
 
 [[nodiscard]] constexpr inline auto parse_color_string(std::string_view string) -> std::optional<ImVec4> {
 
-    if (string.length() != 9) return {};
+    if (string.length() != 1+8 && string.length() != 1+6) return {};
     if (string.at(0) != '#') return {};
 
     uint32_t value = 0;
     auto err = std::from_chars(string.data()+1, string.data()+string.size(), value, 16).ec;
-
     if (err != std::errc{}) return {};
 
-    return ImVec4(
-        (value >> 3*8 & 0xff) / 255.0f,
-        (value >> 2*8 & 0xff) / 255.0f,
-        (value >> 1*8 & 0xff) / 255.0f,
-        (value >> 0*8 & 0xff) / 255.0f
-    );
+    if (string.length() == 1+8)
+        return ImVec4(
+            (value >> 3*8 & 0xff) / 255.0f,
+            (value >> 2*8 & 0xff) / 255.0f,
+            (value >> 1*8 & 0xff) / 255.0f,
+            (value >> 0*8 & 0xff) / 255.0f
+        );
+    else if (string.length() == 1+6)
+        return ImVec4(
+            (value >> 2*8 & 0xff) / 255.0f,
+            (value >> 1*8 & 0xff) / 255.0f,
+            (value >> 0*8 & 0xff) / 255.0f,
+            1.0f
+        );
+    else
+        assert(!"string length should have been checked by now");
+
 }
 
 consteval void test_parse_color_string() {
@@ -51,6 +61,13 @@ consteval void test_parse_color_string() {
     static_assert(b->y == 1);
     static_assert(b->z == 1);
     static_assert(b->w == 1);
+
+    constexpr auto c = parse_color_string("#ffffff");
+    static_assert(c.has_value());
+    static_assert(c->x == 1);
+    static_assert(c->y == 1);
+    static_assert(c->z == 1);
+    static_assert(c->w == 1);
 
 }
 
