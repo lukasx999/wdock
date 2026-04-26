@@ -333,21 +333,23 @@ namespace widgets {
                 g_clear_error(&err);
             }
 
-            int64_t position = playerctl_player_get_position(m_player, &err);
+            int64_t position_micros = playerctl_player_get_position(m_player, &err);
             if (err != nullptr) {
-                position = -1;
+                position_micros = 0;
                 g_clear_error(&err);
             }
 
             const char* length_str = playerctl_player_print_metadata_prop(m_player, "mpris:length", &err);
             if (err != nullptr) {
+                length_str = "0";
                 g_clear_error(&err);
             }
 
-            int64_t length;
-            std::from_chars<int64_t>(length_str, length_str + std::strlen(length_str), length);
+            int64_t length_micros;
+            std::from_chars<int64_t>(length_str, length_str + std::strlen(length_str), length_micros);
 
-            std::chrono::seconds secs(position);
+            std::chrono::microseconds length(length_micros);
+            std::chrono::microseconds position(position_micros);
 
             // TODO: show art as an image widget
             // const char* art = playerctl_player_print_metadata_prop(m_player, "mpris:artUrl", &err);
@@ -362,11 +364,13 @@ namespace widgets {
 
             ImGui::Text("%s - %s - %s", artist, album, title);
 
-            // TODO:
-            // ImGui::TextUnformatted(std::format("{:%M:%S}", secs).c_str());
-            // ImGui::SameLine();
+            ImGui::TextUnformatted(std::format("{:%M}:{:%S}", position, std::chrono::duration_cast<std::chrono::seconds>(position)).c_str());
+            ImGui::SameLine();
 
-            ImGui::ProgressBar(static_cast<float>(position) / length);
+            ImGui::ProgressBar(static_cast<float>(position_micros) / length_micros, ImVec2(0, 0));
+
+            ImGui::SameLine();
+            ImGui::TextUnformatted(std::format("{:%M}:{:%S}", length, std::chrono::duration_cast<std::chrono::seconds>(length)).c_str());
 
             if (ImGui::Button("prev"))
                 playerctl_player_previous(m_player, &err);
