@@ -122,13 +122,21 @@ namespace {
 
     [[nodiscard]] auto parse_widget_player(const widget_definition& def) -> std::unique_ptr<widgets::player> {
 
-        // for (auto& [name, values] : props) {
-        // if (name == "...")
-        // else
-        //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
-        // }
+        std::optional<std::string> player_name;
 
-        return std::make_unique<widgets::player>(def.style);
+        for (auto& [name, values] : def.props) {
+            if (name == "player") {
+                player_name = string_from_u8(values.front().as<std::u8string>());
+
+            } else
+                throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
+        }
+
+        auto player = player_name
+            ? player_name->c_str()
+            : nullptr;
+
+        return std::make_unique<widgets::player>(def.style, player);
     }
 
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {

@@ -293,12 +293,13 @@ namespace widgets {
 
     class player : public widget {
         public:
-        explicit player(widget_style style)
+        /// @param player_name name of the music player, may be null for automatic detection
+        explicit player(widget_style style, const char* player_name)
         : widget(style)
         {
             GError* err = nullptr;
 
-            m_player = playerctl_player_new(nullptr, &err);
+            m_player = playerctl_player_new(player_name, &err);
             if (err != nullptr)
                 throw widget_error("failed to create player: \"{}\"", err->message);
         }
