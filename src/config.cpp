@@ -139,6 +139,19 @@ namespace {
         return std::make_unique<widgets::player>(def.style, player);
     }
 
+    [[nodiscard]] auto parse_widget_disk(const widget_definition& def) -> std::unique_ptr<widgets::disk> {
+        bool show_percentage = false;
+
+        for (auto& [name, values] : def.props) {
+            if (name == "show-percentage")
+                show_percentage = values.front().as<bool>();
+            else
+                throw config_error("property \"{}\" does not exist in widget \"disk\".", name);
+        }
+
+        return std::make_unique<widgets::disk>(def.style, show_percentage);
+    }
+
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
         std::vector<std::unique_ptr<widget>> widgets;
 
@@ -165,7 +178,7 @@ namespace {
                 widgets.push_back(parse_widget_memory(def));
 
             else if (preset == "disk")
-                widgets.push_back(std::make_unique<widgets::disk>(def.style));
+                widgets.push_back(parse_widget_disk(def));
 
             else if (preset == "player")
                 widgets.push_back(parse_widget_player(def));
@@ -331,10 +344,11 @@ namespace {
         | std::ranges::to<std::vector<std::string>>();
     }
 
+
 } // namespace
 
 // TODO: put all of this stuff into a config_parser class?
-config parse_config(const std::filesystem::path& config_path) {
+[[nodiscard]] config parse_config(const std::filesystem::path& config_path) {
 
     if (not std::filesystem::exists(config_path))
         throw config_error("config file at \"{}\" does not exist.", config_path.c_str());
@@ -385,4 +399,5 @@ config parse_config(const std::filesystem::path& config_path) {
     config.widgets = parse_widgets(widgets);
 
     return config;
+
 }

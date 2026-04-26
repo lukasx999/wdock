@@ -33,11 +33,11 @@ int main() {
     try {
         application app;
 
-        std::jthread config_watcher([&] {
-            watch_file(config_path, [&] {
-                reload_config(app, config_path);
-            });
-        });
+        // std::jthread config_watcher([&] {
+        //     watch_file(config_path, [&] {
+        //         reload_config(app, config_path);
+        //     });
+        // });
 
         app.load_config(config_path);
         app.run();

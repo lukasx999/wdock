@@ -91,6 +91,7 @@ define-widget memory preset=memory {
 
 define-widget disk preset=disk {
     format "{used:GiB}GiB/{total:GiB}GiB"
+    show-percentage #false
 }
 
 define-widget player preset=player {

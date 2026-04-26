@@ -190,8 +190,9 @@ namespace widgets {
 
     class disk : public widget {
         public:
-        explicit disk(widget_style style)
+        disk(widget_style style, bool show_percentage)
         : widget(style)
+        , m_show_percentage(show_percentage)
         { }
 
         void on_draw() const override {
@@ -208,8 +209,11 @@ namespace widgets {
 
             ImGui::Text("%dGiB/%dGiB", used, total);
             ImGui::SameLine();
-            ImGui::ProgressBar(static_cast<float>(used) / total);
+            ImGui::ProgressBar(static_cast<float>(used) / total, {0, 0}, m_show_percentage ? nullptr : "");
         }
+
+        private:
+        bool m_show_percentage;
 
     };
 
