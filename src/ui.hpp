@@ -62,7 +62,13 @@ class ui {
         style.WindowPadding = ImVec2(padding, padding);
 
         style.WindowRounding = style_config.border_radius;
-        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.75f);
+
+        auto color_bg = parse_color_string(style_config.background_color);
+        if (not color_bg)
+            throw config_error("failed to parse color \"{}\"", style_config.background_color);
+
+        style.Colors[ImGuiCol_WindowBg] = *color_bg;
+
         style.FontSizeBase = style_config.fontsize;
 
         const char* font_name = style_config.font.c_str();

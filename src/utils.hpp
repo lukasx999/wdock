@@ -14,7 +14,43 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
+#include "imgui.h"
+
 inline std::mutex g_application_lock;
+
+[[nodiscard]] constexpr inline auto parse_color_string(std::string_view string) -> std::optional<ImVec4> {
+    if (string.front() != '#') return {};
+
+    uint32_t value = 0;
+    auto err = std::from_chars(string.data()+1, string.data()+string.size(), value, 16).ec;
+
+    if (err != std::errc{}) return {};
+
+    return ImVec4(
+        (value >> 3*8 & 0xff) / 255.0f,
+        (value >> 2*8 & 0xff) / 255.0f,
+        (value >> 1*8 & 0xff) / 255.0f,
+        (value >> 0*8 & 0xff) / 255.0f
+    );
+}
+
+consteval void test_parse_color_string() {
+
+    constexpr auto a = parse_color_string("#00000000");
+    static_assert(a.has_value());
+    static_assert(a->x == 0);
+    static_assert(a->y == 0);
+    static_assert(a->z == 0);
+    static_assert(a->w == 0);
+
+    constexpr auto b = parse_color_string("#ffffffff");
+    static_assert(b.has_value());
+    static_assert(b->x == 1);
+    static_assert(b->y == 1);
+    static_assert(b->z == 1);
+    static_assert(b->w == 1);
+
+}
 
 // TODO: add some error handling in here?
 /// @brief calls a function whenever a file is modified.
