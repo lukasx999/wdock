@@ -293,8 +293,8 @@ namespace widgets {
 
     class player : public widget {
         public:
-        /// @param player_name name of the music player, may be null for automatic detection
-        explicit player(widget_style style, const char* player_name)
+        /// @param player_name name of the music player, may be nullptr for automatic detection
+        player(widget_style style, const char* player_name)
         : widget(style)
         {
             GError* err = nullptr;

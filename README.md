@@ -5,6 +5,7 @@ a minimal, lightweight desktop dock for wayland.
 ## Build Instructions
 
 ```console
+sudo pacman -S --needed fontconfig playerctl wayland cmake gcc pkg-config
 git clone https://github.com/lukasx999/wdock.git
 cd wdock
 cmake -Bbuild
