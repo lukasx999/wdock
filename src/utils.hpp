@@ -15,6 +15,7 @@
 inline std::mutex g_application_lock;
 
 // TODO: add some error handling in here?
+/// @brief calls a function whenever a file is modified
 void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
 
     // vim will only reliably produce IN_MOVE_SELF events, so we have to catch those

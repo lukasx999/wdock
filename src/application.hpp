@@ -26,9 +26,8 @@ class application {
 
         m_ui.load_style(config.window.style);
 
-        if (not config.widgets.empty()) {
+        if (not config.widgets.empty())
             m_widgets = std::move(config.widgets);
-        }
 
     }
 
