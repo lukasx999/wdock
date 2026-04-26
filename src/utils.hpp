@@ -18,59 +18,6 @@
 
 inline std::mutex g_application_lock;
 
-[[nodiscard]] constexpr inline auto parse_color_string(std::string_view string) -> std::optional<ImVec4> {
-
-    if (string.length() != 1+8 && string.length() != 1+6) return {};
-    if (string.at(0) != '#') return {};
-
-    uint32_t value = 0;
-    auto err = std::from_chars(string.data()+1, string.data()+string.size(), value, 16).ec;
-    if (err != std::errc{}) return {};
-
-    if (string.length() == 1+8)
-        return ImVec4(
-            (value >> 3*8 & 0xff) / 255.0f,
-            (value >> 2*8 & 0xff) / 255.0f,
-            (value >> 1*8 & 0xff) / 255.0f,
-            (value >> 0*8 & 0xff) / 255.0f
-        );
-    else if (string.length() == 1+6)
-        return ImVec4(
-            (value >> 2*8 & 0xff) / 255.0f,
-            (value >> 1*8 & 0xff) / 255.0f,
-            (value >> 0*8 & 0xff) / 255.0f,
-            1.0f
-        );
-    else
-        assert(!"string length should have been checked by now");
-
-}
-
-consteval void test_parse_color_string() {
-
-    constexpr auto a = parse_color_string("#00000000");
-    static_assert(a.has_value());
-    static_assert(a->x == 0);
-    static_assert(a->y == 0);
-    static_assert(a->z == 0);
-    static_assert(a->w == 0);
-
-    constexpr auto b = parse_color_string("#ffffffff");
-    static_assert(b.has_value());
-    static_assert(b->x == 1);
-    static_assert(b->y == 1);
-    static_assert(b->z == 1);
-    static_assert(b->w == 1);
-
-    constexpr auto c = parse_color_string("#ffffff");
-    static_assert(c.has_value());
-    static_assert(c->x == 1);
-    static_assert(c->y == 1);
-    static_assert(c->z == 1);
-    static_assert(c->w == 1);
-
-}
-
 // TODO: add some error handling in here?
 /// @brief calls a function whenever a file is modified.
 inline void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
@@ -137,8 +84,8 @@ inline void watch_file(const std::filesystem::path& path, std::invocable auto fn
 template <typename T>
 class string_switch {
     public:
-    constexpr explicit string_switch(std::string string)
-    : m_string(std::move(string))
+    constexpr explicit string_switch(std::string_view string)
+    : m_string(string)
     { }
 
     constexpr string_switch& match(std::string_view query, T value) {
@@ -167,8 +114,12 @@ class string_switch {
         return *m_value;
     }
 
+    [[nodiscard]] constexpr std::optional<T> maybe_done() const {
+        return m_value;
+    }
+
     private:
-    const std::string m_string;
+    const std::string_view m_string;
     std::optional<T> m_value;
 
 };
@@ -189,5 +140,90 @@ consteval void test_string_switch() {
         .catchall(45)
         .done();
     static_assert(b == 45);
+
+}
+
+[[nodiscard]] constexpr inline auto parse_color_string(std::string_view string) -> std::optional<ImVec4> {
+
+    auto color = string_switch<ImVec4>(string)
+        .match("transparent", ImVec4(0, 0, 0, 0))
+        .match("black", ImVec4(0, 0, 0, 1))
+        .match("white", ImVec4(1, 1, 1, 1))
+        .match("red",   ImVec4(1, 0, 0, 1))
+        .match("green", ImVec4(0, 1, 0, 1))
+        .match("blue",  ImVec4(0, 0, 1, 1))
+        .maybe_done();
+
+    if (color) return *color;
+
+    if (string.length() != 1+8 && string.length() != 1+6) return {};
+    if (string.at(0) != '#') return {};
+
+    uint32_t value = 0;
+    auto err = std::from_chars(string.data()+1, string.data()+string.size(), value, 16).ec;
+    if (err != std::errc{}) return {};
+
+    if (string.length() == 1+8)
+        return ImVec4(
+            (value >> 3*8 & 0xff) / 255.0f,
+            (value >> 2*8 & 0xff) / 255.0f,
+            (value >> 1*8 & 0xff) / 255.0f,
+            (value >> 0*8 & 0xff) / 255.0f
+        );
+    else if (string.length() == 1+6)
+        return ImVec4(
+            (value >> 2*8 & 0xff) / 255.0f,
+            (value >> 1*8 & 0xff) / 255.0f,
+            (value >> 0*8 & 0xff) / 255.0f,
+            1.0f
+        );
+    else
+        assert(!"string length should have been checked by now");
+
+}
+
+consteval void test_parse_color_string() {
+
+    constexpr auto a = parse_color_string("#00000000");
+    static_assert(a.has_value());
+    static_assert(a->x == 0);
+    static_assert(a->y == 0);
+    static_assert(a->z == 0);
+    static_assert(a->w == 0);
+
+    constexpr auto b = parse_color_string("#ffffffff");
+    static_assert(b.has_value());
+    static_assert(b->x == 1);
+    static_assert(b->y == 1);
+    static_assert(b->z == 1);
+    static_assert(b->w == 1);
+
+    constexpr auto c = parse_color_string("#ffffff");
+    static_assert(c.has_value());
+    static_assert(c->x == 1);
+    static_assert(c->y == 1);
+    static_assert(c->z == 1);
+    static_assert(c->w == 1);
+
+    constexpr auto d = parse_color_string("transparent");
+    static_assert(d.has_value());
+    static_assert(d->x == 0);
+    static_assert(d->y == 0);
+    static_assert(d->z == 0);
+    static_assert(d->w == 0);
+
+    constexpr auto e = parse_color_string("red");
+    static_assert(e.has_value());
+    static_assert(e->x == 1);
+    static_assert(e->y == 0);
+    static_assert(e->z == 0);
+    static_assert(e->w == 1);
+
+    constexpr auto f = parse_color_string("white");
+    static_assert(f.has_value());
+    static_assert(f->x == 1);
+    static_assert(f->y == 1);
+    static_assert(f->z == 1);
+    static_assert(f->w == 1);
 
 }

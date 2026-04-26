@@ -47,6 +47,7 @@ window {
 // supported color formats:
 // - rgb: "#ffffff"
 // - rgba: "#ffffffff"
+// - literals: "transparent", "black", "white", "red", "green", "blue", ...
 
 // declare the widgets you are going to use.
 declare-widgets date time system button img memory disk player
