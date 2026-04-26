@@ -12,7 +12,7 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-inline std::mutex g_mutex;
+inline std::mutex g_application_lock;
 
 // TODO: add some error handling in here?
 void watch_file(const std::filesystem::path& path, std::invocable auto fn) {

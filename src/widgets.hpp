@@ -1,18 +1,23 @@
 #pragma once
 
+#include <print>
+#include <cmath>
 #include <chrono>
 #include <filesystem>
 #include <stdexcept>
 #include <cstdio>
+#include <ctime>
 
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
-#include <ctime>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
 
 #include <stb_image.h>
 #include <glad/gl.h>
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 struct widget_error : std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -163,7 +168,7 @@ namespace widgets {
         : widget(style)
         { }
 
-        void on_draw() const {
+        void on_draw() const override {
             struct sysinfo buf{};
             assert(sysinfo(&buf) == 0);
             // TODO: get this right
@@ -181,6 +186,31 @@ namespace widgets {
 
     };
 
+    class disk : public widget {
+        public:
+        explicit disk(widget_style style)
+        : widget(style)
+        { }
+
+        void on_draw() const override {
+            struct statvfs buf;
+            assert(statvfs("/", &buf) == 0);
+
+            auto gibs = 1 / std::pow(2, 30);
+            auto size = buf.f_frsize;
+
+            int total = size * buf.f_blocks * gibs;
+            // int available = size * buf.f_bavail * gibs;
+            int free = size * buf.f_bfree * gibs;
+            int used = total - free;
+
+            ImGui::Text("%dGiB/%dGiB", used, total);
+            ImGui::SameLine();
+            ImGui::ProgressBar(static_cast<float>(used) / total);
+        }
+
+    };
+
     class datetime : public widget {
         public:
         datetime(widget_style style, std::string timezone, std::string format)
@@ -189,7 +219,7 @@ namespace widgets {
         , m_format(std::move(format))
         { }
 
-        void on_draw() const {
+        void on_draw() const override {
             auto time = get_formatted_time();
             ImGui::TextUnformatted(time.c_str());
         }
@@ -218,16 +248,24 @@ namespace widgets {
 
     };
 
-    class kernel : public widget {
+    class system_info : public widget {
         public:
-        explicit kernel(widget_style style)
+        explicit system_info(widget_style style)
         : widget(style)
         { }
 
-        void on_draw() const {
-            struct utsname buf;
-            assert(uname(&buf) == 0); auto fmt = std::format("{} {} {} {}", buf.sysname, buf.nodename, buf.release, buf.machine);
+        void on_draw() const override {
+            struct sysinfo sysinfo_buf;
+            assert(sysinfo(&sysinfo_buf) == 0);
+            std::chrono::seconds uptime(sysinfo_buf.uptime);
+
+            struct utsname uname_buf;
+            assert(uname(&uname_buf) == 0);
+            auto fmt = std::format("{} {} {} {}", uname_buf.sysname, uname_buf.nodename, uname_buf.release, uname_buf.machine);
+
             ImGui::Text("%s", fmt.c_str());
+            ImGui::TextUnformatted(std::format("uptime: {}", uptime).c_str());
+            ImGui::Text("procs: %d", sysinfo_buf.procs);
         }
 
     };
@@ -240,7 +278,7 @@ namespace widgets {
         , m_on_click(std::move(on_click))
         { }
 
-        void on_draw() const {
+        void on_draw() const override {
             if (ImGui::Button(m_label.c_str()))
                 system(m_on_click.c_str());
         }

@@ -18,7 +18,7 @@ int main() {
 
         std::jthread config_watcher([&] {
             watch_file(config_path, [&] {
-                std::scoped_lock lock(g_mutex);
+                std::scoped_lock lock(g_application_lock);
                 config config;
 
                 try {

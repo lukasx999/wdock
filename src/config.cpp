@@ -134,8 +134,8 @@ namespace {
             else if (preset == "image")
                 widgets.push_back(parse_widget_image(def));
 
-            else if (preset == "kernel")
-                widgets.push_back(std::make_unique<widgets::kernel>(def.style));
+            else if (preset == "system")
+                widgets.push_back(std::make_unique<widgets::system_info>(def.style));
 
             else if (preset == "button")
                 widgets.push_back(parse_widget_button(def));
@@ -145,6 +145,9 @@ namespace {
 
             else if (preset == "memory")
                 widgets.push_back(parse_widget_memory(def));
+
+            else if (preset == "disk")
+                widgets.push_back(std::make_unique<widgets::disk>(def.style));
 
             else
                 throw config_error("widget preset \"{}\" does not exist.", preset);
