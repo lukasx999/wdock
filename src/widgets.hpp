@@ -20,6 +20,7 @@
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
+#include "utils.hpp"
 
 struct widget_error : std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -31,14 +32,14 @@ struct widget_error : std::runtime_error {
 };
 
 struct widget_style {
-    std::string color_text;
-    std::string color_button_active;
-    std::string color_button;
-    std::string color_button_hovered;
-    std::string color_progress_fg;
-    std::string color_progress_bg;
-    float frame_padding = 0;
-    float frame_rounding = 0;
+    std::string color_text           = "#ffffffff";
+    std::string color_button_active  = "#A9A9A9ff";
+    std::string color_button         = "#808080ff";
+    std::string color_button_hovered = "#A9A9A9ff";
+    std::string color_progress       = "#A9A9A9ff";
+    std::string color_frame_bg       = "#808080ff";
+    float frame_padding = 5;
+    float frame_rounding = 5;
 };
 
 class widget {
@@ -62,16 +63,28 @@ class widget {
 
         style.FrameRounding = m_style.frame_rounding;
         style.FramePadding = ImVec2(m_style.frame_padding, m_style.frame_padding);
-        // style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0, 1.0, 1.0, 1.0);
-        // style.Colors[ImGuiCol_FrameBg] = ImVec4(1.0, 0.0, 0.0, 1.0);
-        // style.Colors[ImGuiCol_Text] = ImVec4(0, 0, 1, 1);
-        // style.Colors[ImGuiCol_Button] = ImVec4(1.0, 0.0, 0.0, 1.0);
-        // style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0, 0.0, 1.0, 1.0);
-        // style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0, 1.0, 0.0, 1.0);
+
+        set_color(ImGuiCol_Text, m_style.color_text);
+        set_color(ImGuiCol_PlotHistogram, m_style.color_progress);
+        set_color(ImGuiCol_FrameBg, m_style.color_frame_bg);
+        set_color(ImGuiCol_Button, m_style.color_button);
+        set_color(ImGuiCol_ButtonActive, m_style.color_button_active);
+        set_color(ImGuiCol_ButtonHovered, m_style.color_button_hovered);
     }
 
     private:
     const widget_style m_style;
+
+    void set_color(ImGuiCol imgui_color, std::string_view color_string) const {
+        auto& style = ImGui::GetStyle();
+
+        auto color = parse_color_string(color_string);
+        if (not color)
+            throw widget_error("failed to parse color \"{}\"", color_string);
+
+        style.Colors[imgui_color] = *color;
+
+    }
 
 };
 

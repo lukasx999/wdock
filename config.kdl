@@ -79,11 +79,6 @@ define-widget img preset=image {
 define-widget button preset=button {
     label "hello"       // required
     on_click "chromium" // required
-
-    style {
-        frame_padding 20
-        frame_rounding 20
-    }
 }
 
 define-widget memory preset=memory {

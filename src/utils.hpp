@@ -19,7 +19,9 @@
 inline std::mutex g_application_lock;
 
 [[nodiscard]] constexpr inline auto parse_color_string(std::string_view string) -> std::optional<ImVec4> {
-    if (string.front() != '#') return {};
+
+    if (string.length() != 9) return {};
+    if (string.at(0) != '#') return {};
 
     uint32_t value = 0;
     auto err = std::from_chars(string.data()+1, string.data()+string.size(), value, 16).ec;
