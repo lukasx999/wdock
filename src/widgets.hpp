@@ -323,7 +323,7 @@ namespace widgets {
             ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
             ImGui::SameLine();
 
-            ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0});
+            ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
 
             ImGui::SameLine();
             ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
