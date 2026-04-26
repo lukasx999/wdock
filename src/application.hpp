@@ -16,7 +16,9 @@ class application {
         });
     }
 
-    void load_config(config& config) {
+    void load_config(const std::filesystem::path& config_path) {
+
+        auto config = parse_config(config_path);
 
         auto& window = config.window;
         m_window.set_size(window.size.width, window.size.height);

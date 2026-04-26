@@ -9,6 +9,23 @@
 #include "window.hpp"
 #include "config.hpp"
 
+namespace {
+
+    void reload_config(application& app, const std::filesystem::path& config_path) {
+
+        std::scoped_lock lock(g_application_lock);
+
+        try {
+            app.load_config(config_path);
+            std::println("config was reloaded");
+        } catch (const config_error& error) {
+            std::println(std::cerr, "failed to reload config: {}", error.what());
+        }
+
+    }
+
+} // namespace
+
 int main() {
 
     auto config_path = "config.kdl";
@@ -18,25 +35,11 @@ int main() {
 
         std::jthread config_watcher([&] {
             watch_file(config_path, [&] {
-                std::scoped_lock lock(g_application_lock);
-                config config;
-
-                try {
-                    config = parse_config(config_path);
-                } catch (const config_error& error) {
-                    std::println(std::cerr, "failed to reload config: {}", error.what());
-                    return;
-                }
-
-                app.load_config(config);
-                std::println("config was reloaded");
+                reload_config(app, config_path);
             });
         });
 
-        // parse_config() must be called AFTER the application has been constructed, because it
-        // may call widget constructors, which may call into OpenGL functions.
-        config config = parse_config(config_path);
-        app.load_config(config);
+        app.load_config(config_path);
         app.run();
 
     } catch (const config_error& error) {
@@ -48,7 +51,7 @@ int main() {
         return EXIT_FAILURE;
 
     } catch (const widget_error& error) {
-        std::println(std::cerr, "failed to add widget: {}", error.what());
+        std::println(std::cerr, "failed to configure widget: {}", error.what());
         return EXIT_FAILURE;
     }
 
