@@ -9,22 +9,44 @@
 #include <mutex>
 
 #include <fontconfig/fontconfig.h>
-#include <sys/stat.h>
+#include <sys/inotify.h>
+#include <unistd.h>
 
-inline std::mutex mutex;
+inline std::mutex g_mutex;
 
-[[nodiscard]] inline bool has_file_changed(const std::filesystem::path& path) {
-    static auto prev_last_access = 0;
+// TODO: add some error handling in here?
+void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
 
-    struct stat buf;
-    assert(stat(path.c_str(), &buf) == 0);
-    auto last_access = buf.st_atim.tv_nsec;
+    // vim will only reliably produce IN_MOVE_SELF events, so we have to catch those
+    auto flags = IN_MODIFY | IN_CLOSE_WRITE | IN_MOVE_SELF;
 
-    bool has_changed = last_access != prev_last_access;
+    int fd = inotify_init();
+    assert(fd != -1);
 
-    prev_last_access = last_access;
+    int wd = inotify_add_watch(fd, path.c_str(), flags);
+    assert(wd != -1);
 
-    return has_changed;
+    while (true) {
+        struct inotify_event event;
+        ssize_t bytes_read = read(fd, &event, sizeof event);
+        assert(bytes_read != -1);
+        assert(bytes_read != 0);
+
+        // vim will actually swap the edited file with a new file, so
+        // we have to catch that and add the file back to the watchlist
+        if (event.mask & IN_IGNORED) {
+            while (true) {
+                wd = inotify_add_watch(fd, path.c_str(), flags);
+                if (wd != -1) break;
+                assert(errno == ENOENT);
+            }
+        }
+
+        fn();
+    }
+
+    assert(inotify_rm_watch(fd, wd) != -1);
+    assert(close(fd) != -1);
 }
 
 [[nodiscard]] inline auto parse_font_name(const char* font_name) -> std::optional<std::filesystem::path> {
