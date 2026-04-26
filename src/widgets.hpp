@@ -175,7 +175,7 @@ namespace widgets {
             size_t total = buf.totalram / 1'000'000'000;
             size_t free = buf.freeram / 1'000'000'000;
             size_t used = total - free;
-            auto fmt = std::format("{}Gib/{}Gib", used, total);
+            auto fmt = std::format("{}GiB/{}GiB", used, total);
             float frac = static_cast<float>(used) / total;
 
             ImGui::TextUnformatted(fmt.c_str());
