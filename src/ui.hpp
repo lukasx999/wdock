@@ -65,7 +65,7 @@ class ui {
 
         auto color_bg = parse_color_string(style_config.background_color);
         if (not color_bg)
-            throw config_error("failed to parse color \"{}\"", style_config.background_color);
+            throw config_error("ERROR: failed to parse color \"{}\"", style_config.background_color);
 
         style.Colors[ImGuiCol_WindowBg] = *color_bg;
 
@@ -74,7 +74,7 @@ class ui {
         const char* font_name = style_config.font.c_str();
         auto font = parse_font_name(font_name);
         if (!font)
-            throw config_error("failed to parse font \"{}\"", font_name);
+            throw config_error("ERROR: failed to parse font \"{}\"", font_name);
 
         ImGuiIO& io = ImGui::GetIO();
         io.Fonts->ClearFonts();

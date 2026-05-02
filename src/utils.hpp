@@ -1,11 +1,8 @@
 #pragma once
 
-#include <functional>
-#include <print>
 #include <utility>
 #include <cassert>
 #include <optional>
-#include <string>
 #include <string_view>
 #include <filesystem>
 #include <mutex>
@@ -16,7 +13,7 @@
 
 #include "imgui.h"
 
-inline std::mutex g_application_lock;
+inline std::mutex g_draw_lock;
 
 // TODO: add some error handling in here?
 /// @brief calls a function whenever a file is modified.
@@ -126,20 +123,18 @@ class string_switch {
 
 consteval void test_string_switch() {
 
-    constexpr int a = string_switch<int>("bar")
+    static_assert(string_switch<int>("bar")
         .match("foo", 1)
         .match("bar", 2)
         .match("baz", 3)
-        .done();
-    static_assert(a == 2);
+        .done() == 2);
 
-    constexpr int b = string_switch<int>("qux")
+    static_assert(string_switch<int>("qux")
         .match("foo", 1)
         .match("bar", 2)
         .match("baz", 3)
         .catchall(45)
-        .done();
-    static_assert(b == 45);
+        .done() == 45);
 
 }
 

@@ -12,13 +12,13 @@
 namespace {
 
     void reload_config(application& app, const std::filesystem::path& config_path) {
-        std::scoped_lock lock(g_application_lock);
+        std::scoped_lock lock(g_draw_lock);
 
         try {
             app.load_config(config_path);
-            std::println("config was reloaded");
+            std::println("INFO: config was reloaded");
         } catch (const config_error& error) {
-            std::println(std::cerr, "failed to reload config: {}", error.what());
+            std::println(std::cerr, "ERROR: failed to reload config: {}", error.what());
         }
 
     }
@@ -34,7 +34,7 @@ int main() {
     try {
         app.emplace();
     } catch (const window_error& error) {
-        std::println(std::cerr, "failed to open window: {}", error.what());
+        std::println(std::cerr, "ERROR: failed to open window: {}", error.what());
         return EXIT_FAILURE;
     }
 
@@ -48,11 +48,11 @@ int main() {
         app->run();
 
     } catch (const config_error& error) {
-        std::println(std::cerr, "failed to parse config file: {}", error.what());
+        std::println(std::cerr, "ERROR: failed to parse config file: {}", error.what());
         return EXIT_FAILURE;
 
     } catch (const widget_error& error) {
-        std::println(std::cerr, "failed to configure widget: {}", error.what());
+        std::println(std::cerr, "ERROR: failed to configure widget: {}", error.what());
         return EXIT_FAILURE;
     }
 

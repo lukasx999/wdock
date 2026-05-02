@@ -15,7 +15,6 @@ struct config_error : std::runtime_error {
 
 };
 
-// TODO: set default values in the code or always load a default config first?
 struct config {
     struct window {
         struct size {
@@ -29,7 +28,6 @@ struct config {
             float fontsize = 30.0f;
             float item_spacing = 10.0f;
             std::string font = "JetBrainsMonoNerdFontMono";
-            // TODO: add parsing for css colors
             std::string background_color = "#0000007f";
         };
 
