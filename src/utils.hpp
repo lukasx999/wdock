@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <cassert>
+#include <iostream>
 #include <optional>
 #include <string_view>
 #include <filesystem>
@@ -14,6 +15,14 @@
 #include "imgui.h"
 
 inline std::mutex g_draw_lock;
+
+inline constexpr auto g_color_red        = "\033[0;31m";
+inline constexpr auto g_color_blue       = "\033[0;34m";
+inline constexpr auto g_color_green      = "\033[0;32m";
+inline constexpr auto g_color_bold_red   = "\033[1;31m";
+inline constexpr auto g_color_bold_blue  = "\033[1;34m";
+inline constexpr auto g_color_bold_green = "\033[1;32m";
+inline constexpr auto g_color_end        = "\033[0m";
 
 // TODO: add some error handling in here?
 /// @brief calls a function whenever a file is modified.
@@ -49,6 +58,25 @@ inline void watch_file(const std::filesystem::path& path, std::invocable auto fn
 
     assert(inotify_rm_watch(fd, wd) != -1);
     assert(close(fd) != -1);
+}
+
+template <typename... Args>
+inline void print_info(std::format_string<Args...> fmt, Args&&... args) {
+    auto msg = std::vformat(fmt.get(), std::make_format_args(args...));
+    std::println(std::cerr, "{}INFO{}: {}", g_color_bold_blue, g_color_end, msg);
+}
+
+template <typename... Args>
+inline void print_debug(std::format_string<Args...> fmt, Args&&... args) {
+    // TODO: disable in debug mode
+    auto msg = std::vformat(fmt.get(), std::make_format_args(args...));
+    std::println(std::cerr, "{}DEBUG{}: {}", g_color_bold_green, g_color_end, msg);
+}
+
+template <typename... Args>
+inline void print_error(std::format_string<Args...> fmt, Args&&... args) {
+    auto msg = std::vformat(fmt.get(), std::make_format_args(args...));
+    std::println(std::cerr, "{}ERROR{}: {}", g_color_bold_red, g_color_end, msg);
 }
 
 [[nodiscard]] inline auto parse_font_name(const char* font_name) -> std::optional<std::filesystem::path> {

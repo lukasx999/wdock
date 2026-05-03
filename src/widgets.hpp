@@ -26,18 +26,18 @@ struct widget_error : std::runtime_error {
     using std::runtime_error::runtime_error;
 
     template <typename... Args>
-    widget_error(std::format_string<Args...> fmt, Args... args)
+    widget_error(std::format_string<Args...> fmt, Args&&... args)
     : widget_error(std::vformat(fmt.get(), std::make_format_args(args...)))
     { }
 };
 
 struct widget_style {
-    std::string color_text           = "#ffffffff";
-    std::string color_button_active  = "#A9A9A9ff";
-    std::string color_button         = "#808080ff";
-    std::string color_button_hovered = "#A9A9A9ff";
-    std::string color_progress       = "#A9A9A9ff";
-    std::string color_frame_bg       = "#808080ff";
+    std::string color_frame_bg       = "#2e3440";
+    std::string color_text           = "#eceff4";
+    std::string color_button         = "#2e3440";
+    std::string color_button_hovered = "#3b4252";
+    std::string color_button_active  = "#434c5e";
+    std::string color_progress       = "#4c566a";
     float frame_padding = 5;
     float frame_rounding = 5;
 };
@@ -90,7 +90,6 @@ class widget {
 
 namespace widgets {
 
-
     class custom : public widget {
         public:
         custom(widget_style style, std::string command)
@@ -98,26 +97,7 @@ namespace widgets {
         , m_command(std::move(command))
         { }
 
-        void on_draw() const override {
-            FILE* file = popen(m_command.c_str(), "r");
-            if (file == nullptr)
-                throw widget_error("error executing command: \"{}\"", m_command);
-
-            std::string buf;
-
-            char c;
-            while ((c = fgetc(file)) != EOF) {
-                buf += c;
-            }
-
-            // TODO: check for exit code
-            if (not feof(file))
-                throw widget_error("error reading output from command: \"{}\"", m_command);
-
-            ImGui::TextUnformatted(buf.c_str());
-
-            assert(pclose(file) != -1);
-        }
+        void on_draw() const override;
 
         private:
         const std::string m_command;
@@ -126,34 +106,7 @@ namespace widgets {
 
     class image : public widget {
         public:
-        image(widget_style style, const std::filesystem::path& path, float scaling)
-        : widget(style)
-        , m_scaling(scaling)
-        {
-            int channels;
-            unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &channels, 0);
-            if (data == nullptr)
-                throw widget_error("failed to load image at {}", path.c_str());
-
-            GLenum format = [&] {
-                switch (channels) {
-                    case 3: return GL_RGB;
-                    case 4: return GL_RGBA;
-                    default:
-                    stbi_image_free(data);
-                    throw widget_error("invalid amount of channels ({})", channels);
-                }
-            }();
-
-            glGenTextures(1, &m_texture_id);
-            glBindTexture(GL_TEXTURE_2D, m_texture_id);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
+        image(widget_style style, const std::filesystem::path& path, float scaling);
 
         ~image() {
             glDeleteTextures(1, &m_texture_id);
@@ -208,22 +161,7 @@ namespace widgets {
         , m_show_percentage(show_percentage)
         { }
 
-        void on_draw() const override {
-            struct statvfs buf;
-            assert(statvfs("/", &buf) == 0);
-
-            auto gibs = 1 / std::pow(2, 30);
-            auto size = buf.f_frsize;
-
-            int total = size * buf.f_blocks * gibs;
-            // int available = size * buf.f_bavail * gibs;
-            int free = size * buf.f_bfree * gibs;
-            int used = total - free;
-
-            ImGui::Text("%dGiB/%dGiB", used, total);
-            ImGui::SameLine();
-            ImGui::ProgressBar(static_cast<float>(used) / total, {0, 0}, m_show_percentage ? nullptr : "");
-        }
+        void on_draw() const override;
 
         private:
         bool m_show_percentage;
@@ -330,37 +268,7 @@ namespace widgets {
         player& operator=(const player&) = delete;
         player& operator=(player&&) = delete;
 
-        void on_draw() const override {
-
-            auto data = get_data();
-            GError* err = nullptr;
-
-            ImGui::Text("%s - %s - %s", data.artist, data.album, data.title);
-
-            ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
-            ImGui::SameLine();
-
-            ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
-
-            ImGui::SameLine();
-            ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
-
-            if (ImGui::Button("prev"))
-                playerctl_player_previous(m_player, &err);
-
-            auto play_text = data.status == PLAYERCTL_PLAYBACK_STATUS_PLAYING
-                ? "pause"
-                : "play";
-
-            ImGui::SameLine();
-            if (ImGui::Button(play_text))
-                playerctl_player_play_pause(m_player, &err);
-
-            ImGui::SameLine();
-            if (ImGui::Button("next"))
-                playerctl_player_next(m_player, &err);
-
-        }
+        void on_draw() const override;
 
         private:
         struct data {

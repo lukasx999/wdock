@@ -65,20 +65,13 @@ class ui {
 
         auto color_bg = parse_color_string(style_config.background_color);
         if (not color_bg)
-            throw config_error("ERROR: failed to parse color \"{}\"", style_config.background_color);
+            throw config_error("failed to parse color \"{}\"", style_config.background_color);
 
         style.Colors[ImGuiCol_WindowBg] = *color_bg;
 
         style.FontSizeBase = style_config.fontsize;
+        load_font(style_config.font.c_str());
 
-        const char* font_name = style_config.font.c_str();
-        auto font = parse_font_name(font_name);
-        if (!font)
-            throw config_error("ERROR: failed to parse font \"{}\"", font_name);
-
-        ImGuiIO& io = ImGui::GetIO();
-        io.Fonts->ClearFonts();
-        io.Fonts->AddFontFromFileTTF(font->c_str());
     }
 
     private:
@@ -94,6 +87,22 @@ class ui {
     void configure() const {
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;
+    }
+
+    void load_font(const char* font_name) {
+
+        auto font = parse_font_name(font_name);
+        if (!font)
+            throw config_error("failed to parse font name \"{}\"", font_name);
+        print_debug("loaded font from \"{}\"", font->string());
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.Fonts->ClearFonts();
+
+        auto ret = io.Fonts->AddFontFromFileTTF(font->c_str());
+        if (ret == nullptr)
+            throw config_error("failed to load font \"{}\"", font_name);
+
     }
 
 };

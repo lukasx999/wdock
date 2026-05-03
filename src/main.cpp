@@ -16,9 +16,9 @@ namespace {
 
         try {
             app.load_config(config_path);
-            std::println("INFO: config was reloaded");
+            print_info("config was reloaded from \"{}\"", config_path.string());
         } catch (const config_error& error) {
-            std::println(std::cerr, "ERROR: failed to reload config: {}", error.what());
+            print_error("failed to reload config: {}", error.what());
         }
 
     }
@@ -34,7 +34,7 @@ int main() {
     try {
         app.emplace();
     } catch (const window_error& error) {
-        std::println(std::cerr, "ERROR: failed to open window: {}", error.what());
+        print_error("failed to open window: {}", error.what());
         return EXIT_FAILURE;
     }
 
@@ -45,14 +45,15 @@ int main() {
 
     try {
         app->load_config(config_path);
+        print_info("config loaded from \"{}\"", config_path);
         app->run();
 
     } catch (const config_error& error) {
-        std::println(std::cerr, "ERROR: failed to parse config file: {}", error.what());
+        print_error("failed to load config file: {}", error.what());
         return EXIT_FAILURE;
 
     } catch (const widget_error& error) {
-        std::println(std::cerr, "ERROR: failed to configure widget: {}", error.what());
+        print_error("failed to configure widget: {}", error.what());
         return EXIT_FAILURE;
     }
 
