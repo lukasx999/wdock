@@ -97,4 +97,7 @@ define-widget disk preset=disk {
 define-widget player preset=player {
     // format "{artist} - {album} - {title}"
     player "spotify" // leave empty for automatic detection
+    style {
+        frame-padding 15
+    }
 }

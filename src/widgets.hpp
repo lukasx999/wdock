@@ -281,60 +281,12 @@ namespace widgets {
         };
 
         PlayerctlPlayer* m_player;
+        const char* m_icon_pause = "";
+        const char* m_icon_play  = "";
+        const char* m_icon_next  = "";
+        const char* m_icon_prev  = "";
 
-        [[nodiscard]] data get_data() const {
-
-            data data;
-            GError* err = nullptr;
-
-            data.title = playerctl_player_get_title(m_player, &err);
-            if (err != nullptr) {
-                data.title = "N/A";
-                g_clear_error(&err);
-            }
-
-            data.album = playerctl_player_get_album(m_player, &err);
-            if (err != nullptr) {
-                data.album = "N/A";
-                g_clear_error(&err);
-            }
-
-            data.artist = playerctl_player_get_artist(m_player, &err);
-            if (err != nullptr) {
-                data.artist = "N/A";
-                g_clear_error(&err);
-            }
-
-            // TODO: show art as an image widget
-            // const char* art = playerctl_player_print_metadata_prop(m_player, "mpris:artUrl", &err);
-            // if (err != nullptr) {
-            //     art = nullptr;
-            //     g_clear_error(&err);
-            // }
-
-            g_main_context_iteration(nullptr, false);
-            g_object_get(m_player, "playback-status", &data.status, nullptr);
-
-            int64_t position_µs = playerctl_player_get_position(m_player, &err);
-            if (err != nullptr) {
-                position_µs = 0;
-                g_clear_error(&err);
-            }
-
-            const char* length_str = playerctl_player_print_metadata_prop(m_player, "mpris:length", &err);
-            if (err != nullptr) {
-                length_str = "0";
-                g_clear_error(&err);
-            }
-
-            int64_t length_µs;
-            std::from_chars(length_str, length_str + std::strlen(length_str), length_µs);
-
-            data.length = std::chrono::microseconds(length_µs);
-            data.position = std::chrono::microseconds(position_µs);
-
-            return data;
-        }
+        [[nodiscard]] data get_data() const;
 
     };
 

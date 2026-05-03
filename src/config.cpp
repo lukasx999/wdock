@@ -301,10 +301,10 @@ namespace {
             auto args = child.args();
             auto name = string_from_u8(child.name());
 
-            if (name == "frame_padding")
+            if (name == "frame-padding")
                 style.frame_padding = args.front().as<float>();
 
-            else if (name == "frame_rounding")
+            else if (name == "frame-rounding")
                 style.frame_rounding = args.front().as<float>();
 
             else
