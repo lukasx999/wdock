@@ -15,6 +15,8 @@
 
 #include "imgui.h"
 
+// this lock exists, so that we can make sure that the main thread is not
+// rendering to the window, while the config watcher thread tries to reload the config.
 inline std::mutex g_draw_lock;
 
 inline constexpr auto g_color_red        = "\033[0;31m";
