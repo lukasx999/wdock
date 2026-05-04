@@ -167,7 +167,7 @@ class string_switch {
         return *this;
     }
 
-    // throws std::bad_optional_access if there is no matched value.
+    /// @throws std::bad_optional_access if there is no matched value.
     [[nodiscard]] constexpr T done() const {
         return *m_value;
     }
