@@ -108,20 +108,13 @@ namespace widgets {
     class image : public widget {
         public:
         image(widget_style style, const std::filesystem::path& path, float scaling);
-
-        ~image() {
-            glDeleteTextures(1, &m_texture_id);
-        }
-
+        ~image();
         image(const image&) = delete;
         image(image&&) = delete;
         image& operator=(const image&) = delete;
         image& operator=(image&&) = delete;
 
-        void on_draw() const override {
-            ImVec2 size(m_width * m_scaling, m_height * m_scaling);
-            ImGui::Image(m_texture_id, size);
-        }
+        void on_draw() const override;
 
         private:
         const float m_scaling;
@@ -137,21 +130,7 @@ namespace widgets {
         : widget(style)
         { }
 
-        void on_draw() const override {
-            struct sysinfo buf{};
-            assert(sysinfo(&buf) == 0);
-            // TODO: get this right
-            size_t total = buf.totalram / 1'000'000'000;
-            size_t free = buf.freeram / 1'000'000'000;
-            size_t used = total - free;
-            auto fmt = std::format("{}GiB/{}GiB", used, total);
-            float frac = static_cast<float>(used) / total;
-
-            ImGui::TextUnformatted(fmt.c_str());
-            ImGui::SameLine();
-            ImGui::ProgressBar(frac);
-
-        }
+        void on_draw() const override;
 
     };
 

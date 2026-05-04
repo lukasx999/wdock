@@ -54,6 +54,31 @@ namespace widgets {
         stbi_image_free(data);
     }
 
+    image::~image() {
+        glDeleteTextures(1, &m_texture_id);
+    }
+
+    void image::on_draw() const {
+        ImVec2 size(m_width * m_scaling, m_height * m_scaling);
+        ImGui::Image(m_texture_id, size);
+    }
+
+    void memory::on_draw() const {
+        struct sysinfo buf{};
+        assert(sysinfo(&buf) == 0);
+        // TODO: get this right
+        size_t total = buf.totalram / 1'000'000'000;
+        size_t free = buf.freeram / 1'000'000'000;
+        size_t used = total - free;
+        auto fmt = std::format("{}GiB/{}GiB", used, total);
+        float frac = static_cast<float>(used) / total;
+
+        ImGui::TextUnformatted(fmt.c_str());
+        ImGui::SameLine();
+        ImGui::ProgressBar(frac);
+
+    }
+
     void disk::on_draw() const {
         struct statvfs buf;
         assert(statvfs("/", &buf) == 0);
