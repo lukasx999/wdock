@@ -1,5 +1,7 @@
 #include "widgets.hpp"
 
+#include <fstream>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -64,19 +66,61 @@ namespace widgets {
     }
 
     void memory::on_draw() const {
-        struct sysinfo buf{};
-        assert(sysinfo(&buf) == 0);
-        // TODO: get this right
-        size_t total = buf.totalram / 1'000'000'000;
-        size_t free = buf.freeram / 1'000'000'000;
-        size_t used = total - free;
-        auto fmt = std::format("{}GiB/{}GiB", used, total);
+        std::ifstream file("/proc/meminfo");
+        std::string line;
+
+        uint64_t total;
+        uint64_t avail;
+
+        while (std::getline(file, line)) {
+            auto [attribute, value] = parse_proc_meminfo_line(line);
+
+            if (attribute == "MemTotal") {
+                total = value;
+
+            } else if (attribute == "MemAvailable") {
+                avail = value;
+
+            }
+
+        }
+
+        uint64_t used = total - avail;
+
+        auto gibs = 1 / std::pow(2, 20);
+        auto fmt = std::format("{:.1f}Gib/{:.1f}Gib", used * gibs, total * gibs);
         float frac = static_cast<float>(used) / total;
 
         ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();
         ImGui::ProgressBar(frac);
 
+    }
+
+    auto memory::parse_proc_meminfo_line(std::string_view line) -> std::tuple<std::string, uint64_t> {
+
+        size_t colon_pos = line.find(':');
+        assert(colon_pos != std::string::npos);
+        std::string attribute(line.substr(0, colon_pos));
+
+        size_t value_start = line.find_first_not_of(' ', colon_pos+1);
+        assert(value_start != std::string::npos);
+
+        size_t value_end = line.find_first_of(' ', value_start);
+
+        // some entries dont have a "kB" at the end, in that case the value
+        // ends at the end of the line.
+        size_t n = value_end == std::string::npos
+            ? std::string::npos
+            : value_end - value_start;
+
+        auto value_string = line.substr(value_start, n);
+        uint64_t value;
+
+        auto ec = std::from_chars(value_string.data(), value_string.data() + value_string.size(), value).ec;
+        assert(ec == std::errc{});
+
+        return std::make_tuple(attribute, value);
     }
 
     void disk::on_draw() const {

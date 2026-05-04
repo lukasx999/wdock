@@ -25,6 +25,8 @@ inline constexpr auto g_color_bold_blue  = "\033[1;34m";
 inline constexpr auto g_color_bold_green = "\033[1;32m";
 inline constexpr auto g_color_end        = "\033[0m";
 
+#define DBG(value) std::println(std::cerr, "{}: {}", #value, value)
+
 /// @return whether the operation was successful
 inline bool download_file(const char* url, const std::filesystem::path& path) {
 

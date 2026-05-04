@@ -132,6 +132,11 @@ namespace widgets {
 
         void on_draw() const override;
 
+        private:
+        /// @brief parses a line from /proc/meminfo
+        /// @returns the attribute, and the parsed value in KiB's
+        [[nodiscard]] static auto parse_proc_meminfo_line(std::string_view line) -> std::tuple<std::string, uint64_t>;
+
     };
 
     class disk : public widget {
