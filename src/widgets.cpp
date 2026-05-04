@@ -69,23 +69,24 @@ namespace widgets {
         std::ifstream file("/proc/meminfo");
         std::string line;
 
-        uint64_t total;
-        uint64_t avail;
+        int64_t total = -1;
+        int64_t avail = -1;
 
         while (std::getline(file, line)) {
             auto [attribute, value] = parse_proc_meminfo_line(line);
 
-            if (attribute == "MemTotal") {
+            if (attribute == "MemTotal")
                 total = value;
 
-            } else if (attribute == "MemAvailable") {
+            else if (attribute == "MemAvailable")
                 avail = value;
-
-            }
 
         }
 
-        uint64_t used = total - avail;
+        assert(total != -1);
+        assert(avail != -1);
+
+        int64_t used = total - avail;
 
         auto gibs = 1 / std::pow(2, 20);
         auto fmt = std::format("{:.1f}Gib/{:.1f}Gib", used * gibs, total * gibs);
@@ -93,7 +94,7 @@ namespace widgets {
 
         ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();
-        ImGui::ProgressBar(frac);
+        ImGui::ProgressBar(frac, {0, 0}, m_show_percentage ? nullptr : "");
 
     }
 
@@ -130,12 +131,13 @@ namespace widgets {
         auto gibs = 1 / std::pow(2, 30);
         auto size = buf.f_frsize;
 
-        int total = size * buf.f_blocks * gibs;
-        // int available = size * buf.f_bavail * gibs;
-        int free = size * buf.f_bfree * gibs;
-        int used = total - free;
+        uint64_t total = size * buf.f_blocks * gibs;
+        uint64_t free = size * buf.f_bfree * gibs;
+        uint64_t used = total - free;
 
-        ImGui::Text("%dGiB/%dGiB", used, total);
+        auto fmt = std::format(" {} GiB / {} GiB", used, total);
+
+        ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();
         ImGui::ProgressBar(static_cast<float>(used) / total, {0, 0}, m_show_percentage ? nullptr : "");
     }

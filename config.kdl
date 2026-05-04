@@ -87,6 +87,7 @@ define-widget button preset=button {
 }
 
 define-widget memory preset=memory {
+    show-percentage #false
 }
 
 define-widget disk preset=disk {

@@ -111,13 +111,16 @@ namespace {
 
     [[nodiscard]] auto parse_widget_memory(const widget_definition& def) -> std::unique_ptr<widgets::memory> {
 
-        // for (auto& [name, values] : props) {
-        // if (name == "...")
-        // else
-        //     throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
-        // }
+        bool show_percentage = false;
 
-        return std::make_unique<widgets::memory>(def.style);
+        for (auto& [name, values] : def.props) {
+            if (name == "show-percentage")
+                show_percentage = values.front().as<bool>();
+            else
+                throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
+        }
+
+        return std::make_unique<widgets::memory>(def.style, show_percentage);
     }
 
     [[nodiscard]] auto parse_widget_player(const widget_definition& def) -> std::unique_ptr<widgets::player> {
