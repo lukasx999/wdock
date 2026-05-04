@@ -49,24 +49,26 @@ inline bool download_file(const char* url, const std::filesystem::path& path) {
     return true;
 }
 
-// TODO: add some error handling in here?
 /// @brief calls a function whenever a file is modified.
-inline void watch_file(const std::filesystem::path& path, std::invocable auto fn) {
+/// @return returns false if the watcher could not be installed
+inline bool watch_file(const std::filesystem::path& path, std::invocable auto fn) {
 
     // vim will only reliably produce IN_MOVE_SELF events, so we have to catch those
     auto flags = IN_MODIFY | IN_CLOSE_WRITE | IN_MOVE_SELF;
 
     int fd = inotify_init();
-    assert(fd != -1);
+    if (fd == -1)
+        return false;
 
     int wd = inotify_add_watch(fd, path.c_str(), flags);
-    assert(wd != -1);
+    if (wd == -1)
+        return false;
 
     while (true) {
         struct inotify_event event;
         ssize_t bytes_read = read(fd, &event, sizeof event);
-        assert(bytes_read != -1);
-        assert(bytes_read != 0);
+        if (bytes_read == 0 || bytes_read == -1)
+            return false;
 
         // vim will actually swap the edited file with a new file, so
         // we have to catch that and add the file back to the watchlist
@@ -74,15 +76,21 @@ inline void watch_file(const std::filesystem::path& path, std::invocable auto fn
             while (true) {
                 wd = inotify_add_watch(fd, path.c_str(), flags);
                 if (wd != -1) break;
-                assert(errno == ENOENT);
+                if (errno != ENOENT)
+                    return false;
             }
         }
 
         fn();
     }
 
-    assert(inotify_rm_watch(fd, wd) != -1);
-    assert(close(fd) != -1);
+    if (inotify_rm_watch(fd, wd) == -1)
+        return false;
+
+    if (close(fd) == -1)
+        return false;
+
+    return true;
 }
 
 template <typename... Args>
