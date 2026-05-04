@@ -3,6 +3,7 @@
 #include <format>
 #include <print>
 #include <thread>
+#include <cstdio>
 
 #include "application.hpp"
 #include "widgets.hpp"

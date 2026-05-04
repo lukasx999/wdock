@@ -15,6 +15,7 @@ FetchContent_MakeAvailable(ckdl)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL)
 find_package(Fontconfig REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(CURL REQUIRED)
 
 pkg_check_modules(Playerctl REQUIRED playerctl)
 
@@ -70,7 +71,7 @@ target_include_directories(wdock PRIVATE deps/glad/include/ deps/imgui/ deps/img
 target_include_directories(wdock PRIVATE ${PROJECT_BINARY_DIR})
 target_include_directories(wdock PRIVATE ${ckdl_SOURCE_DIR}/include/ ${ckdl_SOURCE_DIR}/bindings/cpp/include/)
 target_include_directories(wdock PRIVATE ${Playerctl_INCLUDE_DIRS})
-target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL::OpenGL OpenGL::EGL kdl kdlpp Fontconfig::Fontconfig ${Playerctl_LIBRARIES})
+target_link_libraries(wdock PRIVATE wayland-client wayland-egl OpenGL::OpenGL OpenGL::EGL kdl kdlpp Fontconfig::Fontconfig ${Playerctl_LIBRARIES} CURL::libcurl)
 
 install(
 TARGETS wdock

@@ -13,9 +13,8 @@ namespace widgets {
         std::string buf;
 
         char c;
-        while ((c = fgetc(file)) != EOF) {
+        while ((c = fgetc(file)) != EOF)
             buf += c;
-        }
 
         // TODO: check for exit code
         if (not feof(file))
@@ -102,6 +101,14 @@ namespace widgets {
         if (ImGui::Button(m_icon_next))
             playerctl_player_next(m_player, &err);
 
+        // TODO: fix messed up image
+        // TODO: cache image for performance
+        // auto art_path = "/tmp/wdock_art.png";
+        // if (not download_file(data.art_url, art_path))
+        //     throw widget_error("failed to download album art from \"{}\"", data.art_url);
+        // image image(m_style, art_path, 0.5f);
+        // image.draw();
+
     }
 
     player::data player::get_data() const {
@@ -127,12 +134,11 @@ namespace widgets {
             g_clear_error(&err);
         }
 
-        // TODO: show art as an image widget
-        // const char* art = playerctl_player_print_metadata_prop(m_player, "mpris:artUrl", &err);
-        // if (err != nullptr) {
-        //     art = nullptr;
-        //     g_clear_error(&err);
-        // }
+        data.art_url = playerctl_player_print_metadata_prop(m_player, "mpris:artUrl", &err);
+        if (err != nullptr) {
+            data.art_url = nullptr;
+            g_clear_error(&err);
+        }
 
         g_main_context_iteration(nullptr, false);
         g_object_get(m_player, "playback-status", &data.status, nullptr);

@@ -72,9 +72,10 @@ class widget {
         set_color(ImGuiCol_ButtonHovered, m_style.color_button_hovered);
     }
 
-    private:
+    protected:
     const widget_style m_style;
 
+    private:
     void set_color(ImGuiCol imgui_color, std::string_view color_string) const {
         auto& style = ImGui::GetStyle();
 
@@ -275,6 +276,7 @@ namespace widgets {
             const char* title;
             const char* album;
             const char* artist;
+            const char* art_url;
             std::chrono::microseconds length;
             std::chrono::microseconds position;
             PlayerctlPlaybackStatus status;

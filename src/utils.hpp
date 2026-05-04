@@ -8,9 +8,10 @@
 #include <filesystem>
 #include <mutex>
 
+#include <unistd.h>
 #include <fontconfig/fontconfig.h>
 #include <sys/inotify.h>
-#include <unistd.h>
+#include <curl/curl.h>
 
 #include "imgui.h"
 
@@ -23,6 +24,30 @@ inline constexpr auto g_color_bold_red   = "\033[1;31m";
 inline constexpr auto g_color_bold_blue  = "\033[1;34m";
 inline constexpr auto g_color_bold_green = "\033[1;32m";
 inline constexpr auto g_color_end        = "\033[0m";
+
+/// @return whether the operation was successful
+inline bool download_file(const char* url, const std::filesystem::path& path) {
+
+    CURL* curl = curl_easy_init();
+    if (curl == nullptr)
+        return false;
+
+    FILE* file = fopen(path.c_str(), "wb");
+    if (file == nullptr)
+        return false;
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, nullptr);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+
+    if (curl_easy_perform(curl) != CURLE_OK)
+        return false;
+
+    fclose(file);
+    curl_easy_cleanup(curl);
+
+    return true;
+}
 
 // TODO: add some error handling in here?
 /// @brief calls a function whenever a file is modified.
