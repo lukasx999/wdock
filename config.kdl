@@ -38,8 +38,8 @@ window {
     style {
         font "JetBrainsMonoNerdFontMono" // this may be a fontconfig-compatible string
         fontsize 32
-        background-color "#0000007f"
-        border-radius 30
+        background-color "#000000c8"
+        border-radius 0
         padding 20
     }
 }

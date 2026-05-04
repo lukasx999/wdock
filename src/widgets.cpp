@@ -131,11 +131,11 @@ namespace widgets {
         auto gibs = 1 / std::pow(2, 30);
         auto size = buf.f_frsize;
 
-        uint64_t total = size * buf.f_blocks * gibs;
-        uint64_t free = size * buf.f_bfree * gibs;
+        uint64_t total = size * buf.f_blocks;
+        uint64_t free = size * buf.f_bfree;
         uint64_t used = total - free;
 
-        auto fmt = std::format(" {} GiB / {} GiB", used, total);
+        auto fmt = std::format(" {:.1f}GiB/{:.1f}GiB", used * gibs, total * gibs);
 
         ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();
