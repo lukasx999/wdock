@@ -23,9 +23,9 @@ class window {
     public:
     enum class anchor {
         top,
+        right,
         bottom,
         left,
-        right,
     };
 
     enum class layer {
