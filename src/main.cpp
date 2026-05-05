@@ -42,7 +42,7 @@ int main() {
     // TODO: stop this thread if an exception is thrown
     std::jthread config_watcher([&] {
         if (not watch_file(config_path, std::bind(reload_config, std::ref(*app), config_path)))
-            print_error("failed to installed watcher for config file at \"{}\"", config_path);
+            print_error("failed to install watcher for config file at \"{}\"", config_path);
     });
 
     try {
