@@ -14,9 +14,6 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 
-#include <stb_image.h>
-#include <glad/gl.h>
-
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "utils.hpp"
@@ -24,6 +21,7 @@
 #include "widget.hpp"
 #include "widgets/image.hpp"
 #include "widgets/player.hpp"
+#include "widgets/memory.hpp"
 
 namespace widgets {
 
@@ -38,25 +36,6 @@ namespace widgets {
 
         private:
         const std::string m_command;
-
-    };
-
-
-    class memory : public widget {
-        public:
-        memory(widget_style style, bool show_percentage)
-        : widget(style)
-        , m_show_percentage(show_percentage)
-        { }
-
-        void on_draw() const override;
-
-        private:
-        const bool m_show_percentage;
-
-        /// @brief parses a line from /proc/meminfo
-        /// @returns the attribute, and the parsed value in KiB's
-        [[nodiscard]] static auto parse_proc_meminfo_line(std::string_view line) -> std::tuple<std::string, uint64_t>;
 
     };
 

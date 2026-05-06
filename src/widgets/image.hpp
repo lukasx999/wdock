@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../window.hpp"
+#include <glad/gl.h>
+
 #include "../widget.hpp"
 
 namespace widgets {

@@ -44,6 +44,4 @@ namespace widgets {
         ImGui::Image(m_texture_id, size);
     }
 
-
-
 } // namespace widgets
