@@ -7,6 +7,7 @@
 #include "config.hpp"
 #include "utils.hpp"
 #include "widgets.hpp"
+#include "widgets/player.hpp"
 
 // TODO: handle type errors
 
