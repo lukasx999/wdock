@@ -70,6 +70,8 @@ namespace widgets {
 
         } else {
             art_path = std::format("/tmp/wdock/album-art-{}", counter++);
+
+            print_debug("downloading album art from \"{}\" to \"{}\"", art_url, art_path);
             if (not download_file(art_url, art_path))
                 throw widget_error("failed to download album art from \"{}\"", art_url);
 
