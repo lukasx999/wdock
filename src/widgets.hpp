@@ -257,6 +257,7 @@ namespace widgets {
         const char* m_icon_play  = "";
         const char* m_icon_next  = "";
         const char* m_icon_prev  = "";
+        const float m_album_art_scaling = 0.25f;
 
         void draw_album_art(const char* art_url) const;
         [[nodiscard]] data get_data() const;

@@ -1,6 +1,7 @@
 #include "widgets.hpp"
 
 #include <fstream>
+#include <unordered_map>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -198,12 +199,25 @@ namespace widgets {
     }
 
     void player::draw_album_art(const char* art_url) const {
+        static std::unordered_map<std::string, std::filesystem::path> url_path_map;
+        static int counter = 0;
 
-        // TODO: cache image for performance
-        auto art_path = "/tmp/wdock_art.png";
-        if (not download_file(art_url, art_path))
-            throw widget_error("failed to download album art from \"{}\"", art_url);
-        image image(m_style, art_path, 0.25f);
+        std::filesystem::create_directory("/tmp/wdock");
+
+        std::string art_path;
+
+        if (url_path_map.contains(art_url)) {
+            art_path = url_path_map.at(art_url);
+
+        } else {
+            art_path = std::format("/tmp/wdock/album-art-{}", counter++);
+            if (not download_file(art_url, art_path))
+                throw widget_error("failed to download album art from \"{}\"", art_url);
+
+            url_path_map.insert({art_url, art_path});
+        }
+
+        image image(m_style, art_path, m_album_art_scaling);
         image.draw();
 
     }
