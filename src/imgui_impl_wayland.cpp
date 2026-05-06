@@ -1,4 +1,3 @@
-#include <print>
 #include <functional>
 #include <string_view>
 
@@ -7,11 +6,11 @@
 #include "imgui_impl_wayland.hpp"
 
 struct imgui_impl_wayland_data {
-    struct wl_display* wl_display = nullptr;
+    struct wl_display*    wl_display    = nullptr;
     struct wl_egl_window* wl_egl_window = nullptr;
-    struct wl_registry* wl_registry = nullptr;
-    struct wl_seat* wl_seat = nullptr;
-    struct wl_pointer* wl_pointer = nullptr;
+    struct wl_registry*   wl_registry   = nullptr;
+    struct wl_seat*       wl_seat       = nullptr;
+    struct wl_pointer*    wl_pointer    = nullptr;
 };
 
 [[nodiscard]] static imgui_impl_wayland_data& get_data() {
