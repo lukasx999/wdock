@@ -57,7 +57,8 @@ namespace widgets {
     }
 
     image::~image() {
-        glDeleteTextures(1, &m_texture_id);
+        // TODO: cant delete texture after drawing with imgui because of deferred drawing in draw list
+        // glDeleteTextures(1, &m_texture_id);
     }
 
     void image::on_draw() const {
@@ -142,11 +143,32 @@ namespace widgets {
         ImGui::ProgressBar(static_cast<float>(used) / total, {0, 0}, m_show_percentage ? nullptr : "");
     }
 
+    std::string datetime::get_formatted_time() const {
+        try {
+            auto now = std::chrono::system_clock::now();
+            std::chrono::zoned_time zt(m_timezone, now);
+
+            time_t time = std::chrono::system_clock::to_time_t(zt);
+            tm* tm = localtime(&time);
+
+            std::stringstream fmt;
+            fmt << std::put_time(tm, m_format.c_str());
+            return fmt.str();
+
+        } catch (const std::runtime_error&) {
+            throw widget_error("invalid time zone: {}", m_timezone);
+        }
+
+    }
+
     void player::on_draw() const {
 
         auto data = get_data();
         GError* err = nullptr;
 
+        draw_album_art(data.art_url);
+
+        ImGui::SameLine();
         ImGui::Text("%s - %s - %s", data.artist, data.album, data.title);
 
         ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
@@ -172,13 +194,17 @@ namespace widgets {
         if (ImGui::Button(m_icon_next))
             playerctl_player_next(m_player, &err);
 
-        // TODO: fix messed up image
+
+    }
+
+    void player::draw_album_art(const char* art_url) const {
+
         // TODO: cache image for performance
-        // auto art_path = "/tmp/wdock_art.png";
-        // if (not download_file(data.art_url, art_path))
-        //     throw widget_error("failed to download album art from \"{}\"", data.art_url);
-        // image image(m_style, art_path, 0.5f);
-        // image.draw();
+        auto art_path = "/tmp/wdock_art.png";
+        if (not download_file(art_url, art_path))
+            throw widget_error("failed to download album art from \"{}\"", art_url);
+        image image(m_style, art_path, 0.25f);
+        image.draw();
 
     }
 

@@ -56,6 +56,8 @@ class widget {
     }
 
     protected:
+    const widget_style m_style;
+
     virtual void on_draw() const { };
 
     void apply_style() const {
@@ -72,17 +74,14 @@ class widget {
         set_color(ImGuiCol_ButtonHovered, m_style.color_button_hovered);
     }
 
-    protected:
-    const widget_style m_style;
-
     private:
     void set_color(ImGuiCol imgui_color, std::string_view color_string) const {
-        auto& style = ImGui::GetStyle();
 
         auto color = parse_color_string(color_string);
         if (not color)
             throw widget_error("failed to parse color \"{}\"", color_string);
 
+        auto& style = ImGui::GetStyle();
         style.Colors[imgui_color] = *color;
 
     }
@@ -173,23 +172,7 @@ namespace widgets {
         const std::string m_timezone;
         const std::string m_format;
 
-        [[nodiscard]] std::string get_formatted_time() const {
-            try {
-                auto now = std::chrono::system_clock::now();
-                std::chrono::zoned_time zt(m_timezone, now);
-
-                time_t time = std::chrono::system_clock::to_time_t(zt);
-                tm* tm = localtime(&time);
-
-                std::stringstream fmt;
-                fmt << std::put_time(tm, m_format.c_str());
-                return fmt.str();
-
-            } catch (const std::runtime_error& error) {
-                throw widget_error("invalid time zone: {}", m_timezone);
-            }
-
-        }
+        [[nodiscard]] std::string get_formatted_time() const;
 
     };
 
@@ -275,6 +258,7 @@ namespace widgets {
         const char* m_icon_next  = "";
         const char* m_icon_prev  = "";
 
+        void draw_album_art(const char* art_url) const;
         [[nodiscard]] data get_data() const;
 
     };
