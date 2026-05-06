@@ -10,7 +10,7 @@ struct config_error : std::runtime_error {
 
     template <typename... Args>
     config_error(std::format_string<Args...> fmt, Args&&... args)
-    : config_error(std::vformat(fmt.get(), std::make_format_args(args...)))
+    : config_error(std::format(fmt, std::forward<Args>(args)...))
     { }
 
 };

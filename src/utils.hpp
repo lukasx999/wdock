@@ -99,20 +99,20 @@ inline bool watch_file(const std::filesystem::path& path, std::invocable auto fn
 
 template <typename... Args>
 inline void print_info(std::format_string<Args...> fmt, Args&&... args) {
-    auto msg = std::vformat(fmt.get(), std::make_format_args(args...));
+    auto msg = std::format(fmt, std::forward<Args>(args)...);
     std::println(std::cerr, "{}INFO{}: {}", g_color_bold_blue, g_color_end, msg);
 }
 
 template <typename... Args>
 inline void print_debug(std::format_string<Args...> fmt, Args&&... args) {
     // TODO: disable in debug mode
-    auto msg = std::vformat(fmt.get(), std::make_format_args(args...));
+    auto msg = std::format(fmt, std::forward<Args>(args)...);
     std::println(std::cerr, "{}DEBUG{}: {}", g_color_bold_green, g_color_end, msg);
 }
 
 template <typename... Args>
 inline void print_error(std::format_string<Args...> fmt, Args&&... args) {
-    auto msg = std::vformat(fmt.get(), std::make_format_args(args...));
+    auto msg = std::format(fmt, std::forward<Args>(args)...);
     std::println(std::cerr, "{}ERROR{}: {}", g_color_bold_red, g_color_end, msg);
 }
 
