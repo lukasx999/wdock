@@ -21,71 +21,9 @@
 #include "imgui_stdlib.h"
 #include "utils.hpp"
 
-struct widget_error : std::runtime_error {
-    using std::runtime_error::runtime_error;
-
-    template <typename... Args>
-    widget_error(std::format_string<Args...> fmt, Args&&... args)
-    : widget_error(std::format(fmt, std::forward<Args>(args)...))
-    { }
-};
-
-struct widget_style {
-    std::string color_frame_bg       = "#2e3440";
-    std::string color_text           = "#eceff4";
-    std::string color_button         = "#2e3440";
-    std::string color_button_hovered = "#3b4252";
-    std::string color_button_active  = "#434c5e";
-    std::string color_progress       = "#4c566a";
-    float frame_padding = 5;
-    float frame_rounding = 5;
-};
-
-class widget {
-    public:
-    explicit widget(widget_style style)
-    : m_style(style)
-    { }
-
-    virtual ~widget() = default;
-
-    void draw() const {
-        apply_style();
-        on_draw();
-    }
-
-    protected:
-    const widget_style m_style;
-
-    virtual void on_draw() const { };
-
-    void apply_style() const {
-        auto& style = ImGui::GetStyle();
-
-        style.FrameRounding = m_style.frame_rounding;
-        style.FramePadding = ImVec2(m_style.frame_padding, m_style.frame_padding);
-
-        set_color(ImGuiCol_Text, m_style.color_text);
-        set_color(ImGuiCol_PlotHistogram, m_style.color_progress);
-        set_color(ImGuiCol_FrameBg, m_style.color_frame_bg);
-        set_color(ImGuiCol_Button, m_style.color_button);
-        set_color(ImGuiCol_ButtonActive, m_style.color_button_active);
-        set_color(ImGuiCol_ButtonHovered, m_style.color_button_hovered);
-    }
-
-    private:
-    void set_color(ImGuiCol imgui_color, std::string_view color_string) const {
-
-        auto color = parse_color_string(color_string);
-        if (not color)
-            throw widget_error("failed to parse color \"{}\"", color_string);
-
-        auto& style = ImGui::GetStyle();
-        style.Colors[imgui_color] = *color;
-
-    }
-
-};
+#include "widget.hpp"
+#include "widgets/image.hpp"
+#include "widgets/player.hpp"
 
 namespace widgets {
 
@@ -103,24 +41,6 @@ namespace widgets {
 
     };
 
-    class image : public widget {
-        public:
-        image(widget_style style, const std::filesystem::path& path, float scaling);
-        ~image();
-        image(const image&) = delete;
-        image(image&&) = delete;
-        image& operator=(const image&) = delete;
-        image& operator=(image&&) = delete;
-
-        void on_draw() const override;
-
-        private:
-        const float m_scaling;
-        int m_width;
-        int m_height;
-        GLuint m_texture_id = 0;
-
-    };
 
     class memory : public widget {
         public:

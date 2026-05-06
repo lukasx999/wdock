@@ -1,6 +1,10 @@
 #include <unordered_map>
+#include <cstring>
+#include <chrono>
+#include <format>
 
 #include "player.hpp"
+#include "image.hpp"
 
 namespace widgets {
 

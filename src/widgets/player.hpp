@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../widgets.hpp"
-
 #include <playerctl/playerctl.h>
+
+#include "../widget.hpp"
 
 namespace widgets {
 
