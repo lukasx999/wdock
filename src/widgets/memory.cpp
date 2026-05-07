@@ -58,7 +58,7 @@ namespace widgets {
         auto value_string = line.substr(value_start, n);
         uint64_t value;
 
-        auto ec = std::from_chars(value_string.data(), value_string.data() + value_string.size(), value).ec;
+        [[maybe_unused]] auto ec = std::from_chars(value_string.data(), value_string.data() + value_string.size(), value).ec;
         assert(ec == std::errc{});
 
         return std::make_tuple(attribute, value);

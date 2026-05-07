@@ -1,8 +1,11 @@
-run: build
+debug: build
     ./build/wdock
 
-build: configure
+build:
+    cmake -Bbuild -GNinja
     cmake --build build
 
-configure:
-    cmake -Bbuild -GNinja
+release:
+    cmake -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release
+    cmake --build build
+    ./build/wdock
