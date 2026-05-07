@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "window.hpp"
 
 #define GLAD_GL_IMPLEMENTATION
@@ -76,7 +78,10 @@ zwlr_layer_surface_v1_anchor window::anchor_to_wlr_anchor(anchor anchor) {
         case anchor::bottom: return ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
         case anchor::left:   return ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT;
         case anchor::right:  return ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-        default: assert(!"unreachable");
+        default: {
+            assert(!"unreachable");
+            std::unreachable();
+        }
     }
 }
 
@@ -86,7 +91,10 @@ zwlr_layer_shell_v1_layer window::layer_to_wlr_layer(layer layer) {
         case layer::bottom:     return ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM;
         case layer::top:        return ZWLR_LAYER_SHELL_V1_LAYER_TOP;
         case layer::overlay:    return ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY;
-        default: assert(!"unreachable");
+        default: {
+            assert(!"unreachable");
+            std::unreachable();
+        }
     }
 
 }

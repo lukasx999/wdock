@@ -8,7 +8,8 @@ namespace widgets {
 
     void disk::on_draw() const {
         struct statvfs buf;
-        assert(statvfs("/", &buf) == 0);
+        if (statvfs("/", &buf) != 0)
+            throw widget_error("failed to statvfs on \"/\"");
 
         auto gibs = 1 / std::pow(2, 30);
         auto size = buf.f_frsize;

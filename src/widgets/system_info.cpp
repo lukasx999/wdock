@@ -9,12 +9,17 @@
 namespace widgets {
 
     void system_info::on_draw() const {
+
         struct sysinfo sysinfo_buf;
-        assert(sysinfo(&sysinfo_buf) == 0);
+        if (sysinfo(&sysinfo_buf) != 0)
+            throw widget_error("call to sysinfo() failed");
+
         std::chrono::seconds uptime(sysinfo_buf.uptime);
 
         struct utsname uname_buf;
-        assert(uname(&uname_buf) == 0);
+        if (uname(&uname_buf) != 0)
+            throw widget_error("call to uname() failed");
+
         auto fmt = std::format("{} {} {} {}", uname_buf.sysname, uname_buf.nodename, uname_buf.release, uname_buf.machine);
 
         ImGui::Text("%s", fmt.c_str());
