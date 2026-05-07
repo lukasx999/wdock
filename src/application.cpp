@@ -1,5 +1,12 @@
 #include "application.hpp"
 
+application::application()
+: m_window("wdock", 100, 100)
+, m_ui(m_window.get_wl_display(), m_window.get_wl_egl_window())
+{
+    m_window.on_draw([&] { draw(); });
+}
+
 void application::load_config(const std::filesystem::path& config_path) {
 
     auto config = parse_config(config_path);

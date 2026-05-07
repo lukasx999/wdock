@@ -1,4 +1,5 @@
 #include "ui.hpp"
+#include "imgui_impl_wayland.hpp"
 
 ui::ui(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
     IMGUI_CHECKVERSION();
@@ -6,7 +7,8 @@ ui::ui(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
     ImGui_ImplWayland_Init(wl_display, wl_egl_window);
     ImGui_ImplOpenGL3_Init();
 
-    configure();
+    ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = nullptr;
 }
 
 ui::~ui() {
@@ -55,5 +57,30 @@ void ui::load_style(const struct config::window::style& style_config) {
 
     style.FontSizeBase = style_config.fontsize;
     load_font(style_config.font.c_str());
+
+}
+
+void ui::with_frame_context(std::invocable auto fn) const {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplWayland_NewFrame();
+    ImGui::NewFrame();
+    fn();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ui::load_font(const char* font_name) {
+
+    auto font = parse_font_name(font_name);
+    if (!font)
+        throw config_error("failed to parse font name \"{}\"", font_name);
+    print_debug("loaded font from \"{}\"", font->string());
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->ClearFonts();
+
+    auto ret = io.Fonts->AddFontFromFileTTF(font->c_str());
+    if (ret == nullptr)
+        throw config_error("failed to load font \"{}\"", font_name);
 
 }
