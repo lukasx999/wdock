@@ -8,16 +8,9 @@ namespace widgets {
 
     class datetime : public widget {
         public:
-        datetime(widget_style style, std::string timezone, std::string format)
-        : widget(style)
-        , m_timezone(std::move(timezone))
-        , m_format(std::move(format))
-        { }
+        datetime(widget_style style, std::string timezone, std::string format);
 
-        void on_draw() const override {
-            auto time = get_formatted_time();
-            ImGui::TextUnformatted(time.c_str());
-        }
+        void on_draw() const override;
 
         private:
         const std::string m_timezone;

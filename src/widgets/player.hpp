@@ -38,6 +38,7 @@ class player : public widget {
     const float m_album_art_scaling = 0.25f;
 
     void draw_album_art(const char* art_url) const;
+    void draw_control_buttons(const data& data) const;
     [[nodiscard]] data get_data() const;
 
 };

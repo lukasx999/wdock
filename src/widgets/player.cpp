@@ -22,23 +22,8 @@ namespace widgets {
         g_object_unref(m_player);
     }
 
-    void player::on_draw() const {
-
-        auto data = get_data();
+    void player::draw_control_buttons(const data& data) const {
         GError* err = nullptr;
-
-        draw_album_art(data.art_url);
-
-        ImGui::SameLine();
-        ImGui::Text("%s - %s - %s", data.artist, data.album, data.title);
-
-        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
-        ImGui::SameLine();
-
-        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
-
-        ImGui::SameLine();
-        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
 
         if (ImGui::Button(m_icon_prev))
             playerctl_player_previous(m_player, &err);
@@ -55,6 +40,26 @@ namespace widgets {
         if (ImGui::Button(m_icon_next))
             playerctl_player_next(m_player, &err);
 
+    }
+
+    void player::on_draw() const {
+
+        auto data = get_data();
+
+        draw_album_art(data.art_url);
+
+        ImGui::SameLine();
+        ImGui::Text("%s - %s - %s", data.artist, data.album, data.title);
+
+        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
+        ImGui::SameLine();
+
+        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
+
+        draw_control_buttons(data);
 
     }
 
