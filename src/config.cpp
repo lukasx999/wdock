@@ -126,7 +126,7 @@ namespace {
     [[nodiscard]] auto parse_widget_player(const widget_definition& def) -> std::unique_ptr<widgets::player> {
 
         std::optional<std::string> player_name;
-        bool show_album_art = false;
+        bool show_album_art = true;
 
         for (auto& [name, values] : def.props) {
             if (name == "player")
