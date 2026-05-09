@@ -41,6 +41,7 @@ namespace widgets {
 
     void image::on_draw() const {
         ImVec2 size(m_width * m_scaling, m_height * m_scaling);
+        imgui_center(size.x);
         ImGui::Image(m_texture_id, size);
     }
 

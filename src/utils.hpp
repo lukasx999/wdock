@@ -30,7 +30,8 @@ inline constexpr auto g_color_end        = "\033[0m";
 inline void imgui_center(float width, float alignment=0.5f) {
     float total_width = ImGui::GetContentRegionAvail().x;
     float offset = (total_width - width) * alignment;
-    ImGui::SetCursorPosX(offset);
+    if (offset >= 0.0f)
+        ImGui::SetCursorPosX(offset);
 }
 
 /// @return whether the operation was successful

@@ -39,6 +39,8 @@ class player : public widget {
 
     void draw_album_art(const char* art_url) const;
     void draw_control_buttons(const data& data) const;
+    void draw_progress_bar(const data& data) const;
+    void draw_text(const data& data) const;
     [[nodiscard]] data get_data() const;
 
 };

@@ -22,6 +22,32 @@ namespace widgets {
         g_object_unref(m_player);
     }
 
+    void player::on_draw() const {
+        auto data = get_data();
+        draw_album_art(data.art_url);
+        draw_text(data);
+        draw_progress_bar(data);
+        draw_control_buttons(data);
+    }
+
+    void player::draw_text(const data& data) const {
+        auto text = std::format("{} - {} - {}", data.artist, data.album, data.title);
+        float width = ImGui::CalcTextSize(text.c_str()).x;
+        imgui_center(width);
+        ImGui::TextUnformatted(text.c_str());
+    }
+
+    void player::draw_progress_bar(const data& data) const {
+
+        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
+
+        ImGui::SameLine();
+        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
+    }
+
     void player::draw_control_buttons(const data& data) const {
         GError* err = nullptr;
 
@@ -44,27 +70,6 @@ namespace widgets {
         ImGui::SameLine();
         if (ImGui::Button(m_icon_next))
             playerctl_player_next(m_player, &err);
-
-    }
-
-    void player::on_draw() const {
-
-        auto data = get_data();
-
-        draw_album_art(data.art_url);
-
-        ImGui::SameLine();
-        ImGui::Text("%s - %s - %s", data.artist, data.album, data.title);
-
-        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
-        ImGui::SameLine();
-
-        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
-
-        ImGui::SameLine();
-        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
-
-        draw_control_buttons(data);
 
     }
 
