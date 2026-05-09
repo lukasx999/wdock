@@ -9,8 +9,9 @@
 
 namespace widgets {
 
-    player::player(widget_style style, const char* player_name)
+    player::player(widget_style style, const char* player_name, bool show_album_art)
     : widget(style)
+    , m_show_album_art(show_album_art)
     {
         GError* err = nullptr;
 
@@ -25,7 +26,9 @@ namespace widgets {
 
     void player::on_draw() const {
         auto data = get_data();
-        draw_album_art(data.art_url);
+
+        if (m_show_album_art)
+            draw_album_art(data.art_url);
         draw_text(data);
         draw_progress_bar(data);
         draw_control_buttons(data);
@@ -44,6 +47,7 @@ namespace widgets {
         ImGui::TextUnformatted(text_position.c_str());
 
         ImGui::SameLine();
+        // TODO: dont hardcode height of progressbar - obtain fontsize
         ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 32}, "");
 
         ImGui::SameLine();

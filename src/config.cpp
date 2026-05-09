@@ -126,12 +126,16 @@ namespace {
     [[nodiscard]] auto parse_widget_player(const widget_definition& def) -> std::unique_ptr<widgets::player> {
 
         std::optional<std::string> player_name;
+        bool show_album_art = false;
 
         for (auto& [name, values] : def.props) {
-            if (name == "player") {
+            if (name == "player")
                 player_name = string_from_u8(values.front().as<std::u8string>());
 
-            } else
+            else if (name == "show-album-art")
+                show_album_art = values.front().as<bool>();
+
+            else
                 throw config_error("property \"{}\" does not exist in widget \"memory\".", name);
         }
 
@@ -139,7 +143,7 @@ namespace {
             ? player_name->c_str()
             : nullptr;
 
-        return std::make_unique<widgets::player>(def.style, player);
+        return std::make_unique<widgets::player>(def.style, player, show_album_art);
     }
 
     [[nodiscard]] auto parse_widget_disk(const widget_definition& def) -> std::unique_ptr<widgets::disk> {
