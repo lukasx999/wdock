@@ -34,7 +34,7 @@ namespace widgets {
 
         ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();
-        ImGui::ProgressBar(frac, {0, 0}, m_show_percentage ? nullptr : "");
+        ImGui::ProgressBar(frac, {300, 32}, m_show_percentage ? nullptr : "");
 
     }
 

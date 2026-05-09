@@ -22,7 +22,7 @@ namespace widgets {
 
         ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();
-        ImGui::ProgressBar(static_cast<float>(used) / total, {0, 0}, m_show_percentage ? nullptr : "");
+        ImGui::ProgressBar(static_cast<float>(used) / total, {300, 32}, m_show_percentage ? nullptr : "");
     }
 
 } // namespace widgets

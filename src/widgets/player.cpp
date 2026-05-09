@@ -44,7 +44,7 @@ namespace widgets {
         ImGui::TextUnformatted(text_position.c_str());
 
         ImGui::SameLine();
-        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
+        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 32}, "");
 
         ImGui::SameLine();
         auto text_length = std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length));
