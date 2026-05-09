@@ -25,12 +25,17 @@ namespace widgets {
     void player::draw_control_buttons(const data& data) const {
         GError* err = nullptr;
 
-        if (ImGui::Button(m_icon_prev))
-            playerctl_player_previous(m_player, &err);
-
         auto play_text = data.status == PLAYERCTL_PLAYBACK_STATUS_PLAYING
             ? m_icon_pause
             : m_icon_play;
+
+        // TODO: find a cleaner way to align the 3 buttons to the center
+        auto text = std::format("{}{}{}", m_icon_prev, play_text, m_icon_next);
+        auto width = ImGui::CalcTextSize(text.c_str()).x + 6 * ImGui::GetStyle().FramePadding.x + 2 * ImGui::GetStyle().ItemSpacing.x;
+        imgui_center(width);
+
+        if (ImGui::Button(m_icon_prev))
+            playerctl_player_previous(m_player, &err);
 
         ImGui::SameLine();
         if (ImGui::Button(play_text))

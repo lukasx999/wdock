@@ -27,6 +27,12 @@ inline constexpr auto g_color_end        = "\033[0m";
 #define DBG(value) std::println(std::cerr, "{}: {}", #value, value)
 #endif // NDEBUG
 
+inline void imgui_center(float width, float alignment=0.5f) {
+    float total_width = ImGui::GetContentRegionAvail().x;
+    float offset = (total_width - width) * alignment;
+    ImGui::SetCursorPosX(offset);
+}
+
 /// @return whether the operation was successful
 bool download_file(const char* url, const std::filesystem::path& path);
 
