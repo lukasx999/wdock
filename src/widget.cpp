@@ -6,11 +6,11 @@ void widget::apply_style() const {
     style.FrameRounding = m_style.frame_rounding;
     style.FramePadding = ImVec2(m_style.frame_padding, m_style.frame_padding);
 
-    set_color(ImGuiCol_Text, m_style.color_text);
+    set_color(ImGuiCol_Text,          m_style.color_text);
     set_color(ImGuiCol_PlotHistogram, m_style.color_progress);
-    set_color(ImGuiCol_FrameBg, m_style.color_frame_bg);
-    set_color(ImGuiCol_Button, m_style.color_button);
-    set_color(ImGuiCol_ButtonActive, m_style.color_button_active);
+    set_color(ImGuiCol_FrameBg,       m_style.color_frame_bg);
+    set_color(ImGuiCol_Button,        m_style.color_button);
+    set_color(ImGuiCol_ButtonActive,  m_style.color_button_active);
     set_color(ImGuiCol_ButtonHovered, m_style.color_button_hovered);
 }
 

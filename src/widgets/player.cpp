@@ -5,6 +5,7 @@
 
 #include "player.hpp"
 #include "image.hpp"
+#include "../utils.hpp"
 
 namespace widgets {
 
@@ -39,13 +40,15 @@ namespace widgets {
 
     void player::draw_progress_bar(const data& data) const {
 
-        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position)).c_str());
+        auto text_position = std::format("{:%M}:{:%S}", data.position, std::chrono::duration_cast<std::chrono::seconds>(data.position));
+        ImGui::TextUnformatted(text_position.c_str());
 
         ImGui::SameLine();
         ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 0}, "");
 
         ImGui::SameLine();
-        ImGui::TextUnformatted(std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length)).c_str());
+        auto text_length = std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length));
+        ImGui::TextUnformatted(text_length.c_str());
     }
 
     void player::draw_control_buttons(const data& data) const {

@@ -10,6 +10,7 @@
 #include <mutex>
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 // this lock exists, so that we can make sure that the main thread is not
 // rendering to the window, while the config watcher thread tries to reload the config.

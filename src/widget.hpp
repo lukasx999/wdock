@@ -26,6 +26,8 @@ struct widget_style {
     std::string color_progress       = "#4c566a";
     float frame_padding = 5;
     float frame_rounding = 5;
+    // TODO:
+    // bool centered = false;
 };
 
 class widget {

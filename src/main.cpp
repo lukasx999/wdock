@@ -1,12 +1,8 @@
 #include <cstdlib>
-#include <iostream>
 #include <format>
-#include <print>
 #include <thread>
-#include <cstdio>
 
 #include "application.hpp"
-#include "widgets.hpp"
 #include "window.hpp"
 #include "config.hpp"
 
