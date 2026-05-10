@@ -5,6 +5,7 @@
 #include "window.hpp"
 #include "config.hpp"
 #include "config_watcher.hpp"
+#include "print.hpp"
 
 int main() {
 

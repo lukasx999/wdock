@@ -1,10 +1,7 @@
 #pragma once
 
 #include <utility>
-#include <print>
-#include <functional>
 #include <cassert>
-#include <iostream>
 #include <optional>
 #include <string_view>
 #include <filesystem>
@@ -17,18 +14,6 @@
 // rendering to the window, while the config watcher thread tries to reload the config.
 inline std::mutex g_draw_lock;
 
-inline constexpr auto g_color_red        = "\033[0;31m";
-inline constexpr auto g_color_blue       = "\033[0;34m";
-inline constexpr auto g_color_green      = "\033[0;32m";
-inline constexpr auto g_color_bold_red   = "\033[1;31m";
-inline constexpr auto g_color_bold_blue  = "\033[1;34m";
-inline constexpr auto g_color_bold_green = "\033[1;32m";
-inline constexpr auto g_color_end        = "\033[0m";
-
-#ifndef NDEBUG
-#define DBG(value) std::println(std::cerr, "{}: {}", #value, value)
-#endif // NDEBUG
-
 inline void imgui_center(float width, float alignment=0.5f) {
     float total_width = ImGui::GetContentRegionAvail().x;
     float offset = (total_width - width) * alignment;
@@ -40,26 +25,6 @@ inline void imgui_center(float width, float alignment=0.5f) {
 bool download_file(const char* url, const std::filesystem::path& path);
 
 [[nodiscard]] auto parse_font_name(const char* font_name) -> std::optional<std::filesystem::path>;
-
-template <typename... Args>
-inline void print_info(std::format_string<Args...> fmt, Args&&... args) {
-    auto msg = std::format(fmt, std::forward<Args>(args)...);
-    std::println(std::cerr, "{}INFO{}: {}", g_color_bold_blue, g_color_end, msg);
-}
-
-template <typename... Args>
-inline void print_debug([[maybe_unused]] std::format_string<Args...> fmt, [[maybe_unused]] Args&&... args) {
-    #ifndef NDEBUG
-    auto msg = std::format(fmt, std::forward<Args>(args)...);
-    std::println(std::cerr, "{}DEBUG{}: {}", g_color_bold_green, g_color_end, msg);
-    #endif // NDEBUG
-}
-
-template <typename... Args>
-inline void print_error(std::format_string<Args...> fmt, Args&&... args) {
-    auto msg = std::format(fmt, std::forward<Args>(args)...);
-    std::println(std::cerr, "{}ERROR{}: {}", g_color_bold_red, g_color_end, msg);
-}
 
 template <typename T>
 class string_switch {

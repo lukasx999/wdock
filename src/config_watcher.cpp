@@ -1,4 +1,5 @@
 #include "config_watcher.hpp"
+#include "print.hpp"
 
 config_watcher::config_watcher(application& app, std::filesystem::path path)
 : m_app(app)
@@ -9,7 +10,7 @@ config_watcher::config_watcher(application& app, std::filesystem::path path)
         auto stop_fn = std::bind(&std::stop_token::stop_requested, stop_token);
 
         if (not watch_file(stop_fn))
-            print_error("failed to install watcher for config file at \"{}\"", path.string());
+            print_warning("failed to install watcher for config file at \"{}\"", path.string());
     });
 
 }
