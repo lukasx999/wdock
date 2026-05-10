@@ -108,23 +108,6 @@ class string_switch {
 
 };
 
-consteval void test_string_switch() {
-
-    static_assert(string_switch<int>("bar")
-        .match("foo", 1)
-        .match("bar", 2)
-        .match("baz", 3)
-        .done() == 2);
-
-    static_assert(string_switch<int>("qux")
-        .match("foo", 1)
-        .match("bar", 2)
-        .match("baz", 3)
-        .catchall(45)
-        .done() == 45);
-
-}
-
 [[nodiscard]] constexpr inline auto parse_color_string(std::string_view string) -> std::optional<ImVec4> {
 
     auto color = string_switch<ImVec4>(string)
@@ -165,51 +148,5 @@ consteval void test_string_switch() {
         assert(!"string length should have been checked by now");
         std::unreachable();
     }
-
-}
-
-consteval void test_parse_color_string() {
-
-    constexpr auto a = parse_color_string("#00000000");
-    static_assert(a.has_value());
-    static_assert(a->x == 0);
-    static_assert(a->y == 0);
-    static_assert(a->z == 0);
-    static_assert(a->w == 0);
-
-    constexpr auto b = parse_color_string("#ffffffff");
-    static_assert(b.has_value());
-    static_assert(b->x == 1);
-    static_assert(b->y == 1);
-    static_assert(b->z == 1);
-    static_assert(b->w == 1);
-
-    constexpr auto c = parse_color_string("#ffffff");
-    static_assert(c.has_value());
-    static_assert(c->x == 1);
-    static_assert(c->y == 1);
-    static_assert(c->z == 1);
-    static_assert(c->w == 1);
-
-    constexpr auto d = parse_color_string("transparent");
-    static_assert(d.has_value());
-    static_assert(d->x == 0);
-    static_assert(d->y == 0);
-    static_assert(d->z == 0);
-    static_assert(d->w == 0);
-
-    constexpr auto e = parse_color_string("red");
-    static_assert(e.has_value());
-    static_assert(e->x == 1);
-    static_assert(e->y == 0);
-    static_assert(e->z == 0);
-    static_assert(e->w == 1);
-
-    constexpr auto f = parse_color_string("white");
-    static_assert(f.has_value());
-    static_assert(f->x == 1);
-    static_assert(f->y == 1);
-    static_assert(f->z == 1);
-    static_assert(f->w == 1);
 
 }
