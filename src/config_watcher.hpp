@@ -12,6 +12,12 @@ class config_watcher {
     public:
     config_watcher(application& app, std::filesystem::path path);
 
+    ~config_watcher() = default;
+    config_watcher(const config_watcher&) = delete;
+    config_watcher(config_watcher&&) noexcept = delete;
+    config_watcher& operator=(const config_watcher&) = delete;
+    config_watcher& operator=(config_watcher&&) noexcept = delete;
+
     private:
     std::jthread m_thread;
     application& m_app;

@@ -10,12 +10,12 @@ class player : public widget {
     public:
     /// @param player_name name of the music player, may be nullptr for automatic detection
     player(widget_style style, const char* player_name, bool show_album_art);
-    ~player();
 
+    ~player();
     player(const player&) = delete;
-    player(player&&) = delete;
+    player(player&&) noexcept = delete;
     player& operator=(const player&) = delete;
-    player& operator=(player&&) = delete;
+    player& operator=(player&&) noexcept = delete;
 
     void on_draw() const override;
 
