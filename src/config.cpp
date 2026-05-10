@@ -41,6 +41,25 @@ namespace {
         return std::make_unique<widgets::datetime>(def.style, std::move(timezone), std::move(format));
     }
 
+    [[nodiscard]] auto parse_widget_label(const widget_definition& def) -> std::unique_ptr<widgets::label> {
+
+        std::optional<std::string> text;
+
+        for (auto& [name, values] : def.props) {
+
+            if (name == "text")
+                text = string_from_u8(values.front().as<std::u8string>());
+
+            else
+                throw config_error("property \"{}\" does not exist in widget \"label\".", name);
+        }
+
+        if (!text)
+            throw config_error("property \"text\" in widget preset \"label\" does not have a default value.");
+
+        return std::make_unique<widgets::label>(def.style, std::move(*text));
+    }
+
     [[nodiscard]] auto parse_widget_image(const widget_definition& def) -> std::unique_ptr<widgets::image> {
 
         std::optional<std::string> path;
@@ -166,6 +185,9 @@ namespace {
             // TODO: string_switch
             if (preset == "datetime")
                 widgets.push_back(parse_widget_datetime(def));
+
+            else if (preset == "label")
+                widgets.push_back(parse_widget_label(def));
 
             else if (preset == "image")
                 widgets.push_back(parse_widget_image(def));

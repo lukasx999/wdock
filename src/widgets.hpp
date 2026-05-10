@@ -8,3 +8,4 @@
 #include "widgets/disk.hpp"
 #include "widgets/custom.hpp"
 #include "widgets/button.hpp"
+#include "widgets/label.hpp"
