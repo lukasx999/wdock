@@ -35,9 +35,9 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    // TODO: stop this thread if an exception is thrown
-    std::jthread config_watcher([&] {
-        if (not watch_file(config_path, std::bind(reload_config, std::ref(*app), config_path)))
+    std::jthread config_watcher([&](std::stop_token stop_token) {
+        std::function<bool()> stop_fn = std::bind(&std::stop_token::stop_requested, stop_token);
+        if (not watch_file_async(config_path, std::bind(reload_config, std::ref(*app), config_path), stop_fn))
             print_error("failed to install watcher for config file at \"{}\"", config_path);
     });
 
@@ -48,10 +48,12 @@ int main() {
 
     } catch (const config_error& error) {
         print_error("failed to load config file: {}", error.what());
+        config_watcher.request_stop();
         return EXIT_FAILURE;
 
     } catch (const widget_error& error) {
         print_error("failed to configure widget: {}", error.what());
+        config_watcher.request_stop();
         return EXIT_FAILURE;
     }
 
