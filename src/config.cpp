@@ -8,8 +8,6 @@
 #include "utils.hpp"
 #include "widgets.hpp"
 
-// TODO: handle type errors
-
 namespace {
 
     struct widget_definition {
@@ -354,57 +352,61 @@ namespace {
 
 } // namespace
 
-// TODO: put all of this stuff into a config_parser class?
 [[nodiscard]] config parse_config(const std::filesystem::path& config_path) {
 
-    if (not std::filesystem::exists(config_path))
-        throw config_error("config file at \"{}\" does not exist.", config_path.c_str());
+    try {
 
-    std::ifstream stream(config_path);
-    std::u8string config_src(std::istreambuf_iterator<char>(stream), {});
-    auto doc = kdl::parse(config_src);
+        if (not std::filesystem::exists(config_path))
+            throw config_error("config file at \"{}\" does not exist.", config_path.c_str());
 
-    config config;
+        std::ifstream stream(config_path);
+        std::u8string config_src(std::istreambuf_iterator<char>(stream), {});
+        auto doc = kdl::parse(config_src);
 
-    std::vector<std::string> used_widgets;
-    std::unordered_map<std::string, widget_definition> widget_definitions;
+        config config;
 
-    for (auto& node : doc.nodes()) {
-        auto name = string_from_u8(node.name());
+        std::vector<std::string> used_widgets;
+        std::unordered_map<std::string, widget_definition> widget_definitions;
 
-        if (name == "window")
-            // TODO: check for multiple definitions
-            config.window = parse_window(node);
+        for (auto& node : doc.nodes()) {
+            auto name = string_from_u8(node.name());
 
-        else if (name == "declare-widgets") {
-            if (not used_widgets.empty())
-                throw config_error("there may only be one \"declare-widgets\" definition.");
+            if (name == "window")
+                // TODO: check for multiple definitions
+                config.window = parse_window(node);
 
-            used_widgets = parse_widget_declaration(node);
+            else if (name == "declare-widgets") {
+                if (not used_widgets.empty())
+                    throw config_error("there may only be one \"declare-widgets\" definition.");
 
-        } else if (name == "define-widget") {
-            auto [name, def] = parse_widget_definition(node);
+                used_widgets = parse_widget_declaration(node);
 
-            if (widget_definitions.contains(name))
-                throw config_error("widget \"{}\" has been defined multiple times.", name);
+            } else if (name == "define-widget") {
+                auto [name, def] = parse_widget_definition(node);
 
-            widget_definitions.insert({name, def});
+                if (widget_definitions.contains(name))
+                    throw config_error("widget \"{}\" has been defined multiple times.", name);
 
-        } else
-            throw config_error("invalid config option: \"{}\"", name);
+                widget_definitions.insert({name, def});
 
+            } else
+                throw config_error("invalid config option: \"{}\"", name);
+
+        }
+
+        auto widgets = used_widgets
+            | std::views::transform([&](const std::string& name) {
+                if (not widget_definitions.contains(name))
+                    throw config_error("widget \"{}\" has not been defined.", name);
+                return widget_definitions[name];
+            })
+            | std::ranges::to<std::vector<widget_definition>>();
+
+        config.widgets = parse_widgets(widgets);
+        return config;
+
+    } catch (const kdl::TypeError& error) {
+        throw config_error("incompatible types");
     }
-
-    auto widgets = used_widgets
-        | std::views::transform([&](const std::string& name) {
-            if (not widget_definitions.contains(name))
-                throw config_error("widget \"{}\" has not been defined.", name);
-            return widget_definitions[name];
-        })
-        | std::ranges::to<std::vector<widget_definition>>();
-
-    config.widgets = parse_widgets(widgets);
-
-    return config;
 
 }
