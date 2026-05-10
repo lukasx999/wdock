@@ -5,14 +5,11 @@
 #include <optional>
 #include <string_view>
 #include <filesystem>
-#include <mutex>
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
-// this lock exists, so that we can make sure that the main thread is not
-// rendering to the window, while the config watcher thread tries to reload the config.
-inline std::mutex g_draw_lock;
+#include "print.hpp"
 
 inline void imgui_center(float width, float alignment=0.5f) {
     float total_width = ImGui::GetContentRegionAvail().x;

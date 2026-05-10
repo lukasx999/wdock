@@ -1,9 +1,4 @@
-#include <cstdlib>
-#include <format>
-
 #include "application.hpp"
-#include "window.hpp"
-#include "config.hpp"
 #include "config_watcher.hpp"
 #include "print.hpp"
 

@@ -16,8 +16,6 @@ config_watcher::config_watcher(application& app, std::filesystem::path path)
 }
 
 void config_watcher::reload_config() const {
-    std::scoped_lock lock(g_draw_lock);
-
     try {
         m_app.load_config(m_config_path);
         print_info("config was reloaded from \"{}\"", m_config_path.string());

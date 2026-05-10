@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "window.hpp"
 #include "ui.hpp"
 
@@ -17,6 +19,11 @@ class application {
     window m_window;
     ui m_ui;
     std::vector<std::unique_ptr<widget>> m_widgets;
+
+    // this lock exists, so that we can make sure that the main thread is not
+    // rendering to the window, while the config watcher thread tries to reload the config.
+    mutable std::mutex m_draw_lock;
+
 
     void draw() const;
 

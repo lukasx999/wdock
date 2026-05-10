@@ -8,6 +8,7 @@ application::application()
 }
 
 void application::load_config(const std::filesystem::path& config_path) {
+    std::scoped_lock lock(m_draw_lock);
 
     auto config = parse_config(config_path);
 
@@ -25,7 +26,7 @@ void application::load_config(const std::filesystem::path& config_path) {
 }
 
 void application::draw() const {
-    std::scoped_lock lock(g_draw_lock);
+    std::scoped_lock lock(m_draw_lock);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
