@@ -1,8 +1,6 @@
 #include <unistd.h>
 #include <fontconfig/fontconfig.h>
-#include <sys/inotify.h>
 #include <curl/curl.h>
-#include <poll.h>
 
 #include "utils.hpp"
 
@@ -25,103 +23,6 @@ bool download_file(const char* url, const std::filesystem::path& path) {
 
     fclose(file);
     curl_easy_cleanup(curl);
-
-    return true;
-}
-
-bool watch_file_async(const std::filesystem::path& path, std::function<void()> fn, std::function<bool()> stop_fn) {
-
-    // vim will only reliably produce IN_MOVE_SELF events, so we have to catch those
-    auto flags = IN_MODIFY | IN_CLOSE_WRITE | IN_MOVE_SELF;
-
-    int fd = inotify_init1(IN_NONBLOCK);
-    if (fd == -1)
-        return false;
-
-    int wd = inotify_add_watch(fd, path.c_str(), flags);
-    if (wd == -1)
-        return false;
-
-    struct pollfd pfd;
-    pfd.fd = fd;
-    pfd.events = POLLIN;
-
-    while (!stop_fn()) {
-        int num_fds = poll(&pfd, 1, 0);
-        assert(num_fds != -1);
-
-        if (num_fds == 1) {
-            if (!(pfd.revents & POLLIN)) continue;
-
-            struct inotify_event event;
-            ssize_t bytes_read = read(fd, &event, sizeof event);
-            if (bytes_read == 0 || bytes_read == -1)
-                return false;
-
-            // vim will actually swap the edited file with a new file, so
-            // we have to catch that and add the file back to the watchlist
-            if (event.mask & IN_IGNORED) {
-                while (true) {
-                    wd = inotify_add_watch(fd, path.c_str(), flags);
-                    if (wd != -1) break;
-                    if (errno != ENOENT)
-                        return false;
-                }
-            }
-
-            fn();
-
-        }
-
-    }
-
-    if (inotify_rm_watch(fd, wd) == -1)
-        return false;
-
-    if (close(fd) == -1)
-        return false;
-
-    return true;
-}
-
-bool watch_file(const std::filesystem::path& path, std::function<void()> fn) {
-
-    // vim will only reliably produce IN_MOVE_SELF events, so we have to catch those
-    auto flags = IN_MODIFY | IN_CLOSE_WRITE | IN_MOVE_SELF;
-
-    int fd = inotify_init();
-    if (fd == -1)
-        return false;
-
-    int wd = inotify_add_watch(fd, path.c_str(), flags);
-    if (wd == -1)
-        return false;
-
-    while (true) {
-        struct inotify_event event;
-        ssize_t bytes_read = read(fd, &event, sizeof event);
-        if (bytes_read == 0 || bytes_read == -1)
-            return false;
-
-        // vim will actually swap the edited file with a new file, so
-        // we have to catch that and add the file back to the watchlist
-        if (event.mask & IN_IGNORED) {
-            while (true) {
-                wd = inotify_add_watch(fd, path.c_str(), flags);
-                if (wd != -1) break;
-                if (errno != ENOENT)
-                    return false;
-            }
-        }
-
-        fn();
-    }
-
-    if (inotify_rm_watch(fd, wd) == -1)
-        return false;
-
-    if (close(fd) == -1)
-        return false;
 
     return true;
 }

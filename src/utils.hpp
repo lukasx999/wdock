@@ -29,8 +29,6 @@ inline constexpr auto g_color_end        = "\033[0m";
 #define DBG(value) std::println(std::cerr, "{}: {}", #value, value)
 #endif // NDEBUG
 
-bool watch_file_async(const std::filesystem::path& path, std::function<void()> fn, std::function<bool()> stop_fn);
-
 inline void imgui_center(float width, float alignment=0.5f) {
     float total_width = ImGui::GetContentRegionAvail().x;
     float offset = (total_width - width) * alignment;
@@ -40,10 +38,6 @@ inline void imgui_center(float width, float alignment=0.5f) {
 
 /// @return whether the operation was successful
 bool download_file(const char* url, const std::filesystem::path& path);
-
-/// @brief calls a function whenever a file is modified.
-/// @return returns false if the watcher could not be installed
-bool watch_file(const std::filesystem::path& path, std::function<void()> fn);
 
 [[nodiscard]] auto parse_font_name(const char* font_name) -> std::optional<std::filesystem::path>;
 
