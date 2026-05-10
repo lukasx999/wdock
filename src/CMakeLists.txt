@@ -6,5 +6,6 @@ application.cpp
 ui.cpp
 widget.cpp
 utils.cpp
+config_watcher.cpp
 )
 add_subdirectory(widgets/)
