@@ -1,9 +1,11 @@
 #pragma once
 
 #include <mutex>
+#include <filesystem>
 
 #include "window.hpp"
 #include "ui.hpp"
+#include "widget.hpp"
 
 class application {
     public:

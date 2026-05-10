@@ -196,9 +196,9 @@ namespace {
         return widgets;
     }
 
-    [[nodiscard]] struct config::window::style parse_style_window(const kdl::Node& node) {
+    [[nodiscard]] window_style parse_style_window(const kdl::Node& node) {
 
-        struct config::window::style style;
+        window_style style;
 
         for (auto& child : node.children()) {
             auto args = child.args();

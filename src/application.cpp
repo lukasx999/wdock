@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "config.hpp"
 
 application::application()
 : m_window("wdock", 100, 100)

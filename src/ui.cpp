@@ -1,4 +1,6 @@
 #include "ui.hpp"
+#include "config.hpp"
+#include "utils.hpp"
 #include "imgui_impl_wayland.hpp"
 
 ui::ui(struct wl_display* wl_display, struct wl_egl_window* wl_egl_window) {
@@ -38,25 +40,25 @@ void ui::draw(std::function<void()> fn) const {
     });
 }
 
-void ui::load_style(const struct config::window::style& style_config) {
+void ui::load_style(const window_style& window_style) {
     auto& style = ImGui::GetStyle();
 
-    float spacing = style_config.item_spacing;
+    float spacing = window_style.item_spacing;
     style.ItemSpacing = ImVec2(spacing, spacing);
 
-    float padding = style_config.padding;
+    float padding = window_style.padding;
     style.WindowPadding = ImVec2(padding, padding);
 
-    style.WindowRounding = style_config.border_radius;
+    style.WindowRounding = window_style.border_radius;
 
-    auto color_bg = parse_color_string(style_config.background_color);
+    auto color_bg = parse_color_string(window_style.background_color);
     if (not color_bg)
-        throw config_error("failed to parse color \"{}\"", style_config.background_color);
+        throw config_error("failed to parse color \"{}\"", window_style.background_color);
 
     style.Colors[ImGuiCol_WindowBg] = *color_bg;
 
-    style.FontSizeBase = style_config.fontsize;
-    load_font(style_config.font.c_str());
+    style.FontSizeBase = window_style.fontsize;
+    load_font(window_style.font.c_str());
 
 }
 

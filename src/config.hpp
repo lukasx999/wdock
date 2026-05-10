@@ -4,6 +4,7 @@
 
 #include "window.hpp"
 #include "widgets.hpp"
+#include "ui.hpp"
 
 struct config_error : std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -22,20 +23,11 @@ struct config {
             int height = 800;
         };
 
-        struct style {
-            float padding = 20.0f;
-            float border_radius = 15.0f;
-            float fontsize = 30.0f;
-            float item_spacing = 10.0f;
-            std::string font = "JetBrainsMonoNerdFontMono";
-            std::string background_color = "#0000007f";
-        };
-
         size size;
         ::window::anchor anchor = ::window::anchor::right;
         ::window::layer layer = ::window::layer::background;
         ::window::margin margin = { 0, 200, 0, 0 };
-        style style;
+        window_style style;
     };
 
     window window;

@@ -1,4 +1,5 @@
 #include "config_watcher.hpp"
+#include "config.hpp"
 #include "print.hpp"
 
 config_watcher::config_watcher(application& app, std::filesystem::path path)
