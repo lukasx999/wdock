@@ -24,10 +24,6 @@ class config_watcher {
 
     }
 
-    void stop() {
-        m_thread.request_stop();
-    }
-
     private:
     std::jthread m_thread;
 
