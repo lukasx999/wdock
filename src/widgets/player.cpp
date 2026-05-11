@@ -35,10 +35,11 @@ namespace widgets {
     }
 
     void player::draw_text(const data& data) const {
-        auto text = std::format("{} - {} - {}", data.artist, data.album, data.title);
-        float width = ImGui::CalcTextSize(text.c_str()).x;
-        imgui_center(width);
-        ImGui::TextUnformatted(text.c_str());
+        imgui_center(ImGui::CalcTextSize(data.title).x);
+        ImGui::TextUnformatted(data.title);
+
+        imgui_center(ImGui::CalcTextSize(data.artist).x);
+        ImGui::TextUnformatted(data.artist);
     }
 
     void player::draw_progress_bar(const data& data) const {
@@ -48,7 +49,7 @@ namespace widgets {
 
         ImGui::SameLine();
         // TODO: dont hardcode height of progressbar - obtain fontsize
-        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 32}, "");
+        ImGui::ProgressBar(static_cast<float>(data.position.count()) / data.length.count(), {0, 15}, "");
 
         ImGui::SameLine();
         auto text_length = std::format("{:%M}:{:%S}", data.length, std::chrono::duration_cast<std::chrono::seconds>(data.length));

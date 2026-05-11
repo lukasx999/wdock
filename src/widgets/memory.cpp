@@ -29,7 +29,7 @@ namespace widgets {
         int64_t used = total - avail;
 
         auto gibs = 1 / std::pow(2, 20);
-        auto fmt = std::format("{:.1f}Gib/{:.1f}Gib", used * gibs, total * gibs);
+        auto fmt = std::format("mem: {:.1f}Gib/{:.1f}Gib", used * gibs, total * gibs);
         float frac = static_cast<float>(used) / total;
 
         ImGui::TextUnformatted(fmt.c_str());

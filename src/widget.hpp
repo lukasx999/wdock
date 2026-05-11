@@ -24,8 +24,8 @@ struct widget_style {
     std::string color_button_hovered = "#3b4252";
     std::string color_button_active  = "#434c5e";
     std::string color_progress       = "#4c566a";
-    float frame_padding = 5;
-    float frame_rounding = 5;
+    float frame_padding = 0;
+    float frame_rounding = 0;
     // TODO:
     // bool centered = false;
 };

@@ -20,7 +20,7 @@ namespace widgets {
         if (uname(&uname_buf) != 0)
             throw widget_error("call to uname() failed");
 
-        auto fmt = std::format("{} {} {} {}", uname_buf.sysname, uname_buf.nodename, uname_buf.release, uname_buf.machine);
+        auto fmt = std::format("sys: {} {} {} {}", uname_buf.sysname, uname_buf.nodename, uname_buf.release, uname_buf.machine);
 
         ImGui::Text("%s", fmt.c_str());
         ImGui::TextUnformatted(std::format("uptime: {}", uptime).c_str());
