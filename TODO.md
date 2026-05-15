@@ -1,5 +1,6 @@
 # TODO
 
+- support for per-widget fonts and fontsizes
 - BUG: image turns black when reloading config
 - mini process viewer (like htop)
 - calendar api
