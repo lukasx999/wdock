@@ -49,7 +49,14 @@ define-widget time preset=datetime {
 
 define-widget system preset=system {
     label "system:"
-    // format "{sysname} {nodename} {release} {machine} {procs} {uptime}"
+    // possibles values:
+    // * {sysname}
+    // * {nodename}
+    // * {release}
+    // * {machine}
+    // * {procs}
+    // * {uptime}
+    format "{sysname} {nodename} {release} {machine}"
 }
 
 define-widget custom_command preset=custom {

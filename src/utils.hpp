@@ -28,6 +28,16 @@ namespace ImGuiHelpers {
 
 } // namespace ImGuiHelpers
 
+inline void replace_string(std::string& string, std::string_view query, std::string_view replacement) {
+    size_t offset = 0;
+    while (true) {
+        size_t pos = string.find(query, offset);
+        if (pos == std::string::npos)
+            break;
+        string.replace(pos, query.length(), replacement);
+    }
+}
+
 /// @return whether the operation was successful
 bool download_file(const char* url, const std::filesystem::path& path);
 

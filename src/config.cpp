@@ -187,15 +187,20 @@ namespace {
 
     [[nodiscard]] auto parse_widget_system_info(const widget_definition& def) -> std::unique_ptr<widgets::system_info> {
         std::string label = "system:";
+        std::string format = "{sysname} {nodename} {release} {machine}";
 
         for (auto& [name, values] : def.props) {
             if (name == "label")
                 label = string_from_u8(values.front().as<std::u8string>());
+
+            else if (name == "format")
+                format = string_from_u8(values.front().as<std::u8string>());
+
             else
                 throw config_error("property \"{}\" does not exist in widget \"system\".", name);
         }
 
-        return std::make_unique<widgets::system_info>(def.style, std::move(label));
+        return std::make_unique<widgets::system_info>(def.style, std::move(label), std::move(format));
     }
 
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {

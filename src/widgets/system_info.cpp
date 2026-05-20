@@ -10,26 +10,42 @@ namespace widgets {
 
     void system_info::on_draw() const {
 
-        struct sysinfo sysinfo_buf;
-        if (sysinfo(&sysinfo_buf) != 0)
-            throw widget_error("call to sysinfo() failed");
+        std::string fmt = m_format;
+        auto data = get_data();
 
-        std::chrono::seconds uptime(sysinfo_buf.uptime);
-
-        struct utsname uname_buf;
-        if (uname(&uname_buf) != 0)
-            throw widget_error("call to uname() failed");
-
-        auto fmt = std::format("{} {} {} {}", uname_buf.sysname, uname_buf.nodename, uname_buf.release, uname_buf.machine);
+        replace_string(fmt, "{sysname}", data.sysname);
+        replace_string(fmt, "{nodename}", data.nodename);
+        replace_string(fmt, "{sysname}", data.sysname);
+        replace_string(fmt, "{release}", data.release);
+        replace_string(fmt, "{machine}", data.machine);
+        replace_string(fmt, "{uptime}", std::format("{}", data.uptime));
+        replace_string(fmt, "{procs}", std::to_string(data.procs));
 
         if (!m_label.empty()) {
             ImGui::TextUnformatted(m_label.c_str());
             ImGui::SameLine();
         }
         ImGui::Text("%s", fmt.c_str());
-        // ImGui::TextUnformatted(std::format("uptime: {}", uptime).c_str());
-        // ImGui::Text("procs: %d", sysinfo_buf.procs);
     }
 
+    system_info::data system_info::get_data() {
+
+        struct sysinfo sysinfo_buf;
+        if (sysinfo(&sysinfo_buf) != 0)
+            throw widget_error("call to sysinfo() failed");
+
+        struct utsname uname_buf;
+        if (uname(&uname_buf) != 0)
+            throw widget_error("call to uname() failed");
+
+        return {
+            uname_buf.sysname,
+            uname_buf.nodename,
+            uname_buf.release,
+            uname_buf.machine,
+            std::chrono::seconds(sysinfo_buf.uptime),
+            sysinfo_buf.procs
+        };
+    }
 
 } // namespace widgets
