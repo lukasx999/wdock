@@ -24,12 +24,16 @@ namespace {
     [[nodiscard]] auto parse_widget_datetime(const widget_definition& def) -> std::unique_ptr<widgets::datetime> {
 
         std::string timezone = "Europe/Vienna";
+        std::string label = "datetime:";
         std::string format = "%d.%m.%Y";
 
         for (auto& [name, values] : def.props) {
 
             if (name == "timezone")
                 timezone = string_from_u8(values.front().as<std::u8string>());
+
+            else if (name == "label")
+                label = string_from_u8(values.front().as<std::u8string>());
 
             else if (name == "format")
                 format = string_from_u8(values.front().as<std::u8string>());
@@ -38,7 +42,7 @@ namespace {
                 throw config_error("property \"{}\" does not exist in widget \"datetime\".", name);
         }
 
-        return std::make_unique<widgets::datetime>(def.style, std::move(timezone), std::move(format));
+        return std::make_unique<widgets::datetime>(def.style, std::move(timezone), std::move(label), std::move(format));
     }
 
     [[nodiscard]] auto parse_widget_label(const widget_definition& def) -> std::unique_ptr<widgets::label> {
@@ -176,6 +180,19 @@ namespace {
         return std::make_unique<widgets::disk>(def.style, show_percentage);
     }
 
+    [[nodiscard]] auto parse_widget_system_info(const widget_definition& def) -> std::unique_ptr<widgets::system_info> {
+        std::string label = "system:";
+
+        for (auto& [name, values] : def.props) {
+            if (name == "label")
+                label = string_from_u8(values.front().as<std::u8string>());
+            else
+                throw config_error("property \"{}\" does not exist in widget \"system\".", name);
+        }
+
+        return std::make_unique<widgets::system_info>(def.style, std::move(label));
+    }
+
     [[nodiscard]] auto parse_widgets(std::span<const widget_definition> widget_definitions) -> std::vector<std::unique_ptr<widget>> {
         std::vector<std::unique_ptr<widget>> widgets;
 
@@ -193,7 +210,7 @@ namespace {
                 widgets.push_back(parse_widget_image(def));
 
             else if (preset == "system")
-                widgets.push_back(std::make_unique<widgets::system_info>(def.style));
+                widgets.push_back(parse_widget_system_info(def));
 
             else if (preset == "button")
                 widgets.push_back(parse_widget_button(def));

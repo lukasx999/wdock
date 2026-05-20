@@ -4,13 +4,16 @@
 
 namespace widgets {
 
-    datetime::datetime(widget_style style, std::string timezone, std::string format)
+    datetime::datetime(widget_style style, std::string timezone, std::string label, std::string format)
     : widget(style)
     , m_timezone(std::move(timezone))
+    , m_label(std::move(label))
     , m_format(std::move(format))
     { }
 
     void datetime::on_draw() const {
+        ImGui::TextUnformatted(m_label.c_str());
+        ImGui::SameLine();
         auto time = get_formatted_time();
         ImGui::TextUnformatted(time.c_str());
     }

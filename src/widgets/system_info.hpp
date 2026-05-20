@@ -6,11 +6,15 @@ namespace widgets {
 
     class system_info : public widget {
         public:
-        explicit system_info(widget_style style)
+        system_info(widget_style style, std::string label)
         : widget(style)
+        , m_label(std::move(label))
         { }
 
         void on_draw() const override;
+
+        private:
+        const std::string m_label;
 
     };
 

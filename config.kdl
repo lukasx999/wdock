@@ -34,16 +34,22 @@ define-widget header preset=label {
 
 define-widget date preset=datetime {
     timezone "Europe/Vienna"
-    format "date: %d.%m.%Y" // the format string is parsed by std::strftime (https://en.cppreference.com/cpp/chrono/c/strftime)
+    label "date:"
+    format "%d.%m.%Y" // the format string is parsed by std::strftime (https://en.cppreference.com/cpp/chrono/c/strftime)
+    // style {
+    //     align "right" // possible values: { left center right }
+    // }
 }
 
 define-widget time preset=datetime {
     timezone "Europe/Vienna"
-    format "time: %H:%M"
+    label "time:"
+    format "%H:%M"
 }
 
 define-widget system preset=system {
-    format "system: {sysname} {nodename} {release} {machine} {uptime:seconds}"
+    label "system:"
+    // format "{sysname} {nodename} {release} {machine} {procs} {uptime}"
 }
 
 define-widget say_hello preset=custom {
