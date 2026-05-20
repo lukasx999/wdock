@@ -12,8 +12,10 @@ namespace widgets {
     { }
 
     void datetime::on_draw() const {
-        ImGui::TextUnformatted(m_label.c_str());
-        ImGui::SameLine();
+        if (!m_label.empty()) {
+            ImGui::TextUnformatted(m_label.c_str());
+            ImGui::SameLine();
+        }
         auto time = get_formatted_time();
         ImGui::TextUnformatted(time.c_str());
     }

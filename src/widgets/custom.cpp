@@ -17,6 +17,10 @@ namespace widgets {
         if (not feof(file))
             throw widget_error("error reading output from command: \"{}\"", m_command);
 
+        if (!m_label.empty()) {
+            ImGui::TextUnformatted(m_label.c_str());
+            ImGui::SameLine();
+        }
         ImGui::TextUnformatted(buf.c_str());
 
         assert(pclose(file) != -1);

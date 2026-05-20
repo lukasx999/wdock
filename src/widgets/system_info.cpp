@@ -22,8 +22,10 @@ namespace widgets {
 
         auto fmt = std::format("{} {} {} {}", uname_buf.sysname, uname_buf.nodename, uname_buf.release, uname_buf.machine);
 
-        ImGui::TextUnformatted(m_label.c_str());
-        ImGui::SameLine();
+        if (!m_label.empty()) {
+            ImGui::TextUnformatted(m_label.c_str());
+            ImGui::SameLine();
+        }
         ImGui::Text("%s", fmt.c_str());
         // ImGui::TextUnformatted(std::format("uptime: {}", uptime).c_str());
         // ImGui::Text("procs: %d", sysinfo_buf.procs);

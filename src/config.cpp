@@ -115,11 +115,16 @@ namespace {
     }
     [[nodiscard]] auto parse_widget_custom(const widget_definition& def) -> std::unique_ptr<widgets::custom> {
 
+        std::string label = "";
         std::optional<std::string> command;
 
         for (auto& [name, values] : def.props) {
-            if (name == "command")
+            if (name == "label")
+                label = string_from_u8(values.front().as<std::u8string>());
+
+            else if (name == "command")
                 command = string_from_u8(values.front().as<std::u8string>());
+
             else
                 throw config_error("property \"{}\" does not exist in widget \"custom\".", name);
         }
@@ -127,7 +132,7 @@ namespace {
         if (!command)
             throw config_error("property \"command\" in widget preset \"custom\" does not have a default value.");
 
-        return std::make_unique<widgets::custom>(def.style, *command);
+        return std::make_unique<widgets::custom>(def.style, std::move(label), *command);
     }
 
     [[nodiscard]] auto parse_widget_memory(const widget_definition& def) -> std::unique_ptr<widgets::memory> {
