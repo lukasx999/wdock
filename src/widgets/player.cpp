@@ -35,10 +35,10 @@ namespace widgets {
     }
 
     void player::draw_text(const data& data) const {
-        imgui_center(ImGui::CalcTextSize(data.title).x);
+        ImGuiHelpers::Center(ImGui::CalcTextSize(data.title).x);
         ImGui::TextUnformatted(data.title);
 
-        imgui_center(ImGui::CalcTextSize(data.artist).x);
+        ImGuiHelpers::Center(ImGui::CalcTextSize(data.artist).x);
         ImGui::TextUnformatted(data.artist);
     }
 
@@ -66,7 +66,7 @@ namespace widgets {
         // TODO: find a cleaner way to align the 3 buttons to the center
         auto text = std::format("{}{}{}", m_icon_prev, play_text, m_icon_next);
         auto width = ImGui::CalcTextSize(text.c_str()).x + 6 * ImGui::GetStyle().FramePadding.x + 2 * ImGui::GetStyle().ItemSpacing.x;
-        imgui_center(width);
+        ImGuiHelpers::Center(width);
 
         if (ImGui::Button(m_icon_prev))
             playerctl_player_previous(m_player, &err);
