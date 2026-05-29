@@ -28,7 +28,7 @@ namespace ImGuiHelpers {
 
 } // namespace ImGuiHelpers
 
-inline void replace_string(std::string& string, std::string_view query, std::string_view replacement) {
+inline void replace_substring(std::string& string, std::string_view query, std::string_view replacement) {
     size_t offset = 0;
     while (true) {
         size_t pos = string.find(query, offset);

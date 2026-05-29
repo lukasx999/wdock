@@ -13,13 +13,13 @@ namespace widgets {
         std::string fmt = m_format;
         auto data = get_data();
 
-        replace_string(fmt, "{sysname}", data.sysname);
-        replace_string(fmt, "{nodename}", data.nodename);
-        replace_string(fmt, "{sysname}", data.sysname);
-        replace_string(fmt, "{release}", data.release);
-        replace_string(fmt, "{machine}", data.machine);
-        replace_string(fmt, "{uptime}", std::format("{}", data.uptime));
-        replace_string(fmt, "{procs}", std::to_string(data.procs));
+        replace_substring(fmt, "{sysname}", data.sysname);
+        replace_substring(fmt, "{nodename}", data.nodename);
+        replace_substring(fmt, "{sysname}", data.sysname);
+        replace_substring(fmt, "{release}", data.release);
+        replace_substring(fmt, "{machine}", data.machine);
+        replace_substring(fmt, "{uptime}", std::format("{}", data.uptime));
+        replace_substring(fmt, "{procs}", std::to_string(data.procs));
 
         if (!m_label.empty()) {
             ImGui::TextUnformatted(m_label.c_str());
