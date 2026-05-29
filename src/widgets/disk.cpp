@@ -18,7 +18,12 @@ namespace widgets {
         uint64_t free = size * buf.f_bfree;
         uint64_t used = total - free;
 
-        auto fmt = std::format("disk {:.1f}GiB/{:.1f}GiB", used * gibs, total * gibs);
+        auto fmt = std::format("{:.1f}GiB/{:.1f}GiB", used * gibs, total * gibs);
+
+        if (!m_label.empty()) {
+            ImGui::TextUnformatted(m_label.c_str());
+            ImGui::SameLine();
+        }
 
         ImGui::TextUnformatted(fmt.c_str());
         ImGui::SameLine();

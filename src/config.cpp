@@ -174,15 +174,20 @@ namespace {
 
     [[nodiscard]] auto parse_widget_disk(const widget_definition& def) -> std::unique_ptr<widgets::disk> {
         bool show_percentage = false;
+        std::string label = "disk:";
 
         for (auto& [name, values] : def.props) {
             if (name == "show-percentage")
                 show_percentage = values.front().as<bool>();
+
+            else if (name == "label")
+                label = string_from_u8(values.front().as<std::u8string>());
+
             else
                 throw config_error("property \"{}\" does not exist in widget \"disk\".", name);
         }
 
-        return std::make_unique<widgets::disk>(def.style, show_percentage);
+        return std::make_unique<widgets::disk>(def.style, std::move(label), show_percentage);
     }
 
     [[nodiscard]] auto parse_widget_system_info(const widget_definition& def) -> std::unique_ptr<widgets::system_info> {
