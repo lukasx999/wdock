@@ -13,12 +13,27 @@ namespace widgets {
 
     void datetime::on_draw() const {
 
-        if (!m_label.empty()) {
-            ImGui::TextUnformatted(m_label.c_str());
-            ImGui::SameLine();
+        auto time = get_formatted_time();
+
+        switch (m_style.align) {
+            using enum widget_style::alignment;
+
+            case left:
+            if (!m_label.empty()) {
+                ImGui::TextUnformatted(m_label.c_str());
+                ImGui::SameLine();
+            }
+            break;
+
+            case right:
+            if (!m_label.empty()) {
+                ImGui::TextUnformatted(m_label.c_str());
+                ImGuiHelpers::SameLineRightAligned(ImGui::CalcTextSize(time.c_str()).x);
+            }
+            break;
         }
 
-        auto time = get_formatted_time();
+
         ImGui::TextUnformatted(time.c_str());
     }
 

@@ -374,10 +374,9 @@ namespace {
 
                 style.align = string_switch<align>(str)
                     .match("left", align::left)
-                    .match("center", align::center)
                     .match("right", align::right)
                     .if_empty([] {
-                        throw config_error("invalid \"align\" value, must be one of \"left\", \"center\" or \"right\".");
+                        throw config_error("invalid \"align\" value, must be either \"left\" or \"right\".");
                     })
                     .done();
 

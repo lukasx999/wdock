@@ -37,7 +37,7 @@ define-widget date preset=datetime {
     label "date:"
     format "%d.%m.%Y" // the format string is parsed by std::strftime (https://en.cppreference.com/cpp/chrono/c/strftime)
     style {
-        align "right" // possible values: { left center right }
+        align "right" // possible values: { left right }
     }
 }
 
