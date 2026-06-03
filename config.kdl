@@ -36,9 +36,9 @@ define-widget date preset=datetime {
     timezone "Europe/Vienna"
     label "date:"
     format "%d.%m.%Y" // the format string is parsed by std::strftime (https://en.cppreference.com/cpp/chrono/c/strftime)
-    // style {
-    //     align "right" // possible values: { left center right }
-    // }
+    style {
+        align "right" // possible values: { left center right }
+    }
 }
 
 define-widget time preset=datetime {

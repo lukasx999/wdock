@@ -366,6 +366,24 @@ namespace {
             else if (name == "frame-rounding")
                 style.frame_rounding = args.front().as<float>();
 
+            else if (name == "align") {
+
+                auto str = string_from_u8(args.front().as<std::u8string>());
+
+                using align = widget_style::alignment;
+
+                style.align = string_switch<align>(str)
+                    .match("left", align::left)
+                    .match("center", align::center)
+                    .match("right", align::right)
+                    .if_empty([] {
+                        throw config_error("invalid \"align\" value, must be one of \"left\", \"center\" or \"right\".");
+                    })
+                    .done();
+
+            }
+
+
             else
                 throw config_error("unknown style property \"{}\"", name);
         }

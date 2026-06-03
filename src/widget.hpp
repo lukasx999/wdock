@@ -18,6 +18,12 @@ struct widget_error : std::runtime_error {
 };
 
 struct widget_style {
+    enum alignment {
+        left,
+        center,
+        right,
+    };
+
     std::string color_frame_bg       = "#2e3440";
     std::string color_text           = "#eceff4";
     std::string color_button         = "#2e3440";
@@ -26,8 +32,7 @@ struct widget_style {
     std::string color_progress       = "#4c566a";
     float frame_padding = 0;
     float frame_rounding = 0;
-    // TODO:
-    // bool centered = false;
+    alignment align = alignment::left;
 };
 
 class widget {
